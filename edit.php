@@ -42,7 +42,8 @@ $value = htmlspecialchars(stripslashes($_POST['value']));
 
 if (($field == 'status') || ($field == 'severity') || ($field == 'version') || ($field == 'description')|| ($field == 'resolution') && (auth_isadmin()==1))
     {
-    $bugs[$id_bug][$field]=$value;
+    $bugs[$id_bug][$field] = $value;
+    $bugs[$id_bug]['modified'] = date ('Y-m-d');
 //    echo $id_bug;
 //    echo $pfile;
     }

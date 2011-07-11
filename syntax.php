@@ -109,7 +109,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $Generated_Header = '';
             if (($data['display']=='FORM') || ($data['display']=='ALL'))
             {
-                //If it s a usr report add it to the pseudo db
+                //If it s a user report add it to the db-file
                 $Generated_Header = '';
                 if (isset($_REQUEST['severity'])) 
                 {
@@ -118,8 +118,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                           if ($this->_captcha_ok())
                             {
                                 if (checkSecurityToken())
-                                {
-                                
+                                {                                
                                     //Add it
                                     $bug_id=count($bugs);      
                                     foreach ($bugs as $value)
@@ -353,7 +352,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 
         // load severity values from config file into control
         $user_mail = pageinfo();  //to get mail address of reporter
-        $cur_date=date ('Y-m-d');
+        $cur_date = date ('Y-m-d');
         $STR_SEVERITY = "";
         $severity = explode(',', $this->getConf('severity')) ;
         foreach ($severity as $_severity)
