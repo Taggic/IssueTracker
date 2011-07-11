@@ -1,6 +1,6 @@
 <?php
 /**
-*  IssueTracker Plugin: allows to create simple bugtracker
+*  IssueTracker Plugin: allows to create simple issue tracker
 *
 * initial code from DokuMicroBugTracker Plugin: allows to create simple bugtracker
 *
@@ -14,15 +14,14 @@
 if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
 if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 require_once(DOKU_PLUGIN.'syntax.php');
-//require_once('FirePHPCore/FirePHP.class.php');
     
-/**
+/******************************************************************************
 * All DokuWiki plugins to extend the parser/rendering mechanism
 * need to inherit from this class
 */
 class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin 
 {
-    /**
+    /**************************************************************************
     * return some info
     */
     function getInfo(){
@@ -32,17 +31,19 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     function getType(){ return 'substition';}
     function getPType(){ return 'block';}
     function getSort(){ return 167;}
-    /**
+    
+    /**************************************************************************
     * Connect pattern to lexer
     */
     function connectTo($mode){
         $this->Lexer->addSpecialPattern('\{\{issuetracker>[^}]*\}\}',$mode,'plugin_issuetracker');
     }
-    /**
+    
+    /**************************************************************************
     * Handle the match
     */
     function handle($match, $state, $pos, &$handler){
-        $match = substr($match,22,-2); //strip markup from start and end
+        $match = substr($match,15,-2); //strip markup from start and end
         //handle params
         $data = array();
         $params = explode('|',$match,3);
@@ -59,7 +60,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 	{$data['project'] = $splitparam[1];
                     /*continue;*/}
 
-                if ($splitparam[0]=='status')
+                if ($splitparam[0]=='status')   
                 	{$data['status'] = strtoupper($splitparam[1]);
                     /*continue;*/}
                 
@@ -70,8 +71,23 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         }
         return $data;
     }
+
+    /**************************************************************************
+	  * Captcha OK	    
+    */
+		function _captcha_ok()
+		{        			
+			$helper = null;		
+			if(@is_dir(DOKU_PLUGIN.'captcha'))
+				$helper = plugin_load('helper','captcha');
+			if(!is_null($helper) && $helper->isEnabled())
+				{	
+				return $helper->check();
+				}
+			return ($this->getConf('use_captcha'));
+		}
     
-    /**
+    /**************************************************************************
     * Create output
     */
     function render($mode, &$renderer, $data) {        
@@ -81,62 +97,84 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         if ($mode == 'xhtml'){
             
             $renderer->info['cache'] = false;     
-   
-            //$renderer->doc .= '<h1>Bug tracker is currently broken : i m working on it.</h1>';
-            
+               
             // get bugs file contents
-//            $pfile = metaFN(md5($data['project']), '.bugs');            
             $pfile = metaFN($data['project'], '.bugs'); 
-            $project = $data['project'];           
+
             if (@file_exists($pfile))
             	{$bugs  = unserialize(@file_get_contents($pfile));}
             else
             	{$bugs = array();}	          
 
+            $Generated_Header = '';
             if (($data['display']=='FORM') || ($data['display']=='ALL'))
             {
                 //If it s a usr report add it to the pseudo db
                 $Generated_Header = '';
-                if ((($_REQUEST['severity'])))
-                  {
-                      if (($_REQUEST['captcha']==$_SESSION['security_number']) || ($this->getConf('use_captcha')==0))
-                        {
-                        if (checkSecurityToken())
+                if (isset($_REQUEST['severity'])) 
+                {
+                    if ($_REQUEST['severity'])
+                      {
+                          if ($this->_captcha_ok())
                             {
-                            //Add it
-                            $bug_id=count($bugs);      
-                            foreach ($bugs as $value)
-                                {if ($value['id'] >= $bug_id) {$bug_id=$value['id'] + 1;}}
-                            $bugs[$bug_id]['id'] = $bug_id;    
-                            $bugs[$bug_id]['version'] = htmlspecialchars(stripslashes($_REQUEST['version']));
-                            $bugs[$bug_id]['severity'] = htmlspecialchars(stripslashes($_REQUEST['severity']));
-                            $bugs[$bug_id]['created'] = htmlspecialchars(stripslashes($_REQUEST['created']));
-                            $bugs[$bug_id]['status'] = "New";
-                            $bugs[$bug_id]['user'] = htmlspecialchars(stripslashes($_REQUEST['user']));
-                            $bugs[$bug_id]['description'] = htmlspecialchars(stripslashes($_REQUEST['description']));
-                            $bugs[$bug_id]['assigned'] = 'admin';
-                            $bugs[$bug_id]['resolution'] = '';
-                            $bugs[$bug_id]['modified'] = htmlspecialchars(stripslashes($_REQUEST['modified']));
-                            //Ecriture en pseudo db
-                            $fh = fopen($pfile, 'w');
-                            fwrite($fh, serialize($bugs));
-                            fclose($fh);
-                            $Generated_Header = '<div style="border: 3px green solid; background-color: lightgreen; margin: 10px; padding: 10px;">Your report have been successfully stored as issue#'.$bug_id.'</div>';
-                            $this->_emailForNewBug($bug_id,$data['project'],$bugs[$bug_id]['version'],$bugs[$bug_id]['severity'],$bugs[$bug_id]['description']);
-                            $_REQUEST['description'] = '';
-                            }
-                        }
-                  else
-                        {
-                        $Generated_Header = ':<div class ="important">Wrong answer to the antispam question '.$_SESSION['security_number'].'<>'.$_REQUEST['captcha'].'.</div> :';
-                        }  
-                  }            
+                                if (checkSecurityToken())
+                                {
+                                
+                                    //Add it
+                                    $bug_id=count($bugs);      
+                                    foreach ($bugs as $value)
+                                        {if ($value['id'] >= $bug_id) {$bug_id=$value['id'] + 1;}}
+                                    $bugs[$bug_id]['id'] = $bug_id;    
+                                    $bugs[$bug_id]['version'] = htmlspecialchars(stripslashes($_REQUEST['version']));
+                                    $bugs[$bug_id]['severity'] = htmlspecialchars(stripslashes($_REQUEST['severity']));
+                                    $bugs[$bug_id]['created'] = htmlspecialchars(stripslashes($_REQUEST['created']));
+                                    $bugs[$bug_id]['status'] = "New";
+                                    $bugs[$bug_id]['user'] = htmlspecialchars(stripslashes($_REQUEST['user']));
+                                    $bugs[$bug_id]['description'] = htmlspecialchars(stripslashes($_REQUEST['description']));
+                                    $bugs[$bug_id]['assigned'] = 'admin';
+                                    $bugs[$bug_id]['resolution'] = '';
+                                    $bugs[$bug_id]['modified'] = htmlspecialchars(stripslashes($_REQUEST['modified']));
+    
+    
+                                    $xuser = $bugs[$bug_id]['user'];
+                                    $xdescription = $bugs[$bug_id]['description'];
+                                    //check user mail address, necessary for further clarification of the issue
+                                    if ((stripos($xuser, "@") > 1) && (strlen($bugs[$bug_id]['description'])>9) && (stripos($xdescription, " ") > 0))
+                                    {                                
+                                        //Create db-file
+                                        $fh = fopen($pfile, 'w');
+                                        fwrite($fh, serialize($bugs));
+                                        fclose($fh);
+                                        $Generated_Header = '<div style="border: 3px green solid; background-color: lightgreen; margin: 10px; padding: 10px;">Your report have been successfully stored as issue#'.$bug_id.'</div>';
+                                        $this->_emailForNewBug($bug_id,$data['project'],$bugs[$bug_id]['version'],$bugs[$bug_id]['severity'],$bugs[$bug_id]['description']);
+                                        $_REQUEST['description'] = '';
+                                    }
+                                
+                                    else
+                                    {
+                                        $wmsg ='';
+                                        if (stripos($xuser, "@") == 0) 
+                                            { $wmsg = 'Please enter your eMail address for clarifications and/or feedback regarding your reported issue.'; }
+                                        else 
+                                            { $wmsg = 'Please provide a better description of your issue.'; }
+                                        
+                                        $Generated_Header = '<div style="border: 3px red solid; background-color: #FFAAAD; margin: 10px; padding: 10px;">'.$wmsg.'</div>';
+                                    }
+                                
+                                }
+                          else
+                                {
+                                $Generated_Header = ':<div class ="important">Wrong answer to the antispam question.</div>';
+                                }  
+                          }
+                    }            
+                }
             }
             $Generated_Table = '';
             $Generated_Scripts = '';
             $Generated_Report = '';
             
-            // Creation de la table            
+            // Create table            
             if (($data['display']=='BUGS') || ($data['display']=='ALL'))
             {
                 $Generated_Table = $this->_table_render($bugs,$data); 
@@ -148,15 +186,16 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             {
                 $Generated_Table = $this->_count_render($bugs);                
             }            
-            // Generation du form
+            // Generate form
             if (($data['display']=='FORM') || ($data['display']=='ALL'))
-            {$Generated_Report = $this->_report_render($project);}
+            {$Generated_Report = $this->_report_render($data);}
                         
             // Render            
             $renderer->doc .= $Generated_Header.$Generated_Table.$Generated_Scripts.$Generated_Report;
         }
     }
 
+    /**************************************************************************/
     function _count_render($bugs)
     {
         $count = array();
@@ -178,6 +217,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         return $rendered_count;
     }
     
+    /**************************************************************************/
     function _scripts_render()
     {
         // added by Taggic on 2011-07-08
@@ -192,7 +232,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         }
         
         $BASE = DOKU_BASE."lib/plugins/issuetracker/";
-        return    "<script type=\"text/javascript\" src=\"".$BASE."prototype.js\"></script>        <script type=\"text/javascript\" src=\"".$BASE."fabtabulous.js\"></script>
+        return    "<script type=\"text/javascript\" src=\"".$BASE."prototype.js\"></script><script type=\"text/javascript\" src=\"".$BASE."fabtabulous.js\"></script>
         <script type=\"text/javascript\" src=\"".$BASE."tablekit.js\"></script>
         <script type=\"text/javascript\">
             TableKit.Sortable.addSortType(new TableKit.Sortable.Type('status', {editAjaxURI : '".$BASE."edit.php', ajaxURI : '".$BASE."edit.php',
@@ -219,6 +259,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         </script>";
     }
 
+    /**************************************************************************/
     function _table_render($bugs,$data)
     {
         global $ID;
@@ -283,12 +324,14 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         return $head.$body;
     }
 
+    /**************************************************************************/
     function _get_one_value($bug, $key) {
         if (array_key_exists($key,$bug))
             return $bug[$key];
         return '';
     }
 
+    /**************************************************************************/
     function _emailForNewBug($id,$project,$version,$severity,$description)
     {
         if ($this->getConf('send_email')==1)
@@ -301,10 +344,12 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         }
     }
 
-   function _report_render($project)
+    /**************************************************************************/
+    function _report_render($data)
     {
         global $lang;
         global $ID;
+        $project = $data['project'];
 
         // load severity values from config file into control
         $user_mail = pageinfo();  //to get mail address of reporter
@@ -330,7 +375,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         '  <select class="element select small issuetracker__option" name="severity">'.
         '       '.$STR_SEVERITY.
         '	 </select></p>'.      
-        '<p><label> Project : &nbsp;'.$project.'</label></p>'.
+        '<p><label> Project : &nbsp;&nbsp;'.$project.'</label></p>'.
         '<p><label> Version : &nbsp;</label>'.
         '  <select class="element select small issuetracker__option" name="version">'.
         '       '.$STR_VERSIONS.
@@ -338,10 +383,19 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         '<p><label> Issue Description : </label><br /><textarea class="issuetracker__option" name="description" cols="125" rows="5">'.$_REQUEST['description'].'</textarea></p>'.
         '<p><input type="hidden" name="modified" type="text" value="'.$cur_date.'"/><input type="hidden" name="assigned" type="text" value="" />';
 
-        if ($this->getConf('use_captcha')==1) {
-         
-            $ret .= "<p><div class='captcha_div'<table id='captcha_id'><table><tr><td id='captcha_pic'><img src='".DOKU_BASE."lib/plugins/issuetracker/image.php' alt='captcha' /></td>".
-                    "<td id='Answer'><label>What is the result? </label><br><input class='issuetracker__option' name='captcha' type='text' maxlength='3' value=''/></td></tr></table></div></p>";      
+        if ($this->getConf('use_captcha')==1) 
+        {        
+//              $ret .= "<p><div class='captcha_div'<table id='captcha_id'><table><tr><td id='captcha_pic'><img src='".DOKU_BASE."lib/plugins/issuetracker/image.php' alt='captcha' /></td>".
+//                      "<td id='Answer'><label>What is the result? </label><br><input class='issuetracker__option' name='captcha' type='text' maxlength='3' value=''/></td></tr></table></div></p>";      
+            $helper = null;
+  		      if(@is_dir(DOKU_PLUGIN.'captcha'))
+  			       $helper = plugin_load('helper','captcha');
+  			       
+  		      if(!is_null($helper) && $helper->isEnabled())
+  			    {
+  			       $ret .= '<p>'.$helper->getHTML().'</p>';
+  			    }
+           
         }
 
         $ret .= '<p><input class="button" type="submit" '.
@@ -351,6 +405,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         return $ret;    
     }
 
+    /**************************************************************************/
     function _show_message($string){
         return "<script type='text/javascript'>
             alert('$string');
