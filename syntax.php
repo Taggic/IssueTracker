@@ -228,30 +228,57 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $date_style =' style="text-align:center; white-space:pre;">';
 
         if (auth_quickaclcheck($ID) >= AUTH_ADMIN)        
-            {            $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class=\"sortable editable resizable inline\"><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Created'>Created</th><th id='Version'>Version</th><th id='User'>User</th><th id='Description'>Description</th><th id='assigned'>assigned to</th><th id='Resolution'>Resolution</th><th id='Modified'>Modified</th></tr></thead>";        } 
+            {   
+                $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class=\"sortable editable resizable inline\"><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Created'>Created</th><th id='Version'>Version</th><th id='User'>User</th><th id='Description'>Description</th><th id='assigned'>assigned to</th><th id='Resolution'>Resolution</th><th id='Modified'>Modified</th></tr></thead>";        
+                $body = '<tbody>';
+                
+                foreach ($bugs as $bug)
+                {
+                    if (($data['status']=='ALL') || (strtoupper($bug['status'])==$data['status']))
+                    {
+                        $body .= '<tr id = "'.$data['project'].' '.$this->_get_one_value($bug,'id').'">'.
+                        '<td'.$style.$this->_get_one_value($bug,'id').'</td>'.
+                        '<td'.$style.$this->_get_one_value($bug,'status').'</td>'.
+                        '<td'.$style.$this->_get_one_value($bug,'severity').'</td>'.
+                        '<td'.$date_style.$this->_get_one_value($bug,'created').'</td>'.
+                        '<td'.$style.$this->_get_one_value($bug,'version').'</td>'.
+                        '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'user').'">'.$this->_get_one_value($bug,'user').'</a></td>'. 
+                        '<td class="canbreak"'.$style.$this->_get_one_value($bug,'description').'</td>'.
+                        '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'assigned').'">'.$this->_get_one_value($bug,'assigned').'</a></td>'. 
+                        '<td'.$style.$this->_get_one_value($bug,'resolution').'</td>'.
+                        '<td'.$date_style.$this->_get_one_value($bug,'modified').'</td>'.
+                        '</tr>';        
+                    }
+                }           
+            } 
+
         else       
-            {            $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class=\"sortable resizable inline\"><thead><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Created'>Created</th><th id='Version'>Version</th><th id='User'>User</th><th id='Description'>Description</th><th id='assigned'>assigned to</th><th id='Resolution'>Resolution</th><th id='Modified'>Modified</th></tr></thead>";        }
-        
-        $body = '<tbody>';
-        
-        foreach ($bugs as $bug)
-        {
-            if (($data['status']=='ALL') || (strtoupper($bug['status'])==$data['status']))
-            {
-                $body .= '<tr id = "'.$data['project'].' '.$this->_get_one_value($bug,'id').'">'.
-                '<td'.$style.$this->_get_one_value($bug,'id').'</td>'.
-                '<td'.$style.$this->_get_one_value($bug,'status').'</td>'.
-                '<td'.$style.$this->_get_one_value($bug,'severity').'</td>'.
-                '<td'.$date_style.$this->_get_one_value($bug,'created').'</td>'.
-                '<td'.$style.$this->_get_one_value($bug,'version').'</td>'.
-                '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'user').'">'.$this->_get_one_value($bug,'user').'</a></td>'. 
-                '<td class="canbreak"'.$style.$this->_get_one_value($bug,'description').'</td>'.
-                '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'assigned').'">'.$this->_get_one_value($bug,'assigned').'</a></td>'. 
-                '<td'.$style.$this->_get_one_value($bug,'resolution').'</td>'.
-                '<td'.$date_style.$this->_get_one_value($bug,'modified').'</td>'.
-                '</tr>';        
+            {   
+                //$head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class=\"sortable resizable inline\"><thead><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Created'>Created</th><th id='Version'>Version</th><th id='User'>User</th><th id='Description'>Description</th><th id='assigned'>assigned to</th><th id='Resolution'>Resolution</th><th id='Modified'>Modified</th></tr></thead>";        
+                $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class=\"sortable resizable inline\"><thead><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Version'>Version</th><th id='Description'>Description</th><th id='Resolution'>Resolution</th></tr></thead>";
+                $body = '<tbody>';
+                
+                foreach ($bugs as $bug)
+                {
+                    if (($data['status']=='ALL') || (strtoupper($bug['status'])==$data['status']))
+                    {
+                        $body .= '<tr id = "'.$data['project'].' '.$this->_get_one_value($bug,'id').'">'.
+                        '<td'.$style.$this->_get_one_value($bug,'id').'</td>'.
+                        '<td'.$style.$this->_get_one_value($bug,'status').'</td>'.
+                        '<td'.$style.$this->_get_one_value($bug,'severity').'</td>'.
+                        //'<td'.$date_style.$this->_get_one_value($bug,'created').'</td>'.
+                        '<td'.$style.$this->_get_one_value($bug,'version').'</td>'.
+                        //'<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'user').'">'.$this->_get_one_value($bug,'user').'</a></td>'. 
+                        '<td class="canbreak"'.$style.$this->_get_one_value($bug,'description').'</td>'.
+                        //'<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'assigned').'">'.$this->_get_one_value($bug,'assigned').'</a></td>'. 
+                        '<td'.$style.$this->_get_one_value($bug,'resolution').'</td>'.
+                        //'<td'.$date_style.$this->_get_one_value($bug,'modified').'</td>'.
+                        '</tr>';        
+                    }
+                }            
             }
-        }
+        
+
         $body .= '</tbody></table></div>';        
         return $head.$body;
     }
