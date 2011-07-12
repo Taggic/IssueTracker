@@ -9,7 +9,7 @@
 $meta['send_email']     = array('onoff');   // Send email off by default
 $meta['email_address']  = array('string');  // Who will be informed about new issues ?      
 $meta['userinfo_email'] = array('onoff');   // Send email off by default
-$meta['shwtbl_usr']	    =	array('multicheckbox', '_choices' => array('id', 'product', 'version', 'severity', 'created', 'status', 'user', 'description', 'assigned', 'resolution', 'modified'));
+$meta['shwtbl_usr']	    =	array('multicheckbox', '_choices' => array('product', 'version', 'severity', 'created', 'status', 'user', 'description', 'assigned', 'resolution', 'modified'));
 $meta['use_captcha']    = array('onoff');   // Use captcha on by default
 $meta['severity']       = array('string');  // Configure allowed severities
 $meta['status']         = array('string');  // Configure allowed status info

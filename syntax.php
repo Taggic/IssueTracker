@@ -140,7 +140,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                     $xuser = $bugs[$bug_id]['user'];
                                     $xdescription = $bugs[$bug_id]['description'];
                                     //check user mail address, necessary for further clarification of the issue
-                                    if ((stripos($xuser, "@") > 1) && (strlen($bugs[$bug_id]['description'])>9) && (stripos($xdescription, " ") > 0))
+                                    if ((stripos($xuser, "@") > 1) && (strlen($bugs[$bug_id]['description'])>9) && (stripos($xdescription, " ") > 0) && (strlen($bugs[$bug_id]['version']) >0))
                                     {                                
                                         //Create db-file
                                         $fh = fopen($pfile, 'w');
@@ -157,6 +157,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                         $wmsg ='';
                                         if (stripos($xuser, "@") == 0) 
                                             { $wmsg = 'Please enter your eMail address for clarifications and/or feedback regarding your reported issue.'; }
+                                        elseif (strlen($bugs[$bug_id]['version']) <1)
+                                            { $wmsg = 'Please enter a valid product version to relate this issue properly.'; }
                                         else 
                                             { $wmsg = 'Please provide a better description of your issue.'; }
                                         
@@ -329,36 +331,62 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                         '<td'.$date_style.$this->_get_one_value($bug,'modified').'</td>'.
                         '</tr>';        
                     }
-                }           
+                } 
+                $body .= '</tbody></table></div>';          
             } 
 
         else       
             {   
                 //$head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class=\"sortable resizable inline\"><thead><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Created'>Created</th><th id='Version'>Version</th><th id='User'>User</th><th id='Description'>Description</th><th id='assigned'>assigned to</th><th id='Resolution'>Resolution</th><th id='Modified'>Modified</th></tr></thead>";        
-                $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class=\"sortable resizable inline\"><thead><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Version'>Version</th><th id='Description'>Description</th><th id='Resolution'>Resolution</th></tr></thead>";
-                $body = '<tbody>';
-                
+
+                //Build table header according settings
+                $configs = explode(',', $this->getConf('shwtbl_usr')) ;
+                $reduced_header = '';
+                foreach ($configs as $config)
+                {
+                    $reduced_header = $reduced_header."<th id='".$config."'>".strtoupper($config)."</th>";
+                }
+
+                //Build rows according settings
+                $reduced_issues='';
                 foreach ($bugs as $bug)
+                {
+                    $reduced_issues = $reduced_issues.'<tr id = "'.$data['project'].' '.$this->_get_one_value($bug,'id').'">'.
+                                                      '<td'.$style.$this->_get_one_value($bug,'id').'</td>';
+                    foreach ($configs as $config)
+                    {
+                        $reduced_issues = $reduced_issues.'<td'.$style.$this->_get_one_value($bug,strtolower($config)).'</td>';
+                    }
+                    $reduced_issues = $reduced_issues.'</tr>';
+                }
+                
+                $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class='sortable editable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
+                $body = '<tbody>'.$reduced_issues.'</tbody></table></div>';
+
+                      
+/*                foreach ($bugs as $bug)
                 {
                     if (($data['status']=='ALL') || (strtoupper($bug['status'])==$data['status']))
                     {
                         $body .= '<tr id = "'.$data['project'].' '.$this->_get_one_value($bug,'id').'">'.
                         '<td'.$style.$this->_get_one_value($bug,'id').'</td>'.
-//                        '<td'.$date_style.$this->_get_one_value($bug,'created').'</td>'.
+                        '<td'.$date_style.$this->_get_one_value($bug,'created').'</td>'.
                         '<td'.$style.$this->_get_one_value($bug,'product').'</td>'.
                         '<td'.$style.$this->_get_one_value($bug,'version').'</td>'.
                         '<td'.$style.$this->_get_one_value($bug,'severity').'</td>'.
                         '<td'.$style.$this->_get_one_value($bug,'status').'</td>'.
-//                        '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'user').'">'.$this->_get_one_value($bug,'user').'</a></td>'. 
+                        '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'user').'">'.$this->_get_one_value($bug,'user').'</a></td>'. 
                         '<td class="canbreak"'.$style.$this->_get_one_value($bug,'description').'</td>'.
-//                        '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'assigned').'">'.$this->_get_one_value($bug,'assigned').'</a></td>'. 
+                        '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'assigned').'">'.$this->_get_one_value($bug,'assigned').'</a></td>'. 
                         '<td class="canbreak"'.$style.$this->_get_one_value($bug,'resolution').'</td>'.
-//                        '<td'.$date_style.$this->_get_one_value($bug,'modified').'</td>'.
+                        '<td'.$date_style.$this->_get_one_value($bug,'modified').'</td>'.
                         '</tr>';        
                     }
                 }            
+*/
             }
-        $body .= '</tbody></table></div>';        
+//        $body .= '</tbody></table></div>';        
+
         return $head.$body;
     }
 
@@ -483,7 +511,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             '  <select class="element select small issuetracker__option" name="severity" style="width:208px">'.
             '       '.$STR_SEVERITY.
             '	 </select></p>'.      
-        '<p><label> Issue Description : </label><br /><textarea class="issuetracker__option" name="description" cols="125" rows="5">'.$_REQUEST['description'].'</textarea></p>'.
+        '<p><label> Issue Description : </label><br /><textarea class="issuetracker__option" name="description" cols="119" rows="5">'.$_REQUEST['description'].'</textarea></p>'.
         '<p><input type="hidden" name="modified" type="text" value="'.$cur_date.'"/>'.
         '<input type="hidden" name="assigned" type="text" value="" />';
 
