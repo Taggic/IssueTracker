@@ -13,12 +13,15 @@ Admin => Configuration Settings ? Issuetracker Plugin Settings
 
 Send email off by default             => on/off 	      (feature available)
 Use captcha 		                      => on/off         (feature available)
-Inform about new issues               => email address 	(feature available) 
+Inform about new issues               => email address 	(feature available)
+Inform user by mail                   => on/off         (currently no effect)
+Configure columns to be shown to user as overview => multi select of columns to be displayed (feature available)
+                                                     if non-admin looking on the issue list
 Define severity levels you will use 	=> Query,Minor,Medium,Major,Critical,     (feature available)
 (comma separated) 		                   Feature Request, (selected by user) 
 Define issue status levels you will use => New,Assigned,External Pending,In     (currently no effect)
 (comma separated) 			                   Progress,Solved,Canceled,Double
-Define tracked versions comma separated => define limits for user selection     (feature available)
+Define tracked products comma separated => define limits for user selection     (feature available)
 (no other can be chosen by users) 
 select wiki user groups pre-selected    => @ADMIN,@USER                         (currently no effect)
 for assigning issues to (comma separated) 
@@ -35,21 +38,22 @@ The plugin delivers a user front end to create issues:
 - Version      user can select from admin pre-defined set of values 
 - Severity     user can select from admin pre-defined set of severities 
 - Description  user to enter the issue details 
-- Captcha      user to enter for security reasons
+- Captcha      user to enter for security reasons (non-admin only)
 
 
-The Plugin delivers a report showing all values to the admin but less details to a simple user: 
+The Plugin delivers a report showing all values to the admin but less details to a user,
+depending on admins configuration: 
 
-- ID           automatically created ID of the issue                            (visible to users) 
-- Status       New if just created but Admin can change this free text          (visible to users) 
-- Severity     given by the user but admin is free to change it                 (visible to users)
-- Created      the date when the issue was created (maybe used for reportings) 
-- Version      user selection from admin defined set, can be changed by admin   (visible to users)) 
-- User         automatically detected if user is registered or entered an email (visible to users)
-               address to be asked for explanation or further symptoms 
-- Description  users description, can be modified by admin                      (visible to users)
+- ID           automatically created ID of the issue
+- Status       New if just created but Admin can change this free text
+- Severity     given by the user but admin is free to change it
+- Created      the date when the issue was created (maybe used for reportings)
+- Version      user selection from admin defined set, can be changed by admin
+- User         automatically detected if user is registered or entered an email
+               address to be asked for explanation or further symptoms
+- Description  users description, can be modified by admin
 - assigned to  admin can enter a valid email address,
-               initially only admin is entered (no mail address !)              (visible to users)
+               initially only admin is entered (no mail address !)
 - Resolution   once the problems root cause is analysed and the correction is 
                available for download (or whatever the solution maybe) 
                it can be entered here by admin role 

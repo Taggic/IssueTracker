@@ -18,39 +18,41 @@ require_once(realpath(dirname(__FILE__)).'/../../../inc/init.php');
 //    * &field=field: The id attribute of the header cell of the column of the edited cell, it may be useful to set this to the field name you are editing
 //    * &value=xxxxxx: The rest of the POST body is the serialised form. The default name of the field is 'value'.
 
-global $ID;
-
-
-$exploded = explode(' ',htmlspecialchars(stripslashes($_POST['id'])));
-$project = $exploded[0];
-$id_bug = intval($exploded[1]);
-
-// get bugs file contents
-$pfile = metaFN($project, '.bugs');
-if (@file_exists($pfile))
-    {$bugs  = unserialize(@file_get_contents($pfile));}
-else 
-    {$bugs = array();}
-
-
-$field = strtolower(htmlspecialchars(stripslashes($_POST['field'])));
-$value = htmlspecialchars(stripslashes($_POST['value']));
-
-//echo auth_isadmin();
-//echo $_POST;
-//print_r($_POST);
-
-if (($field == 'status') || ($field == 'severity') || ($field == 'version') || ($field == 'description')|| ($field == 'resolution') && (auth_isadmin()==1))
+    global $ID;
+    
+    
+    $exploded = explode(' ',htmlspecialchars(stripslashes($_POST['id'])));
+    $project = $exploded[0];
+    $id_bug = intval($exploded[1]);
+    
+    // get bugs file contents
+    $pfile = metaFN($project, '.bugs');
+    if (@file_exists($pfile))
+        {$bugs  = unserialize(@file_get_contents($pfile));}
+    else 
+        {$bugs = array();}
+    
+    
+    $field = strtolower(htmlspecialchars(stripslashes($_POST['field'])));
+    $value = htmlspecialchars(stripslashes($_POST['value']));
+    
+//    echo auth_isadmin();
+//    echo $_POST;
+//    print_r($_POST);
+    
+//    if (($field == 'status') || ($field == 'severity') || ($field == 'version') || ($field == 'description')|| ($field == 'resolution') && (auth_isadmin()==1))
+    //admin is allowed to change all field contents
+    if (auth_isadmin() == 1)
     {
-    $bugs[$id_bug][$field] = $value;
-    $bugs[$id_bug]['modified'] = date ('Y-m-d');
-//    echo $id_bug;
-//    echo $pfile;
+        $bugs[$id_bug][$field] = $value;
+        $bugs[$id_bug]['modified'] = date ('Y-m-d');
     }
-
-// Save bugs file contents
-$fh = fopen($pfile, 'w');
-fwrite($fh, serialize($bugs));
-fclose($fh);
-echo $_POST['value'];
+//        echo $id_bug;
+//        echo $pfile;
+    
+    // Save bugs file contents
+    $fh = fopen($pfile, 'w');
+    fwrite($fh, serialize($bugs));
+    fclose($fh);
+    echo $_POST['value'];    
 ?>

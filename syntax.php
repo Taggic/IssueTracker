@@ -21,9 +21,9 @@ require_once(DOKU_PLUGIN.'syntax.php');
 */
 class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin 
 {
-    /**************************************************************************
-    * return some info
-    */
+/******************************************************************************/
+/* return some info
+*/
     function getInfo(){
         return confToHash(dirname(__FILE__).'/INFO');
     }
@@ -32,16 +32,16 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     function getPType(){ return 'block';}
     function getSort(){ return 167;}
     
-    /**************************************************************************
-    * Connect pattern to lexer
-    */
+/******************************************************************************/
+/* Connect pattern to lexer
+*/
     function connectTo($mode){
         $this->Lexer->addSpecialPattern('\{\{issuetracker>[^}]*\}\}',$mode,'plugin_issuetracker');
     }
     
-    /**************************************************************************
-    * Handle the match
-    */
+/******************************************************************************/
+/* Handle the match
+*/
     function handle($match, $state, $pos, &$handler){
         $match = substr($match,15,-2); //strip markup from start and end
         //handle params
@@ -72,9 +72,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         return $data;
     }
 
-    /**************************************************************************
-	  * Captcha OK	    
-    */
+/******************************************************************************/
+/* Captcha OK	    
+*/
 		function _captcha_ok()
 		{        			
 			$helper = null;		
@@ -87,9 +87,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 			return ($this->getConf('use_captcha'));
 		}
     
-    /**************************************************************************
-    * Create output
-    */
+/******************************************************************************/
+/* Create output
+*/
     function render($mode, &$renderer, $data) {        
         global $ID;
         $project = $data['project'];           
@@ -123,7 +123,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                     $bug_id=count($bugs);      
                                     foreach ($bugs as $value)
                                         {if ($value['id'] >= $bug_id) {$bug_id=$value['id'] + 1;}}
+                                    
                                     $bugs[$bug_id]['id'] = $bug_id;    
+                                    $bugs[$bug_id]['product'] = htmlspecialchars(stripslashes($_REQUEST['product']));
                                     $bugs[$bug_id]['version'] = htmlspecialchars(stripslashes($_REQUEST['version']));
                                     $bugs[$bug_id]['severity'] = htmlspecialchars(stripslashes($_REQUEST['severity']));
                                     $bugs[$bug_id]['created'] = htmlspecialchars(stripslashes($_REQUEST['created']));
@@ -145,7 +147,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                         fwrite($fh, serialize($bugs));
                                         fclose($fh);
                                         $Generated_Header = '<div style="border: 3px green solid; background-color: lightgreen; margin: 10px; padding: 10px;">Your report have been successfully stored as issue#'.$bug_id.'</div>';
-                                        $this->_emailForNewBug($bug_id,$data['project'],$bugs[$bug_id]['version'],$bugs[$bug_id]['severity'],$bugs[$bug_id]['description']);
+//                                        $this->_emailForNewBug($bug_id,$data['project'],$bugs[$bug_id]['product'],$bugs[$bug_id]['version'],$bugs[$bug_id]['severity'],$bugs[$bug_id]['description']);
+                                        $this->_emailForNewBug($data['project'],$bugs[$bug_id]);
                                         $_REQUEST['description'] = '';
                                     }
                                 
@@ -194,7 +197,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         }
     }
 
-    /**************************************************************************/
+/******************************************************************************/
+/* Create count output
+*/
     function _count_render($bugs)
     {
         $count = array();
@@ -216,11 +221,13 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         return $rendered_count;
     }
     
-    /**************************************************************************/
+/******************************************************************************/
+/* Create table scripts
+*/
     function _scripts_render()
     {
         // added by Taggic on 2011-07-08
-        // load status values from config into control
+        // load status values from config into select control
         $s_counter = 0;
         $status = explode(',', $this->getConf('status')) ;
         foreach ($status as $x_status)
@@ -228,24 +235,43 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $s_counter = $s_counter + 1;
             $STR_STATUS = $STR_STATUS . "case '".$x_status."':  val = ".$s_counter."; break;";
             $pattern = $pattern . "|" .  $x_status;
+            $x_status_select = $x_status_select . "['".$x_status."','".$x_status."'],";
         }
+        
+        // Build string to load products select
+        $products = explode(',', $this->getConf('products')) ;
+        foreach ($products as $x_products)
+        {
+            $x_products_select = $x_products_select . "['".$x_products."','".$x_products."'],";
+        } 
+        
+        // Build string to load versions select
+/*        $versions = explode(',', $this->getConf('versions')) ;
+        foreach ($versions as $x_versions)
+        {
+            $x_versions_select = $x_versions_select . "['".$x_versions."','".$x_versions."'],";
+        }
+*/         
+        // Build string to load severity select
+        $severity = explode(',', $this->getConf('severity')) ;
+        foreach ($severity as $x_severity)
+        {
+            $x_severity_select = $x_severity_select . "['".$x_severity."','".$x_severity."'],";
+        } 
+        
+        // Build string to load 'assign to' select from all user_mail of defined DW user groups
+              
         
         $BASE = DOKU_BASE."lib/plugins/issuetracker/";
         return    "<script type=\"text/javascript\" src=\"".$BASE."prototype.js\"></script><script type=\"text/javascript\" src=\"".$BASE."fabtabulous.js\"></script>
         <script type=\"text/javascript\" src=\"".$BASE."tablekit.js\"></script>
         <script type=\"text/javascript\">
-            TableKit.Sortable.addSortType(new TableKit.Sortable.Type('status', {editAjaxURI : '".$BASE."edit.php', ajaxURI : '".$BASE."edit.php',
-                    pattern : /^[".$pattern."]$/,
-                    normal : function(v) {
-                        var val = ".$s_counter.";
-                        switch(v) {".$STR_STATUS."
-                        }
-                        return val;
-                    }
-                }
-            ));
             TableKit.options.editAjaxURI = '".$BASE."edit.php';
-            TableKit.Editable.multiLineInput('Description');
+            TableKit.Editable.selectInput('status',{}, [".$x_status_select."]);
+            TableKit.Editable.selectInput('product',{}, [".$x_products_select."]);
+            TableKit.Editable.selectInput('severity',{}, [".$x_severity_select."]);
+            TableKit.Editable.multiLineInput('description');
+            TableKit.Editable.multiLineInput('resolution');
             var _tabs = new Fabtabs('tabs');
             $$('a.next-tab').each(function(a) {
                 Event.observe(a, 'click', function(e){
@@ -258,7 +284,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         </script>";
     }
 
-    /**************************************************************************/
+/******************************************************************************/
+/* Create table output
+*/
     function _table_render($bugs,$data)
     {
         global $ID;
@@ -269,7 +297,18 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 
         if (auth_quickaclcheck($ID) >= AUTH_ADMIN)        
             {   
-                $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class=\"sortable editable resizable inline\"><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Created'>Created</th><th id='Version'>Version</th><th id='User'>User</th><th id='Description'>Description</th><th id='assigned'>assigned to</th><th id='Resolution'>Resolution</th><th id='Modified'>Modified</th></tr></thead>";        
+                $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class='sortable editable resizable inline'>".
+                        "<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".
+                        "<th id='created'>Created</th>".
+                        "<th id='product'>Product</th>".
+                        "<th id='version'>Version</th>".
+                        "<th id='severity'>Severity</th>".
+                        "<th id='status'>Status</th>".
+                        "<th id='user'>User</th>".
+                        "<th id='description'>Description</th>".
+                        "<th id='assigned'>assigned to</th>". 
+                        "<th id='resolution'>Resolution</th>".
+                        "<th id='modified'>Modified</th></tr></thead>";        
                 $body = '<tbody>';
                 
                 foreach ($bugs as $bug)
@@ -278,14 +317,15 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     {
                         $body .= '<tr id = "'.$data['project'].' '.$this->_get_one_value($bug,'id').'">'.
                         '<td'.$style.$this->_get_one_value($bug,'id').'</td>'.
-                        '<td'.$style.$this->_get_one_value($bug,'status').'</td>'.
-                        '<td'.$style.$this->_get_one_value($bug,'severity').'</td>'.
                         '<td'.$date_style.$this->_get_one_value($bug,'created').'</td>'.
+                        '<td'.$style.$this->_get_one_value($bug,'product').'</td>'.
                         '<td'.$style.$this->_get_one_value($bug,'version').'</td>'.
+                        '<td'.$style.$this->_get_one_value($bug,'severity').'</td>'.
+                        '<td'.$style.$this->_get_one_value($bug,'status').'</td>'.
                         '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'user').'">'.$this->_get_one_value($bug,'user').'</a></td>'. 
                         '<td class="canbreak"'.$style.$this->_get_one_value($bug,'description').'</td>'.
                         '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'assigned').'">'.$this->_get_one_value($bug,'assigned').'</a></td>'. 
-                        '<td'.$style.$this->_get_one_value($bug,'resolution').'</td>'.
+                        '<td class="canbreak"'.$style.$this->_get_one_value($bug,'resolution').'</td>'.
                         '<td'.$date_style.$this->_get_one_value($bug,'modified').'</td>'.
                         '</tr>';        
                     }
@@ -304,46 +344,83 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     {
                         $body .= '<tr id = "'.$data['project'].' '.$this->_get_one_value($bug,'id').'">'.
                         '<td'.$style.$this->_get_one_value($bug,'id').'</td>'.
-                        '<td'.$style.$this->_get_one_value($bug,'status').'</td>'.
-                        '<td'.$style.$this->_get_one_value($bug,'severity').'</td>'.
-                        //'<td'.$date_style.$this->_get_one_value($bug,'created').'</td>'.
+//                        '<td'.$date_style.$this->_get_one_value($bug,'created').'</td>'.
+                        '<td'.$style.$this->_get_one_value($bug,'product').'</td>'.
                         '<td'.$style.$this->_get_one_value($bug,'version').'</td>'.
-                        //'<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'user').'">'.$this->_get_one_value($bug,'user').'</a></td>'. 
+                        '<td'.$style.$this->_get_one_value($bug,'severity').'</td>'.
+                        '<td'.$style.$this->_get_one_value($bug,'status').'</td>'.
+//                        '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'user').'">'.$this->_get_one_value($bug,'user').'</a></td>'. 
                         '<td class="canbreak"'.$style.$this->_get_one_value($bug,'description').'</td>'.
-                        //'<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'assigned').'">'.$this->_get_one_value($bug,'assigned').'</a></td>'. 
-                        '<td'.$style.$this->_get_one_value($bug,'resolution').'</td>'.
-                        //'<td'.$date_style.$this->_get_one_value($bug,'modified').'</td>'.
+//                        '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'assigned').'">'.$this->_get_one_value($bug,'assigned').'</a></td>'. 
+                        '<td class="canbreak"'.$style.$this->_get_one_value($bug,'resolution').'</td>'.
+//                        '<td'.$date_style.$this->_get_one_value($bug,'modified').'</td>'.
                         '</tr>';        
                     }
                 }            
             }
-        
-
         $body .= '</tbody></table></div>';        
         return $head.$body;
     }
 
-    /**************************************************************************/
+/******************************************************************************/
+/* pic-up a single value
+*/
     function _get_one_value($bug, $key) {
         if (array_key_exists($key,$bug))
             return $bug[$key];
         return '';
     }
 
-    /**************************************************************************/
-    function _emailForNewBug($id,$project,$version,$severity,$description)
+/******************************************************************************/
+/* send an e-mail to admin due to new issue created
+*/
+    function _emailForNewBug($project,$bug)
     {
         if ($this->getConf('send_email')==1)
         {
-            $body='A new bug have entered in the project : '.$project.' (id : '.$id.")\n\n".' Version : '.$version.' ('.$severity.") :\n".$description;
-            $subject='A new bug have entered in the project : '.$project.' Version :'.$version.' ('.$severity.') : '.$id;
+            $subject=$bug['severity'].' issue reported for '.$project.' on Product:'.$bug['product'].' v'.$bug['version'];            
+            
+            $body = 'Dear admin, \n\n A new issue was created in the project.\n'.
+            'ID: '.$bug['id'].
+            'Product: '     .$bug['product'].'\n'.
+            'Version: '     .$bug['version'].'\n'.
+            'Severity: '    .$bug['severity'].'\n'.
+            'Creator: '     .$bug['user'].'\n'.
+            'Description: ' .$bug['description'].'\n';
+
             $from=$this->getConf('email_address') ;
             $to=$from;
             mail_send($to, $subject, $body, $from, $cc='', $bcc='', $headers=null, $params=null);
         }
     }
 
-    /**************************************************************************/
+/******************************************************************************/
+/* send an e-mail to user due to issue modificaion
+*/
+    function _emailForBugMod($project,$bug)
+    {
+        if ($this->getConf('userinfo_email')==1)
+        {
+            $subject='Modification info: '.$bug['id'].' was modified';            
+            
+            $body = 'Dear user, \n\n Your reported issue was modified.\n'.
+            'ID: '.$bug['id'].
+            'Status: '      .$bug['status'].'\n'.
+            'Product: '     .$bug['product'].'\n'.
+            'Version: '     .$bug['version'].'\n'.
+            'Severity: '    .$bug['severity'].'\n'.
+            'Creator: '     .$bug['user'].'\n'.
+            'Description: ' .$bug['description'].'\n';
+
+            $from=$this->getConf('email_address') ;
+            $to=$bug['user'];
+            mail_send($to, $subject, $body, $from, $cc='', $bcc='', $headers=null, $params=null);
+        }
+    }
+
+/******************************************************************************/
+/* Create Issue Report 
+*/
     function _report_render($data)
     {
         global $lang;
@@ -353,34 +430,62 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         // load severity values from config file into control
         $user_mail = pageinfo();  //to get mail address of reporter
         $cur_date = date ('Y-m-d');
+        
+        /*--------------------------------------------------------------------*/
+        // load set of product names defined by admin
+        /*--------------------------------------------------------------------*/
+        $products = explode(',', $this->getConf('products'));
+        $STR_PRODUCTS = "";
+        foreach ($products as $_products)
+        {
+            $STR_PRODUCTS = $STR_PRODUCTS . '<option value="'.$_products.'" >'.$_products."</option>'     ";
+        }
+        
+        /*--------------------------------------------------------------------*/
+        // load set of version values defined by admin
+        /*--------------------------------------------------------------------*/
+/*        $versions = explode('|', $this->getConf('versions'));
+        $xversions = explode(',', $versions[0]);
+        $STR_VERSIONS = "";
+        foreach ($xversions as $_versions)
+        {
+            $STR_VERSIONS = $STR_VERSIONS . '<option value="'.$_versions.'" >'.$_versions."</option>'     ";
+        }
+*/        
+        /*--------------------------------------------------------------------*/
+        // load set of severity values defined by admin
+        /*--------------------------------------------------------------------*/
         $STR_SEVERITY = "";
         $severity = explode(',', $this->getConf('severity')) ;
         foreach ($severity as $_severity)
         {
             $STR_SEVERITY = $STR_SEVERITY . '<option value="'.$_severity.'" >'.$_severity."</option>'     ";
         }
-        $versions = explode(',', $this->getConf('versions'));
-        $STR_VERSIONS = "";
-        foreach ($versions as $_versions)
-        {
-            $STR_VERSIONS = $STR_VERSIONS . '<option value="'.$_versions.'" >'.$_versions."</option>'     ";
-        }
 
-        $ret = '<br /><br /><form class="issuetracker__form" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'"><p>';
+        /*--------------------------------------------------------------------*/
+        // create the report template
+        /*--------------------------------------------------------------------*/
+        $ret = '<br /><br /><script type="text/javascript" src="include/selectupdate.js"></script>'.
+               '<form class="issuetracker__form" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'"><p>';
         $ret .= formSecurityToken(false).
-        '<input type="hidden" name="do" value="show" /><input type="hidden" name="id" value="'.$ID.'" /><input type="hidden" name="created" type="text" value="'.$cur_date.'"/></p>'.
+        '<input type="hidden" name="do" value="show" />'.
+        '<input type="hidden" name="id" value="'.$ID.'" />'.
+        '<input type="hidden" name="created" type="text" value="'.$cur_date.'"/></p>'.
+        '<p><label> Project : &nbsp;&nbsp;'.$project.'</label></p>'.
+        '<p><label> Product : &nbsp;</label>'.
+            '  <select class="element select small issuetracker__option" name="product" style="width:208px">'.
+            '       '.$STR_PRODUCTS.
+            '	 </select></p>'.      
+        '<p><label> Version : &nbsp;</label>'.
+            '  <input class="element select small issuetracker__option" name="version" type="text" size="30" value="'.$STR_VERSIONS.'"/></p>'.
         '<p><label> User : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label><input class="issuetracker__option" name="user" type="text" size="30" value="'.$user_mail['userinfo']['mail'].'"/></p>'.
         '<p><label> Severity :&nbsp;</label>'.
-        '  <select class="element select small issuetracker__option" name="severity">'.
-        '       '.$STR_SEVERITY.
-        '	 </select></p>'.      
-        '<p><label> Project : &nbsp;&nbsp;'.$project.'</label></p>'.
-        '<p><label> Version : &nbsp;</label>'.
-        '  <select class="element select small issuetracker__option" name="version">'.
-        '       '.$STR_VERSIONS.
-        '	 </select></p>'.      
+            '  <select class="element select small issuetracker__option" name="severity" style="width:208px">'.
+            '       '.$STR_SEVERITY.
+            '	 </select></p>'.      
         '<p><label> Issue Description : </label><br /><textarea class="issuetracker__option" name="description" cols="125" rows="5">'.$_REQUEST['description'].'</textarea></p>'.
-        '<p><input type="hidden" name="modified" type="text" value="'.$cur_date.'"/><input type="hidden" name="assigned" type="text" value="" />';
+        '<p><input type="hidden" name="modified" type="text" value="'.$cur_date.'"/>'.
+        '<input type="hidden" name="assigned" type="text" value="" />';
 
         if ($this->getConf('use_captcha')==1) 
         {        
@@ -403,8 +508,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 
         return $ret;    
     }
-
-    /**************************************************************************/
+/******************************************************************************/
+/* Display positive/negative message box according user input on submit->Report
+*/
     function _show_message($string){
         return "<script type='text/javascript'>
             alert('$string');

@@ -7,11 +7,14 @@
  */
  
 // for the configuration manager
-$lang['send_email']     = 'Send email off by default'; 
-$lang['email_address']  = 'Inform about new issues';
+$lang['send_email']     = 'Inform by mail about new issues ?'; 
+$lang['email_address']  = 'Who is to be informed ?';
+$lang['userinfo_email'] = 'Inform user by mail about issue modifications ?';
+$lang['shwtbl_usr']     = 'Configure columns to be shown to user as overview';
 $lang['use_captcha']    = 'Use captcha'; 
 $lang['severity']       = 'Define severity levels you will use (comma separated)';
 $lang['status']         = 'Define issue status levels you will use (comma separated)';
-$lang['versions']       = 'define tracked versions comma separated (no other can be chosen by users)';
-$lang['assigns']        = 'select wiki user groups pre-selected for assigning issues to (comma separated)';
+$lang['products']       = 'Define Products coverd by the project (comma separated)';
+//$lang['versions']       = 'Define allowed versions of defined products (comma separated versions, pipe between product version sets)';
+$lang['assign']       = 'select wiki user groups pre-selected for assigning issues to (comma separated)';
 //Setup VIM: ex: et ts=2 :
