@@ -15,6 +15,7 @@ $lang['use_captcha']    = 'Use captcha';
 $lang['severity']       = 'Define severity levels you will use (comma separated)';
 $lang['status']         = 'Define issue status levels you will use (comma separated)';
 $lang['products']       = 'Define Products coverd by the project (comma separated)';
-//$lang['versions']       = 'Define allowed versions of defined products (comma separated versions, pipe between product version sets)';
-$lang['assign']       = 'select wiki user groups pre-selected for assigning issues to (comma separated)';
+//$lang['versions']     = 'Define allowed versions of defined products (comma separated versions, pipe between product version sets)';
+$lang['assign']         = 'select wiki user groups pre-selected for assigning issues to (pipe "|" separated)';
 //Setup VIM: ex: et ts=2 :
+                                                                                                       

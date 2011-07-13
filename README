@@ -24,7 +24,7 @@ Define issue status levels you will use => New,Assigned,External Pending,In     
 Define tracked products comma separated => define limits for user selection     (feature available)
 (no other can be chosen by users) 
 select wiki user groups pre-selected    => @ADMIN,@USER                         (currently no effect)
-for assigning issues to (comma separated) 
+for assigning issues to (pipe "|" separated) 
 
 
 3. Examples/Usage

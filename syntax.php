@@ -7,13 +7,13 @@
 * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
 * @author     Taggic <taggic@t-online.de>
 * 
-* feature extensions by Taggic on 2011-07-08
+* 
 * 
 */
 //session_start();
 if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
 if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
-require_once(DOKU_PLUGIN.'syntax.php');
+require_once(DOKU_PLUGIN.'syntax.php');  
     
 /******************************************************************************
 * All DokuWiki plugins to extend the parser/rendering mechanism
@@ -140,7 +140,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                     $xuser = $bugs[$bug_id]['user'];
                                     $xdescription = $bugs[$bug_id]['description'];
                                     //check user mail address, necessary for further clarification of the issue
-                                    if ((stripos($xuser, "@") > 1) && (strlen($bugs[$bug_id]['description'])>9) && (stripos($xdescription, " ") > 0) && (strlen($bugs[$bug_id]['version']) >0))
+                                    $valid_umail = $this->validEmail($xuser);
+                                    if (($valid_umail == true) && (strlen($bugs[$bug_id]['description'])>9) && (stripos($xdescription, " ") > 0) && (strlen($bugs[$bug_id]['version']) >0))
                                     {                                
                                         //Create db-file
                                         $fh = fopen($pfile, 'w');
@@ -155,8 +156,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                     else
                                     {
                                         $wmsg ='';
-                                        if (stripos($xuser, "@") == 0) 
-                                            { $wmsg = 'Please enter your eMail address for clarifications and/or feedback regarding your reported issue.'; }
+                                        if ($valid_umail == false) 
+                                            { $wmsg = 'Please enter valid eMail address, preferrably your own, for clarifications and/or feedback regarding your reported issue.'; }
                                         elseif (strlen($bugs[$bug_id]['version']) <1)
                                             { $wmsg = 'Please enter a valid product version to relate this issue properly.'; }
                                         else 
@@ -222,13 +223,12 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $rendered_count .= '</ul>';
         return $rendered_count;
     }
-    
+   
 /******************************************************************************/
 /* Create table scripts
 */
     function _scripts_render()
     {
-        // added by Taggic on 2011-07-08
         // load status values from config into select control
         $s_counter = 0;
         $status = explode(',', $this->getConf('status')) ;
@@ -262,7 +262,17 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         } 
         
         // Build string to load 'assign to' select from all user_mail of defined DW user groups
-              
+        global $auth;        
+        $filter['grps']=$this->getConf('assign');
+        $target = $auth->retrieveUsers(0,0,$filter); 
+        $target2 = $this->array_implode($target);
+        foreach ($target2 as $x_umail)
+        {
+                if (strrpos($x_umail, "@") > 0)
+                {
+                $x_umail_select = $x_umail_select . "['".$x_umail."','".$x_umail."'],";
+                }
+        }      
         
         $BASE = DOKU_BASE."lib/plugins/issuetracker/";
         return    "<script type=\"text/javascript\" src=\"".$BASE."prototype.js\"></script><script type=\"text/javascript\" src=\"".$BASE."fabtabulous.js\"></script>
@@ -272,6 +282,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             TableKit.Editable.selectInput('status',{}, [".$x_status_select."]);
             TableKit.Editable.selectInput('product',{}, [".$x_products_select."]);
             TableKit.Editable.selectInput('severity',{}, [".$x_severity_select."]);
+            TableKit.Editable.selectInput('assigned',{}, [".$x_umail_select."]);
             TableKit.Editable.multiLineInput('description');
             TableKit.Editable.multiLineInput('resolution');
             var _tabs = new Fabtabs('tabs');
@@ -287,7 +298,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     }
 
 /******************************************************************************/
-/* Create table output
+/* Create list of Issues
 */
     function _table_render($bugs,$data)
     {
@@ -296,97 +307,79 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $hdr_style="style='width:500px; text-align:left; font-size:0.85em;'";
         $style =' style="text-align:left; white-space:pre-wrap;">';
         $date_style =' style="text-align:center; white-space:pre;">';
-
-        if (auth_quickaclcheck($ID) >= AUTH_ADMIN)        
-            {   
-                $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class='sortable editable resizable inline'>".
-                        "<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".
-                        "<th id='created'>Created</th>".
-                        "<th id='product'>Product</th>".
-                        "<th id='version'>Version</th>".
-                        "<th id='severity'>Severity</th>".
-                        "<th id='status'>Status</th>".
-                        "<th id='user'>User</th>".
-                        "<th id='description'>Description</th>".
-                        "<th id='assigned'>assigned to</th>". 
-                        "<th id='resolution'>Resolution</th>".
-                        "<th id='modified'>Modified</th></tr></thead>";        
-                $body = '<tbody>';
-                
-                foreach ($bugs as $bug)
+        $user_grp = pageinfo();
+        foreach ($user_grp['userinfo']['grps'] as $ugrp)
+        {
+            $user_grps = $user_grps . $ugrp;
+        }
+        
+        // members of defined groups allowed changing issue contents 
+        if ((strpos($this->getConf('assign'),$user_grps)>=0))       
+        {   
+            $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class='sortable editable resizable inline'>".
+                    "<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".
+                    "<th id='created'>Created</th>".
+                    "<th id='product'>Product</th>".
+                    "<th id='version'>Version</th>".
+                    "<th id='severity'>Severity</th>".
+                    "<th id='status'>Status</th>".
+                    "<th id='user'>User</th>".
+                    "<th id='description'>Description</th>".
+                    "<th id='assigned'>assigned to</th>". 
+                    "<th id='resolution'>Resolution</th>".
+                    "<th id='modified'>Modified</th></tr></thead>";        
+            $body = '<tbody>';
+            
+            foreach ($bugs as $bug)
+            {
+                if (($data['status']=='ALL') || (strtoupper($bug['status'])==$data['status']))
                 {
-                    if (($data['status']=='ALL') || (strtoupper($bug['status'])==$data['status']))
-                    {
-                        $body .= '<tr id = "'.$data['project'].' '.$this->_get_one_value($bug,'id').'">'.
-                        '<td'.$style.$this->_get_one_value($bug,'id').'</td>'.
-                        '<td'.$date_style.$this->_get_one_value($bug,'created').'</td>'.
-                        '<td'.$style.$this->_get_one_value($bug,'product').'</td>'.
-                        '<td'.$style.$this->_get_one_value($bug,'version').'</td>'.
-                        '<td'.$style.$this->_get_one_value($bug,'severity').'</td>'.
-                        '<td'.$style.$this->_get_one_value($bug,'status').'</td>'.
-                        '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'user').'">'.$this->_get_one_value($bug,'user').'</a></td>'. 
-                        '<td class="canbreak"'.$style.$this->_get_one_value($bug,'description').'</td>'.
-                        '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'assigned').'">'.$this->_get_one_value($bug,'assigned').'</a></td>'. 
-                        '<td class="canbreak"'.$style.$this->_get_one_value($bug,'resolution').'</td>'.
-                        '<td'.$date_style.$this->_get_one_value($bug,'modified').'</td>'.
-                        '</tr>';        
-                    }
-                } 
-                $body .= '</tbody></table></div>';          
+                    $body .= '<tr id = "'.$data['project'].' '.$this->_get_one_value($bug,'id').'">'.
+                    '<td'.$style.$this->_get_one_value($bug,'id').'</td>'.
+                    '<td'.$date_style.$this->_get_one_value($bug,'created').'</td>'.
+                    '<td'.$style.$this->_get_one_value($bug,'product').'</td>'.
+                    '<td'.$style.$this->_get_one_value($bug,'version').'</td>'.
+                    '<td'.$style.$this->_get_one_value($bug,'severity').'</td>'.
+                    '<td'.$style.$this->_get_one_value($bug,'status').'</td>'.
+                    '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'user').'">'.$this->_get_one_value($bug,'user').'</a></td>'. 
+                    '<td class="canbreak"'.$style.$this->_get_one_value($bug,'description').'</td>'.
+                    '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'assigned').'">'.$this->_get_one_value($bug,'assigned').'</a></td>'. 
+                    '<td class="canbreak"'.$style.$this->_get_one_value($bug,'resolution').'</td>'.
+                    '<td'.$date_style.$this->_get_one_value($bug,'modified').'</td>'.
+                    '</tr>';        
+                }
             } 
+            $body .= '</tbody></table></div>';          
+        } 
 
         else       
-            {   
-                //$head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class=\"sortable resizable inline\"><thead><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Created'>Created</th><th id='Version'>Version</th><th id='User'>User</th><th id='Description'>Description</th><th id='assigned'>assigned to</th><th id='Resolution'>Resolution</th><th id='Modified'>Modified</th></tr></thead>";        
+        {   
+            //$head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class=\"sortable resizable inline\"><thead><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Created'>Created</th><th id='Version'>Version</th><th id='User'>User</th><th id='Description'>Description</th><th id='assigned'>assigned to</th><th id='Resolution'>Resolution</th><th id='Modified'>Modified</th></tr></thead>";        
 
-                //Build table header according settings
-                $configs = explode(',', $this->getConf('shwtbl_usr')) ;
-                $reduced_header = '';
+            //Build table header according settings
+            $configs = explode(',', $this->getConf('shwtbl_usr')) ;
+            $reduced_header = '';
+            foreach ($configs as $config)
+            {
+                $reduced_header = $reduced_header."<th id='".$config."'>".strtoupper($config)."</th>";
+            }
+
+            //Build rows according settings
+            $reduced_issues='';
+            foreach ($bugs as $bug)
+            {
+                $reduced_issues = $reduced_issues.'<tr id = "'.$data['project'].' '.$this->_get_one_value($bug,'id').'">'.
+                                                  '<td'.$style.$this->_get_one_value($bug,'id').'</td>';
                 foreach ($configs as $config)
                 {
-                    $reduced_header = $reduced_header."<th id='".$config."'>".strtoupper($config)."</th>";
+                    $reduced_issues = $reduced_issues.'<td'.$style.$this->_get_one_value($bug,strtolower($config)).'</td>';
                 }
-
-                //Build rows according settings
-                $reduced_issues='';
-                foreach ($bugs as $bug)
-                {
-                    $reduced_issues = $reduced_issues.'<tr id = "'.$data['project'].' '.$this->_get_one_value($bug,'id').'">'.
-                                                      '<td'.$style.$this->_get_one_value($bug,'id').'</td>';
-                    foreach ($configs as $config)
-                    {
-                        $reduced_issues = $reduced_issues.'<td'.$style.$this->_get_one_value($bug,strtolower($config)).'</td>';
-                    }
-                    $reduced_issues = $reduced_issues.'</tr>';
-                }
-                
-                $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class='sortable editable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
-                $body = '<tbody>'.$reduced_issues.'</tbody></table></div>';
-
-                      
-/*                foreach ($bugs as $bug)
-                {
-                    if (($data['status']=='ALL') || (strtoupper($bug['status'])==$data['status']))
-                    {
-                        $body .= '<tr id = "'.$data['project'].' '.$this->_get_one_value($bug,'id').'">'.
-                        '<td'.$style.$this->_get_one_value($bug,'id').'</td>'.
-                        '<td'.$date_style.$this->_get_one_value($bug,'created').'</td>'.
-                        '<td'.$style.$this->_get_one_value($bug,'product').'</td>'.
-                        '<td'.$style.$this->_get_one_value($bug,'version').'</td>'.
-                        '<td'.$style.$this->_get_one_value($bug,'severity').'</td>'.
-                        '<td'.$style.$this->_get_one_value($bug,'status').'</td>'.
-                        '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'user').'">'.$this->_get_one_value($bug,'user').'</a></td>'. 
-                        '<td class="canbreak"'.$style.$this->_get_one_value($bug,'description').'</td>'.
-                        '<td'.$style.'<a href="mailto:'.$this->_get_one_value($bug,'assigned').'">'.$this->_get_one_value($bug,'assigned').'</a></td>'. 
-                        '<td class="canbreak"'.$style.$this->_get_one_value($bug,'resolution').'</td>'.
-                        '<td'.$date_style.$this->_get_one_value($bug,'modified').'</td>'.
-                        '</tr>';        
-                    }
-                }            
-*/
+                $reduced_issues = $reduced_issues.'</tr>';
             }
-//        $body .= '</tbody></table></div>';        
-
+            
+            $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class='sortable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
+            $body = '<tbody>'.$reduced_issues.'</tbody></table></div>';
+        }
         return $head.$body;
     }
 
@@ -447,7 +440,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     }
 
 /******************************************************************************/
-/* Create Issue Report 
+/* Report an Issue 
 */
     function _report_render($data)
     {
@@ -517,8 +510,6 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 
         if ($this->getConf('use_captcha')==1) 
         {        
-//              $ret .= "<p><div class='captcha_div'<table id='captcha_id'><table><tr><td id='captcha_pic'><img src='".DOKU_BASE."lib/plugins/issuetracker/image.php' alt='captcha' /></td>".
-//                      "<td id='Answer'><label>What is the result? </label><br><input class='issuetracker__option' name='captcha' type='text' maxlength='3' value=''/></td></tr></table></div></p>";      
             $helper = null;
   		      if(@is_dir(DOKU_PLUGIN.'captcha'))
   			       $helper = plugin_load('helper','captcha');
@@ -527,7 +518,6 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
   			    {
   			       $ret .= '<p>'.$helper->getHTML().'</p>';
   			    }
-           
         }
 
         $ret .= '<p><input class="button" type="submit" '.
@@ -543,6 +533,111 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         return "<script type='text/javascript'>
             alert('$string');
         </script>";
+    }
+
+/******************************************************************************/
+/* for test purposes only => to be deleted
+*/
+    function array_implode($arrays, &$target = array()) 
+    {         
+         foreach ($arrays as $item) {
+             if (is_array($item)) {
+                 $this->array_implode($item, $target);
+             } else {
+                 $target[] = $item;
+             }
+         }
+         return $target;
+    }
+
+/******************************************************************************/
+/**  http://www.linuxjournal.com/article/9585?page=0,0
+Validate an email address.
+Provide email address (raw input)
+Returns true if the email address has the email 
+address format and the domain exists.
+*/
+    function validEmail($email)
+    {
+       $isValid = true;
+       $atIndex = strrpos($email, "@");
+       if (is_bool($atIndex) && !$atIndex)
+       {
+          $isValid = false;
+       }
+       else
+       {
+          $domain = substr($email, $atIndex+1);
+          $local = substr($email, 0, $atIndex);
+          $localLen = strlen($local);
+          $domainLen = strlen($domain);
+          if ($localLen < 1 || $localLen > 64)
+          {
+             // local part length exceeded
+             $isValid = false;
+          }
+          else if ($domainLen < 1 || $domainLen > 255)
+          {
+             // domain part length exceeded
+             $isValid = false;
+          }
+          else if ($local[0] == '.' || $local[$localLen-1] == '.')
+          {
+             // local part starts or ends with '.'
+             $isValid = false;
+          }
+          else if (preg_match('/\\.\\./', $local))
+          {
+             // local part has two consecutive dots
+             $isValid = false;
+          }
+          else if (!preg_match('/^[A-Za-z0-9\\-\\.]+$/', $domain))
+          {
+             // character not valid in domain part
+             $isValid = false;
+          }
+          else if (preg_match('/\\.\\./', $domain))
+          {
+             // domain part has two consecutive dots
+             $isValid = false;
+          }
+          else if
+    (!preg_match('/^(\\\\.|[A-Za-z0-9!#%&`_=\\/$\'*+?^{}|~.-])+$/',
+                     str_replace("\\\\","",$local)))
+          {
+             // character not valid in local part unless 
+             // local part is quoted
+             if (!preg_match('/^"(\\\\"|[^"])+"$/',
+                 str_replace("\\\\","",$local)))
+             {
+                $isValid = false;
+             }
+          }
+          
+          if(!function_exists('checkdnsrr'))
+          {
+              function checkdnsrr($host, $type='')
+              {
+                if(!empty($host))
+                {
+                    $type = (empty($type)) ? 'MX' :  $type;
+                    exec('nslookup -type='.$type.' '.escapeshellcmd($host), $result);
+                    $it = new ArrayIterator($result);
+                    foreach(new RegexIterator($it, '~^'.$host.'~', RegexIterator::GET_MATCH) as $result)
+                    {
+                         if($result) {  return true;  }                
+                    }
+                 }
+                 return false;
+              }
+           }
+          else if ($isValid && !(checkdnsrr($domain,"MX") || checkdnsrr($domain,"A")))
+          {
+             // domain not found in DNS
+             $isValid = false;
+          }
+       }
+       return $isValid;
     }
 }
 ?>
