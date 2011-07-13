@@ -308,19 +308,18 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $style =' style="text-align:left; white-space:pre-wrap;">';
         $date_style =' style="text-align:center; white-space:pre;">';
         $user_grp = pageinfo();
-        if(!($user_grp['userinfo']))
-        {
-            $user_grps = 'all';
-        }
-        else
+        if(array_key_exists('userinfo', $user_grp))
         {
             foreach ($user_grp['userinfo']['grps'] as $ugrp)
             {
                 $user_grps = $user_grps . $ugrp;
             }
         }
+        else
+        {   $user_grps = 'all';  }
+        
         // members of defined groups allowed changing issue contents 
-        if ((strpos($this->getConf('assign'),$user_grps)!= false))       
+        if ((strpos($this->getConf('assign'),$user_grps)!== false))       
         {   
             $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class='sortable editable resizable inline'>".
                     "<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".
