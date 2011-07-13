@@ -320,7 +320,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             }
         }
         // members of defined groups allowed changing issue contents 
-        if ((strpos($this->getConf('assign'),$user_grps)>=0))       
+        if ((strpos($this->getConf('assign'),$user_grps)!= false))       
         {   
             $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class='sortable editable resizable inline'>".
                     "<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".
@@ -386,7 +386,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class='sortable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
             $body = '<tbody>'.$reduced_issues.'</tbody></table></div>';
         }
-//        $body = $body . '<p><label> User & Groups : &nbsp;&nbsp;'.$user_grps.'</label></p>';
+//        $body = $body . '<p><label> User & Groups : &nbsp;&nbsp;'.$user_grps.' = '.strpos($this->getConf('assign'),$user_grps).'</label></p>';
         return $head.$body;
     }
 
