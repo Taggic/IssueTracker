@@ -23,14 +23,14 @@ require_once(realpath(dirname(__FILE__)).'/../../../inc/init.php');
     
     $exploded = explode(' ',htmlspecialchars(stripslashes($_POST['id'])));
     $project = $exploded[0];
-    $id_bug = intval($exploded[1]);
+    $id_issue = intval($exploded[1]);
     
-    // get bugs file contents
-    $pfile = metaFN($project, '.bugs');
+    // get issues file contents
+    $pfile = metaFN($project, '.issues');
     if (@file_exists($pfile))
-        {$bugs  = unserialize(@file_get_contents($pfile));}
+        {$issues  = unserialize(@file_get_contents($pfile));}
     else 
-        {$bugs = array();}
+        {$issues = array();}
     
     
     $field = strtolower(htmlspecialchars(stripslashes($_POST['field'])));
@@ -44,15 +44,15 @@ require_once(realpath(dirname(__FILE__)).'/../../../inc/init.php');
     //admin is allowed to change all field contents
     if (auth_isadmin() == 1)
     {
-        $bugs[$id_bug][$field] = $value;
-        $bugs[$id_bug]['modified'] = date ('Y-m-d');
+        $issues[$id_issue][$field] = $value;
+        $issues[$id_issue]['modified'] = date ('Y-m-d G:i:s');
     }
-//        echo $id_bug;
+//        echo $id_issue;
 //        echo $pfile;
     
-    // Save bugs file contents
+    // Save issues file contents
     $fh = fopen($pfile, 'w');
-    fwrite($fh, serialize($bugs));
+    fwrite($fh, serialize($issues));
     fclose($fh);
     echo $_POST['value'];    
 ?>

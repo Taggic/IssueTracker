@@ -14,6 +14,8 @@ $meta['use_captcha']    = array('onoff');   // Use captcha on by default
 $meta['severity']       = array('string');  // Configure allowed severities
 $meta['status']         = array('string');  // Configure allowed status info
 $meta['products']       = array('string');  // Configure Products coverd by one project
-//$meta['versions']       = array('string');  // Configure allowed versions of defined products
+//$meta['versions']       = array('string');// Configure allowed versions of defined products
 $meta['assign']         = array('string');  // Configure groups usable for issue asignments
+$meta['noStatIMG']      = array('onoff');   // define if status text instead of pictures will be displayed at Issue list
+$meta['noSevIMG']       = array('onoff');   // define if severity text instead of pictures will be displayed at Issue list
 //Setup VIM: ex: et ts=2 enc=utf-8 :
