@@ -196,59 +196,6 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 $Generated_Scripts = $this->_scripts_render();
             }
 
-            // Create Details form
-            // {{issuetracker>project=cbc_service_wiki|status=all|display=ID,0}}  
-            
-
-                                  
-            if (strpos($data['display'],'ID')!== false)
-            {
-                $Generated_Table = $this->_details_render($issues,$data); 
-                
-                //If comment to be added
-                $Generated_Header = '';
-
-                if (isset($_REQUEST['comment'])) 
-                {
-//echo sprintf("<p><b>code line 213</b></p>\n");
-                    if (($_REQUEST['comment']) && (isset($_REQUEST['comment_issue_ID'])))
-                      {
-                          if ($this->_captcha_ok())
-                            {
-                                if (checkSecurityToken())
-                                {
-                                    // get comment file contents
-                                    $cID  = "issuecomments_".$_REQUEST['comment_issue_ID'];
-                                    $comments_file = metaFN($cID, '.issues');
-
-                                    if (@file_exists($comments_file))
-                                    	{$comments  = unserialize(@file_get_contents($comments_file));}
-                                    else
-                                        	{$comments = array();}
-                                        	
-                                    //Add it to the issue file
-                                    $comment_id=count($comments);      
-                                    foreach ($comments as $value)
-                                        {if ($value['id'] >= $comment_id) {$comment_id=$value['id'] + 1;}}
-                                    
-                                    $comments[$comment_id]['id'] = $comment_id;    
-                                    $comments[$comment_id]['author'] = htmlspecialchars(stripslashes($_REQUEST['author']));
-                                    $comments[$comment_id]['timestamp'] = htmlspecialchars(stripslashes($_REQUEST['timestamp']));
-                                    $comments[$comment_id]['comment'] = htmlspecialchars(stripslashes($_REQUEST['comment']));    
-    
-                                    //Create comments file
-                                    $fh = fopen($comments_file, 'w');
-                                    fwrite($fh, serialize($comments));
-                                    fclose($fh);
-                                    $Generated_Header = '<div style="border: 3px green solid; background-color: lightgreen; margin: 10px; padding: 10px;">Your report have been successfully stored as issue#'.$issue_id.'</div>';
-
-                                    $this->_emailForIssueMod($data['project'],$issues[$issue_id], $comments[$comment_id]);
-                                 }
-                            }
-                       }
-                 }                                
-            }
-
             // Count only ...        
             if ($data['display']=='COUNT') 
             {
@@ -373,6 +320,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $user_grp = pageinfo();
         $noStatIMG = $this->getConf('noStatIMG');
         $noSevIMG = $this->getConf('noSevIMG');
+        $project = $data['project'];
                 
         if(array_key_exists('userinfo', $user_grp))
         {
@@ -391,7 +339,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         // members of defined groups allowed changing issue contents 
         if ((strpos($this->getConf('assign'),$user_grps)!== false))       
         {   
-            $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class='sortable editable resizable inline'>".
+            $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$project."' class='sortable editable resizable inline'>".
                     "<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".
                     "<th id='created'>Created</th>".
                     "<th id='product'>Product</th>".
@@ -426,7 +374,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     else {
                         $severity_img = $style.$a_severity; }
                                             
-                    $body .= '<tr id = "'.$data['project'].' '.$this->_get_one_value($issue,'id').'">'.   
+                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'">'.   
                     
                     '<td'.$style.$this->_get_one_value($issue,'id').'</td>'.
                     '<td'.$date_style.$this->_get_one_value($issue,'created').'</td>'.
@@ -447,7 +395,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 
         else       
         {   
-            //$head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class=\"sortable resizable inline\"><thead><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Created'>Created</th><th id='Version'>Version</th><th id='User'>User</th><th id='Description'>Description</th><th id='assigned'>assigned to</th><th id='Resolution'>Resolution</th><th id='Modified'>Modified</th></tr></thead>";        
+            //$head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$project."' class=\"sortable resizable inline\"><thead><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Created'>Created</th><th id='Version'>Version</th><th id='User'>User</th><th id='Description'>Description</th><th id='assigned'>assigned to</th><th id='Resolution'>Resolution</th><th id='Modified'>Modified</th></tr></thead>";        
 
             //Build table header according settings
             $configs = explode(',', $this->getConf('shwtbl_usr')) ;
@@ -461,7 +409,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $reduced_issues='';
             foreach ($issues as $issue)
             {
-                $reduced_issues = $reduced_issues.'<tr id = "'.$data['project'].' '.$this->_get_one_value($issue,'id').'">'.
+                $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'">'.
                                                   '<td'.$style.$this->_get_one_value($issue,'id').'</td>';
                 foreach ($configs as $config)
                 {
@@ -470,15 +418,20 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 $reduced_issues = $reduced_issues.'</tr>';
             }
             
-            $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$data['project']."' class='sortable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
+            $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$project."' class='sortable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
             $body = '<tbody>'.$reduced_issues.'</tbody></table></div>';
         }
 //        $body = $body . '<p><label> User & Groups : &nbsp;&nbsp;'.$user_grps.' = '.strpos($this->getConf('assign'),$user_grps).'</label></p>';
         
         $ret = $head.$body;
-        $ret .= '<form  method="post" action=""><p><label> Show details of Issue: &nbsp;&nbsp;</label><input class="issuetracker__option" name="issueid" type="text" size="10" value=""/>'.
-                '<input class="button" id="showcase" type="submit" name="do[showcase]" value="showcase" title="showcase");/></form>';                
-                
+     $ret = '<form  method="post" action="doku.php?id=' . $ID . '&do=showcase"><p><label> Show details: &nbsp;&nbsp;</label>'.
+                 '<input class="showid__option" name="showid" id="showid" type="text" size="10" value="0"/>'.
+//                 '<input type="hidden" name="pfile" value="'.$project.'" />'.
+                 '<input type="hidden" name="project" id="project" type="text" value="'.$project.'"/>'.
+                 '<input class="button" id="showcase" type="submit" name="showcase" value="Go" title="Go");/>'.
+
+
+             '</form>' . $ret;
         return $ret;
     }
 
@@ -589,7 +542,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         }
         
         // a file to store the comments regarding an issue going for and back
-        $comments_file == metaFN($ID, '.issues');
+        $comments_file == metaFN($ID, '.cmnts');
         /*--------------------------------------------------------------------*/
         // create the report template
         /*--------------------------------------------------------------------*/
@@ -642,190 +595,6 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         return $ret;    
     }
 /******************************************************************************/
-/**output issue details view
-Template for Issue Overview maybe added to the side bar:
---------------------------------------------------------
-*/
-    function _details_render($issues, $data)
-    {
-      
-//        $li = '<a href="/bugreports/issuedetails" class="wikilink1" title="bugreports:issuedetails">Issue Details</a>';
-//        $fp = fopen('http://www.example.com/index.php', 'r');
-
-        // load issue details and display on page
-        global $lang;
-        $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
-        $project = $data['project'];
-        $d_param = explode(',',$data['display']);
-        $issue_id = $d_param[1];
-        
-        // get issues file contents
-        $pfile = metaFN($data['project'], '.issues');   
-        if (@file_exists($pfile))
-        	{$issue  = unserialize(@file_get_contents($pfile));}
-        else
-        	{
-              // promt error message that issue with ID does not exist
-              return $ret;
-          }	          
-        
-        // get detail information from issue comment file
-        $cID = "issuecomments_".$issue_id;
-        $comments_file = metaFN($cID, '.issues');
-        if (@file_exists($comments_file))
-        	{$comments  = unserialize(@file_get_contents($comments_file));}
-        else
-            	{$comments = array();}
-
-//--------------------------------------
-//Tables for the Issue details view:
-//--------------------------------------
-$issue_edit_head = '<div><TABLE border=0 cellSpacing=0 cellPadding=4 width="90%" bgColor=#ffffff >'.
-                   '<TR>
-                      <TD bgColor=#f0f0f0 vAlign=center colSpan=6 >
-                      <P vAlign=center style="border-width:8px; border-color:#9999FF; border-style:outset; padding:5px;">
-                        <FONT size=1><I>&nbsp['.$issue[$issue_id]['id'].']&nbsp;&nbsp;</I></FONT>
-                        <FONT size=3 color=#00008f>'.
-                          '<B><I><H class=formtitle>'.$issue[$issue_id]['title'].'</H></I></B></FONT></TR></TD></P>'.
-                   '<TBODY>'. 
-                   '<TR bgColor=#f0f0f0 vAlign=center >
-                      <TD width="3%"></TD>
-                      <TD  width="10%"><B>ID:</B></TD>
-                      <TD width="25%">'.$issue[$issue_id]['id'].'</TD>
-                      <TD width="25%"></TD>                   
-                   <FONT size=1>
-                      <TD width="10%"><B>Project:</B></TD>
-                      <TD>'.$project.'</TD></FONT>
-                   </TR>'.
-                   
-                   '<TR bgColor=#f0f0f0 vAlign=center>
-                      <TD width="3%"></TD>
-                      <TD  width="10%"><B>Severity:</B></TD>
-                      <TD width="25%">'.$issue[$issue_id]['severity'].'</TD>
-                      <TD width="25%"></TD>                   
-                   <FONT size=1>'.
-                      '<TD width="10%"><B>Product:</B></TD>
-                      <TD>'.$issue[$issue_id]['product'].'</TD>
-                   </FONT></TR>'.
-                   
-                   '<TR bgColor=#f0f0f0 vAlign=center>
-                      <TD width="3%"></TD>
-                      <TD  width="10%"><B>Status:</B></TD>
-                      <TD width="25%">'.$issue[$issue_id]['status'].'</TD>
-                      <TD width="25%"></TD>                   
-                   <FONT size=1>
-                      <TD width="10%"><B>Affects Version:</B></TD>
-                      <TD>'.$issue[$issue_id]['version'].'</TD>
-                   </Font></TR>'.
-                   
-                   '<TR bgColor=#f0f0f0 vAlign=center>                      
-                      <TD width="3%"></TD>
-                      <TD  width="10%"><B>Assigned:</B></TD>
-                      <TD width="25%"><A  href="mailto:'.$issue[$issue_id]['assigned'].'">'.$issue[$issue_id]['assigned'].'</A></TD>
-                      <TD width="25%"></TD>                   
-                   <FONT size=1>'.
-                      '<TD width="10%"><B>Issue created:</B></TD>
-                      <TD><SPAN class=date>'.$issue[$issue_id]['created'].'</SPAN></TD>
-                   </FONT></TR>'.
-                   
-                   '<TR bgColor=#f0f0f0 vAlign=center>
-                      <TD width="3%"></TD>
-                      <TD  width="10%"><B>Reporter:</B></TD>
-                      <TD width="25%"><A  href="mailto:'.$issue[$issue_id]['user_mail'].'">'.$issue[$issue_id]['user_mail'].'</A></TD>
-                      <TD width="25%"></TD>                   
-                   <FONT size=1>'.                   
-                      '<TD width="10%"><B>Issue modified:</B></TD>
-                      <TD><SPAN class=date>'.$issue[$issue_id]['modified'].'</SPAN></TD>
-                   </FONT></TR>'.
-                   
-                   '<TR bgColor=#f0f0f0 vAlign=center><FONT size=1><TD  colSpan=6 >&nbsp;</TD></FONT></TR>'.                       
-                   '</TBODY>'.
-                   '</TABLE></BR></div>';
-
-
-$issue_client_details = '<DIV id=client_details><TABLE id=tab2 class=gridTabBox border=0 cellSpacing=0 cellPadding=4 width="90%" bgColor=#ffffff ><TBODY>'.
-                        '<TR><TD bgColor=#bbbbbb width="1%" noWrap align=middle colSpan=3><FONT color=#ffffff><B>Client</B></FONT></TD></TR>'.
-                        '<TR id=rowForcustomfield_10020><TD bgColor=#f0f0f0 width="1%"></TD><TD bgColor=#f0f0f0 vAlign=center width="25%"><B>Name:</B></TD><TD bgColor=#f0f0f0 width="75%">'.$issue[$issue_id]['user_name'].'</TD></TR>'.
-                        '<TR id=rowForcustomfield_10030><TD bgColor=#f0f0f0 width="1%"></TD><TD bgColor=#f0f0f0 vAlign=center width="25%"><B>Email:</B></TD><TD bgColor=#f0f0f0 width="75%"><A href="mailto:'.$issue[$issue_id]['user_mail'].'">'.$issue[$issue_id]['user_mail'].'</A> </TD></TR>'.
-                        '<TR id=rowForcustomfield_10040><TD bgColor=#f0f0f0 width="1%"></TD><TD bgColor=#f0f0f0 vAlign=center width="25%"><B>Phone:</B></TD><TD bgColor=#f0f0f0 width="75%">'.$issue[$issue_id]['user_phone'].'</TD></TR>'.
-                        '<TR id=rowForcustomfield_10050><TD bgColor=#f0f0f0 width="1%"></TD><TD bgColor=#f0f0f0 vAlign=center width="25%"><B>Add client contact:</B></TD><TD bgColor=#f0f0f0 width="75%"><A href="mailto:'.$issue[$issue_id]['add_user_mail'].'">'.$issue[$issue_id]['add_user_mail'].'</A></TD></TR>'.
-                        '</TBODY></TABLE></DIV>';
-
-$issue_initial_description = '<DIV id=description-open><TABLE border=0 cellSpacing=0 cellPadding=4 width="90%" bgColor=#ffffff ><TBODY><TR>'.
-        '<TD bgColor=#bbbbbb width="1%" noWrap align=middle colSpan=2 >&nbsp;<FONT color=#ffffff><B>Initial description</B></FONT>&nbsp;</TD></TR></TBODY></TABLE>'.
-        '<TABLE border=0 cellSpacing=0 cellPadding=0 width="100%"><TBODY><TR>'.
-        '<TD width="1%"><TD id=descriptionArea>'.$issue[$issue_id]['description'].'</TD></TR></TBODY></TABLE>';
-
-$issue_attachments = '<DIV id=client_details><TABLE id=tab1 class=gridTabBox border=0 cellSpacing=0 cellPadding=4 width="90%" bgColor=#ffffff ><TBODY>'.
-                     '<TR><TD bgColor=#bbbbbb width="1%" noWrap align=middle colSpan=3><FONT color=#ffffff><B>Links to symptom files</B></FONT></TD></TR>'.
-                     '<TR><TD width="1%"></TD><TD bgColor=#ffffff vAlign=top colSpan=5>
-                          1. <A href="'.$issue[$issue_id]['attachment1'].'"><IMG border=0 alt="symptoms 1" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment1'].'" href="'.$issue[$issue_id]['attachment1'].'">'.$issue[$issue_id]['attachment1'].'</A>'.
-                     '<BR>2. <A href="'.$issue[$issue_id]['attachment2'].'"><IMG border=0 alt="symptoms 2" style="margin-right:0.5em" vspace=1em align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment2'].'" href="'.$issue[$issue_id]['attachment2'].'">'.$issue[$issue_id]['attachment2'].'</A>'.
-                     '<BR>3. <A href="'.$issue[$issue_id]['attachment3'].'"><IMG border=0 alt="symptoms 3" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment3'].'" href="'.$issue[$issue_id]['attachment3'].'">'.$issue[$issue_id]['attachment3'].'</A>'.
-                     '<BR><BR></TD></TR></TBODY></TABLE></DIV></BR>';              
-
-$issue_comments_log ='<DIV id=description-open><TABLE border=0 cellSpacing=0 cellPadding=4 width="90%" bgColor=#ffffff ><TBODY><TR>'.
-        '<TD bgColor=#bbbbbb width="1%" noWrap align=middle colSpan=2 >&nbsp;<FONT color=#ffffff><B>Comments (work log)</B></FONT>&nbsp;</TD></TR></TBODY></TABLE>'.
-        '<TABLE border=0 cellSpacing=0 cellPadding=0 width="100%"></TABLE></DIV>';
-              // loop through the comments
-              foreach ($comments as $a_comment)
-              {
-                    $x_id = $this->_get_one_value($a_comment,'id');
-                    $x_mail = $this->_get_one_value($a_comment,'author');
-                    $issue_comments_log .= '<FONT size=1><I><label>['.$this->_get_one_value($a_comment,'id').'] </label>&nbsp;&nbsp;&nbsp;'.
-                                           '<label>'.$this->_get_one_value($a_comment,'timestamp').' </label>&nbsp;&nbsp;&nbsp;'.
-                                           '<label><a href="mailto:'.$x_mail.'">'.$x_mail.'</a></label></I></FONT><BR>'.
-                                           '<label>'.$this->_get_one_value($a_comment,'comment').'</label><BR><BR><hr width="90%"><BR>';
-              } 
-              $issue_comments_log .= '</DIV>';
-
-/*$issue_comments_log = '<DIV id=description-open><TABLE border=0 cellSpacing=0 cellPadding=4 width="90%" bgColor=#ffffff ><TBODY>'.
-                      '<TR><TD bgColor=#bbbbbb width="1%" noWrap align=middle colSpan=3><FONT color=#ffffff><B>Comments (work log)</B></FONT></TD></TR>'.
-                      '<TR id=rowForcustomfield_10100><TD width="1%"></TD><TD><A name=action_48442><A href="mailto:'.$comments['comment']['mail'].'">'.$comments['comment']['mail'].'</A> <SPAN class=subText>[<SPAN class=date>'.$comments['comment']['timestamp'].'</SPAN>]</SPAN><TD width="1%"></TD></TR>'.
-                      '<TR id=rowForcustomfield_10100><TD width="1%"></TD><TD>'.$comments['comment']['text'].'</TD><TD width="1%"></TD></TR></TBODY></TABLE></DIV>';
-*/
-
-        $issue_add_comment ='<DIV id=description-open><TABLE border=0 cellSpacing=0 cellPadding=4 width="90%" bgColor=#ffffff ><TBODY><TR>'.
-        '<TD bgColor=#bbbbbb width="1%" noWrap align=middle colSpan=2 >&nbsp;<FONT color=#ffffff><B>Add a new comment</B></FONT>&nbsp;</TD></TR></TBODY></TABLE>'.
-        '<TABLE border=0 cellSpacing=0 cellPadding=0 width="100%"></TABLE></DIV>';
-
-$issue_add_comment .= '<br /><script type="text/javascript" src="include/selectupdate.js"></script>'.
-                     '<form class="comments__form" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'">';
-                     
-        // retrive basic information
-        $user_mail = pageinfo();  //to get mail address of reporter
-        $cur_date = date ('Y-m-d G:i:s');
-
-        if($user_mail['userinfo']['mail']=='') {$u_mail_check ='unknown';}
-        else {$u_mail_check =$user_mail['userinfo']['mail'];}
-
-$issue_add_comment .= formSecurityToken(false). 
-                     '<input type="hidden" name="comment_file" type="text" value="'.$comments_file.'"/>'.
-                     '<input type="hidden" name="comment_issue_ID" type="text" value="'.$issue[$issue_id]['id'].'"/>'.
-                     '<input type="hidden" name="author" type="text" value="'.$u_mail_check.'"/>'.        
-                     '<input type="hidden" name="timestamp" type="text" value="'.$cur_date.'"/>'.        
-                     '<p><textarea name="comment" type="text" cols="107" rows="7" value="'.$_REQUEST['comment'].'"></textarea></p>';        
-             
-                     if ($this->getConf('use_captcha')==1) 
-                     {        
-                         $helper = null;
-               		      if(@is_dir(DOKU_PLUGIN.'captcha'))
-               			       $helper = plugin_load('helper','captcha');
-               			       
-               		      if(!is_null($helper) && $helper->isEnabled())
-               			    {
-               			       $issue_add_comment .= '<p>'.$helper->getHTML().'</p>';
-               			    }
-                     }
-            
-                     $issue_add_comment .= '<p><input class="button" type="submit" '.
-                                           'value="Add" /></p>'.
-                                           '</form>';
-                                           
-        $body = $issue_edit_head . $issue_client_details . $issue_initial_description . $issue_attachments . $issue_comments_log . $issue_add_comment;
-        return $body;    
-    }
-/******************************************************************************/
 /* Display positive/negative message box according user input on submit->Report
 */
     function _show_message($string){
@@ -835,7 +604,7 @@ $issue_add_comment .= formSecurityToken(false).
     }
 
 /******************************************************************************/
-/* for test purposes only => to be deleted
+/* improved implode needed
 */
     function array_implode($arrays, &$target = array()) 
     {         
