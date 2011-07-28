@@ -1,72 +1,103 @@
-issuetracker Plugin
-====================
-This tool is derived from dokumicrobugtracker plugin developed by Benoît HERVIER. 
+/** 
+*  IssueTracker Plugin: allows to create simple issue tracker
+*
+* initial code from DokuMicroBugTracker Plugin: allows to create simple bugtracker
+*
+* @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
+* @author     Taggic <taggic@t-online.de>
+*/
 
-1. Installation
-----------------
-Just download and extract it as folder “issuetracker” into your “\lib\plugins” directory. 
+Intro
+------ 
+ Simply spoken a user can easily report an issue for defined products which will be added 
+ to an issue log (project). Some checks are implemented to prove if most important values 
+ are given. The user will be informed by a green info box if the issue was added successfully 
+ to the log file or a red one with details to provide missing information. The issue will 
+ be stored to a file of issues and gets an ID. Automatically the configured admin is informed 
+ by mail about a new entry to the issue list. The complete issue list delivers a detailed 
+ overview to the admin of the reports. The admin is able to easily reduce the visible 
+ information (column wise) displayed to the users, which not necessarily of interest by them.
  
-2. Configuration
------------------
-Admin => Configuration Settings ? Issuetracker Plugin Settings 
+ Members of configured 'assign'groups are able to edit the entries of the issue list and see 
+ the complete set of details. The issue list is sortable on all columns. The email addresses 
+ of this group members are automatically loaded into the lists select box to be easily set as 
+ issue related contact.
+ 
+Syntax
+------- 
+ Simply place the following syntax into the page markup of 2 different pages: 
+
+ <code>
+  ====== Report an Issue ======
+  ~~NOCACHE~~
+  {{issuetracker>project=your_project|status=all|display=form}} 
+
+  ====== List of Issues ======
+  ~~NOCACHE~~
+  {{issuetracker>project=your_project|status=all|display=issues}} 
+ </code>
 
 
-Send email off by default             => on/off 	      (feature available)
-Use captcha 		                      => on/off         (feature available)
-Inform about new issues               => email address 	(feature available)
-Inform user by mail                   => on/off         (currently no effect)
-Configure columns to be shown to user as overview => multi select of columns to be displayed (feature available)
-                                                     if non-admin looking on the issue list
-Define severity levels you will use 	=> Query,Minor,Medium,Major,Critical,     (feature available)
-(comma separated) 		                   Feature Request, (selected by user) 
-Define issue status levels you will use => New,Assigned,External Pending,In     (currently no effect)
-(comma separated) 			                   Progress,Solved,Canceled,Double
-Define tracked products comma separated => define limits for user selection     (feature available)
-(no other can be chosen by users) 
-select wiki user groups pre-selected    => @ADMIN,@USER                         (currently no effect)
-for assigning issues to (pipe "|" separated) 
+Installation
+------------
+ Just download and extract it as folder “issuetracker” into your “\lib\plugins” directory.
 
 
-3. Examples/Usage
------------------- 
-Use this plugin to simply create an issue tracking. 
-The plugin delivers a user front end to create issues: 
+Configuration
+--------------
+ The following configurations can be done by the configuration manager: 
+ Admin ? Configuration Settings ? Issuetracker Plugin Settings
 
-- ID           automatically set 
-- User         e-mail derived from login if registered user, else should be entered by user 
-- Project      automatically set (defined by your_project, see Syntax below) 
-- Version      user can select from admin pre-defined set of values 
-- Severity     user can select from admin pre-defined set of severities 
-- Description  user to enter the issue details 
-- Captcha      user to enter for security reasons (non-admin only)
+Examples/Usage
+--------------
+ Use this plugin to simply create an issue tracking. It is a further development based on 
+ dokumicrobugtracker 2011-04-13  initial code base for corrections, which was not working 
+ on my installation (Rincewind + Arctic). Probably you noticed the same problems 
+ (e.g. edit of entries does not work) and may find a help with this.
+ 
+1. Report an issue
+------------------
+ This is a form shown to the user to provide controls for input of issue information. 
+ Following information are handled:
+ 
+  {{issuetracker>project=your_project|status=all|display=form}}  
+
+  ID			automatically set 
+  Project 		automatically set (defined by your_project, see Syntax) 
+  Product 		user can select from admin pre-defined set of values 
+  Version		user to enter version info 
+  User name 		name derived from login if registered user, else should be entered by user 
+  User mail		e-mail derived from login if registered user, else should be entered by user 
+  User phone		phonenumber of the user 
+  Add contact 		a further contact can be added if necessary 
+  Severity		user can select from admin pre-defined set of severities
+  Issue Title		the headline of the issue 
+  Issue Description	user to enter the issue details 
+  Symptoms		user may add up to 3 links targeting files on a symptom server 
+  Captcha		user to enter for security reasons (if configured)
 
 
-The Plugin delivers a report showing all values to the admin but less details to a user,
-depending on admins configuration: 
+2. Issue List
+-------------
+ The Plugin delivers an issue list, where admin can configure a restricted view for users. 
+ The admin view delivers more details in the table. Admin is able to modify some entries 
+ directly on this output, i.e. admin is able to assign the issue to a member of configured 
+ user-groups (see configuration). 
 
-- ID           automatically created ID of the issue
-- Status       New if just created but Admin can change this free text
-- Severity     given by the user but admin is free to change it
-- Created      the date when the issue was created (maybe used for reportings)
-- Version      user selection from admin defined set, can be changed by admin
-- User         automatically detected if user is registered or entered an email
-               address to be asked for explanation or further symptoms
-- Description  users description, can be modified by admin
-- assigned to  admin can enter a valid email address,
-               initially only admin is entered (no mail address !)
-- Resolution   once the problems root cause is analysed and the correction is 
-               available for download (or whatever the solution maybe) 
-               it can be entered here by admin role 
-- Modified     this is a field to track the last change of the issue            
-               currently an admin task to insert it manually 
+ {{issuetracker>project=your_project|status=all|display=issues}} 
+
+3. Issue Details view
+--------------------- 
+ For better handling and also accessible for users there is a details view of an issue. Therefore 
+ the Issue List containing a input and button to specify the isuue ID. This will provide a new 
+ page displaying all information of an issue and delivering a comment function for interaction 
+ between User and Admin/assigned resource. Both (user/assignee) will be informed about issue 
+ updates by email, if configured. 
 
 
-
-3. Syntax
-----------
-Basic usage is to place the following syntax into the page markup: 
-
-====== Issue Tracker ======
-~~NOCACHE~~
-{{issuetracker>project=your_project|status=all|display=form}} 
-{{issuetracker>project=your_project|status=all|display=bugs}}
+4. General Info 
+----------------
+ There are multiple files created. First there is a project fle containing all issue information 
+ except comments. Each issue will have a related comments file where the communication is stored 
+ to. All files are stored to data/meta directory with file extension ”.issue” or ”.cmnts”.
+ 
