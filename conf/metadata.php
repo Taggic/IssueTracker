@@ -7,7 +7,8 @@
  */
 
 $meta['send_email']     = array('onoff');   // Send email off by default
-$meta['email_address']  = array('string');  // Who will be informed about new issues ?      
+$meta['email_address']  = array('string');  // Who will be informed about new issues ? 
+$meta['registered_users'] = array('onoff'); // only registered users with edit permission on issue tracker page are allowed to create reports and add comments     
 $meta['userinfo_email'] = array('onoff');   // Send email off by default
 $meta['shwtbl_usr']	    =	array('multicheckbox', '_choices' => array('product', 'version', 'severity', 'created', 'status', 'user', 'title', 'description', 'assigned', 'resolution', 'modified'));
 $meta['use_captcha']    = array('onoff');   // Use captcha on by default

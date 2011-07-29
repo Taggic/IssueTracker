@@ -472,15 +472,16 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         {
             $subject=$issue['severity'].' issue reported for '.$project.' on Product:'.$issue['product'].' v'.$issue['version'];            
             
-            $body = 'Dear admin,'.chr(10).chr(13).chr(10).chr(13).'A new issue was created in the project'.chr(10).chr(13).
-            'ID: '          .$issue['id'].chr(10).chr(13).
-            'Product: '     .$issue['product'].chr(10).chr(13).
-            'Version: '     .$issue['version'].chr(10).chr(13).
-            'Severity: '    .$issue['severity'].chr(10).chr(13).
-            'Creator: '     .$issue['user_name'].chr(10).chr(13).
-            'Title: '       .$issue['title'].chr(10).chr(13).
-            'Description: ' .$issue['description'].chr(10).chr(13).chr(10).chr(13).
-            'best regards'.chr(10).chr(13).'Issue Tracker';
+            $body = 'Dear admin,'.chr(10).chr(10).
+            'A new issue was created in the project'.chr(10).
+            'ID: '          .$issue['id'].chr(10).
+            'Product: '     .$issue['product'].chr(10).
+            'Version: '     .$issue['version'].chr(10).
+            'Severity: '    .$issue['severity'].chr(10).
+            'Creator: '     .$issue['user_name'].chr(10).
+            'Title: '       .$issue['title'].chr(10).
+            'Description: ' .$issue['description'].chr(10).chr(10).
+            'best regards'.chr(10).'Issue Tracker';
 
             $from=$this->getConf('email_address') ;
             $to=$from;
@@ -497,16 +498,16 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         {
             $subject='Modification info: '.$issue['id'].' was modified';            
             
-            $body = 'Dear user,'.chr(10).chr(13).chr(10).chr(13).
-            'Your reported issue was modified.'.chr(10).chr(13).chr(10).chr(13).
-            'ID: '          .$issue['id'].chr(10).chr(13).
-            'Status: '      .$issue['status'].chr(10).chr(13).
-            'Product: '     .$issue['product'].chr(10).chr(13).
-            'Version: '     .$issue['version'].chr(10).chr(13).
-            'Severity: '    .$issue['severity'].chr(10).chr(13).
-            'Creator: '     .$issue['user_name'].chr(10).chr(13).
-            'Title: '       .$issue['title'].chr(10).chr(13).chr(10).chr(13).
-            'best regards'.chr(10).chr(13).'Issue Tracker';
+            $body = 'Dear user,'.chr(10).chr(10).
+            'Your reported issue was modified.'.chr(10).chr(10).
+            'ID: '          .$issue['id'].chr(10).
+            'Status: '      .$issue['status'].chr(10).
+            'Product: '     .$issue['product'].chr(10).
+            'Version: '     .$issue['version'].chr(10).
+            'Severity: '    .$issue['severity'].chr(10).
+            'Creator: '     .$issue['user_name'].chr(10).
+            'Title: '       .$issue['title'].chr(10).chr(10).
+            'best regards'.chr(10).'Issue Tracker';
 
             $from=$this->getConf('email_address') ;
             $to=$issue['user_mail'];
@@ -524,91 +525,98 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         global $ID;
         $project = $data['project'];
 
-        // load severity values from config file into control
+        // retrive some basic information
         $user_mail = pageinfo();  //to get mail address of reporter
         $cur_date = date ('Y-m-d G:i:s');
-        
-        /*--------------------------------------------------------------------*/
-        // load set of product names defined by admin
-        /*--------------------------------------------------------------------*/
-        $products = explode(',', $this->getConf('products'));
-        $STR_PRODUCTS = "";
-        foreach ($products as $_products)
-        {
-            $STR_PRODUCTS = $STR_PRODUCTS . '<option value="'.$_products.'" >'.$_products."</option>'     ";
-        }
-        
-        /*--------------------------------------------------------------------*/
-        // load set of version values defined by admin
-        /*--------------------------------------------------------------------*/
-/*        $versions = explode('|', $this->getConf('versions'));
-        $xversions = explode(',', $versions[0]);
-        $STR_VERSIONS = "";
-        foreach ($xversions as $_versions)
-        {
-            $STR_VERSIONS = $STR_VERSIONS . '<option value="'.$_versions.'" >'.$_versions."</option>'     ";
-        }
-*/        
-        /*--------------------------------------------------------------------*/
-        // load set of severity values defined by admin
-        /*--------------------------------------------------------------------*/
-        $STR_SEVERITY = "";
-        $severity = explode(',', $this->getConf('severity')) ;
-        foreach ($severity as $_severity)
-        {
-            $STR_SEVERITY = $STR_SEVERITY . '<option value="'.$_severity.'" >'.$_severity."</option>'     ";
-        }
-        
-        // a file to store the comments regarding an issue going for and back
-        $comments_file == metaFN($ID, '.cmnts');
-        /*--------------------------------------------------------------------*/
-        // create the report template
-        /*--------------------------------------------------------------------*/
-        $ret = '<div><script type="text/javascript" src="include/selectupdate.js"></script>'.
-               '<form class="issuetracker__form" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'"><p>';
-        $ret .= formSecurityToken(false).
-        '<input type="hidden" name="do" value="show" />'.
-        '<input type="hidden" name="id" value="'.$ID.'" />'.
-        '<input type="hidden" name="created" type="text" value="'.$cur_date.'"/>'.
-        '<input type="hidden" name="comments" type="text" value="'.$comments_file.'"/>'.
-        '<p><label> Project &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$project.'</label></p>'.
-        '<p><label> Product &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>'.
-            '  <select class="element select small issuetracker__option" name="product" style="width:208px">'.
-            '       '.$STR_PRODUCTS.
-            '	 </select></p>'.      
-        '<p><label> Version &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>'.
-            '  <input class="element select small issuetracker__option" name="version" type="text" size="30" value="'.$STR_VERSIONS.'"/></p>'.
-        '<p><label> User name &nbsp;&nbsp;&nbsp;&nbsp;</label><input class="issuetracker__option" name="user_name" type="text" size="30" value="'.$user_mail['userinfo']['name'].'"/></p>'.
-        '<p><label> User mail &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label><input class="issuetracker__option" name="user_mail" type="text" size="30" value="'.$user_mail['userinfo']['mail'].'"/></p>'.
-        '<p><label> User phone &nbsp;&nbsp;&nbsp;</label><input class="issuetracker__option" name="user_phone" type="text" size="30" value="'.$user_phone['userinfo']['phone'].'"/></p>'.
-        '<p><label> Add contact &nbsp;&nbsp;</label><input class="issuetracker__option" name="add_user_mail" type="text" size="30" value="'.$_REQUEST['add_user_mail'].'"/></p>'.        
-        '<p><label> Severity &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>'.
-            '  <select class="element select small issuetracker__option" name="severity" style="width:208px">'.
-            '       '.$STR_SEVERITY.
-            '	 </select></p>'.      
-        '<p><label> Issue Title &nbsp;</label><br /><input class="issuetracker__option" name="title" type="text" size="146" value="'.$_REQUEST['title'].'"/></input></p>'.
-        '<p><label> Issue Description : </label><br /><textarea class="issuetracker__option" name="description" cols="109" rows="7">'.$_REQUEST['description'].'</textarea></p>'.
-        '<p><label style="text-align:left;"> Symptom link 1 : </label><input class="issuetracker__option" name="attachment1" type="text" size="126" value="'.$_REQUEST['attachment1'].'"/></p>'.        
-        '<p><label style="text-align:left;"> Symptom link 2 : </label><input class="issuetracker__option" name="attachment2" type="text" size="126" value="'.$_REQUEST['attachment2'].'"/></p>'.        
-        '<p><label style="text-align:left;"> Symptom link 3 : </label><input class="issuetracker__option" name="attachment3" type="text" size="126" value="'.$_REQUEST['attachment3'].'"/></p>'.        
-        '<p><input type="hidden" name="modified" type="text" value="'.$cur_date.'"/>'.
-        '<input type="hidden" name="assigned" type="text" value="" />';
+        $user_check = $this->getConf('registered_users');
 
-        if ($this->getConf('use_captcha')==1) 
-        {        
-            $helper = null;
-  		      if(@is_dir(DOKU_PLUGIN.'captcha'))
-  			       $helper = plugin_load('helper','captcha');
-  			       
-  		      if(!is_null($helper) && $helper->isEnabled())
-  			    {
-  			       $ret .= '<p>'.$helper->getHTML().'</p>';
-  			    }
+        if((($user_check === true) && ($user_mail['perm'] >= 2))||($user_check === false)) {         
+            /*--------------------------------------------------------------------*/
+            // load set of product names defined by admin
+            /*--------------------------------------------------------------------*/
+            $products = explode(',', $this->getConf('products'));
+            $STR_PRODUCTS = "";
+            foreach ($products as $_products)
+            {
+                $STR_PRODUCTS = $STR_PRODUCTS . '<option value="'.$_products.'" >'.$_products."</option>'     ";
+            }
+            
+            /*--------------------------------------------------------------------*/
+            // load set of version values defined by admin
+            /*--------------------------------------------------------------------*/
+    /*        $versions = explode('|', $this->getConf('versions'));
+            $xversions = explode(',', $versions[0]);
+            $STR_VERSIONS = "";
+            foreach ($xversions as $_versions)
+            {
+                $STR_VERSIONS = $STR_VERSIONS . '<option value="'.$_versions.'" >'.$_versions."</option>'     ";
+            }
+    */        
+            /*--------------------------------------------------------------------*/
+            // load set of severity values defined by admin
+            /*--------------------------------------------------------------------*/
+            $STR_SEVERITY = "";
+            $severity = explode(',', $this->getConf('severity')) ;
+            foreach ($severity as $_severity)
+            {
+                $STR_SEVERITY = $STR_SEVERITY . '<option value="'.$_severity.'" >'.$_severity."</option>'     ";
+            }
+            
+            // a file to store the comments regarding an issue going for and back
+            $comments_file == metaFN($ID, '.cmnts');
+            /*--------------------------------------------------------------------*/
+            // create the report template
+            /*--------------------------------------------------------------------*/
+            $ret = '<div><script type="text/javascript" src="include/selectupdate.js"></script>'.
+                   '<form class="issuetracker__form" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'"><p>';
+            $ret .= formSecurityToken(false).
+            '<input type="hidden" name="do" value="show" />'.
+            '<input type="hidden" name="id" value="'.$ID.'" />'.
+            '<input type="hidden" name="created" type="text" value="'.$cur_date.'"/>'.
+            '<input type="hidden" name="comments" type="text" value="'.$comments_file.'"/>'.
+            '<p><label> Project &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$project.'</label></p>'.
+            '<p><label> Product &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>'.
+                '  <select class="element select small issuetracker__option" name="product" style="width:208px">'.
+                '       '.$STR_PRODUCTS.
+                '	 </select></p>'.      
+            '<p><label> Version &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>'.
+                '  <input class="element select small issuetracker__option" name="version" type="text" size="30" value="'.$STR_VERSIONS.'"/></p>'.
+            '<p><label> User name &nbsp;&nbsp;&nbsp;&nbsp;</label><input class="issuetracker__option" name="user_name" type="text" size="30" value="'.$user_mail['userinfo']['name'].'"/></p>'.
+            '<p><label> User mail &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label><input class="issuetracker__option" name="user_mail" type="text" size="30" value="'.$user_mail['userinfo']['mail'].'"/></p>'.
+            '<p><label> User phone &nbsp;&nbsp;&nbsp;</label><input class="issuetracker__option" name="user_phone" type="text" size="30" value="'.$user_phone['userinfo']['phone'].'"/></p>'.
+            '<p><label> Add contact &nbsp;&nbsp;</label><input class="issuetracker__option" name="add_user_mail" type="text" size="30" value="'.$_REQUEST['add_user_mail'].'"/></p>'.        
+            '<p><label> Severity &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>'.
+                '  <select class="element select small issuetracker__option" name="severity" style="width:208px">'.
+                '       '.$STR_SEVERITY.
+                '	 </select></p>'.      
+            '<p><label> Issue Title &nbsp;</label><br /><input class="issuetracker__option" name="title" type="text" size="146" value="'.$_REQUEST['title'].'"/></input></p>'.
+            '<p><label> Issue Description : </label><br /><textarea class="issuetracker__option" name="description" cols="109" rows="7">'.$_REQUEST['description'].'</textarea></p>'.
+            '<p><label style="text-align:left;"> Symptom link 1 : </label><input class="issuetracker__option" name="attachment1" type="text" size="126" value="'.$_REQUEST['attachment1'].'"/></p>'.        
+            '<p><label style="text-align:left;"> Symptom link 2 : </label><input class="issuetracker__option" name="attachment2" type="text" size="126" value="'.$_REQUEST['attachment2'].'"/></p>'.        
+            '<p><label style="text-align:left;"> Symptom link 3 : </label><input class="issuetracker__option" name="attachment3" type="text" size="126" value="'.$_REQUEST['attachment3'].'"/></p>'.        
+            '<p><input type="hidden" name="modified" type="text" value="'.$cur_date.'"/>'.
+            '<input type="hidden" name="assigned" type="text" value="" />';
+    
+            if ($this->getConf('use_captcha')==1) 
+            {        
+                $helper = null;
+      		      if(@is_dir(DOKU_PLUGIN.'captcha'))
+      			       $helper = plugin_load('helper','captcha');
+      			       
+      		      if(!is_null($helper) && $helper->isEnabled())
+      			    {
+      			       $ret .= '<p>'.$helper->getHTML().'</p>';
+      			    }
+            }
+         //<input name="do[save]" type="submit" value="Save" class="button" id="edbtn__save" accesskey="s" tabindex="4" title="Save [S]" />
+            $ret .= '<p><input name="submit" type="submit" value="submit" class="button" id="edbtn__save" title="Save [S]"/>'.
+            '</p></form></div>';
         }
-     //<input name="do[save]" type="submit" value="Save" class="button" id="edbtn__save" accesskey="s" tabindex="4" title="Save [S]" />
-        $ret .= '<p><input name="submit" type="submit" value="submit" class="button" id="edbtn__save" title="Save [S]"/>'.
-        '</p></form></div>';
-
+        else {
+           $wmsg = '&nbsp;Please Login/Register if you want to report an issue.'; 
+           $ret .= '<div style="border: 1px black solid; background-color: #DBDBDB; padding: 3px; width: 89%;">'.$wmsg.'</div>';                      
+        }
+        
         return $ret;    
     }
 /******************************************************************************/
@@ -690,8 +698,7 @@ address format and the domain exists.
     (!preg_match('/^(\\\\.|[A-Za-z0-9!#%&`_=\\/$\'*+?^{}|~.-])+$/',
                      str_replace("\\\\","",$local)))
           {
-             // character not valid in local part unless 
-             // local part is quoted
+             // character not valid in local part unless local part is quoted
              if (!preg_match('/^"(\\\\"|[^"])+"$/',
                  str_replace("\\\\","",$local)))
              {

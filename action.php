@@ -153,6 +153,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
         $noStatIMG = $this->getConf('noStatIMG');
         $noSevIMG = $this->getConf('noSevIMG');
+//        $user_grp = pageinfo();
         
         // get issues file contents
         $pfile = metaFN($project, '.issues');   
@@ -283,19 +284,24 @@ $issue_comments_log ='<DIV id=description-open><TABLE border=0 cellSpacing=0 cel
               } 
               $issue_comments_log .= '</DIV>';
 
-$issue_add_comment ='<DIV id=description-open><TABLE border=0 cellSpacing=0 cellPadding=4 width="90%" bgColor=#ffffff ><TBODY><TR>'.
-        '<TD bgColor=#bbbbbb width="1%" noWrap align=middle colSpan=2 >&nbsp;<FONT color=#ffffff><B>Add a new comment</B></FONT>&nbsp;</TD></TR></TBODY></TABLE>'.
-        '<TABLE border=0 cellSpacing=0 cellPadding=0 width="100%">';
 
-$issue_add_comment .= '<script type="text/javascript" src="include/selectupdate.js"></script>'.
-                     '<form class="comments__form" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'">';
                      
-        // retrive basic information
+        // retrive some basic information
         $user_mail = pageinfo();  //to get mail address of reporter
         $cur_date = date ('Y-m-d G:i:s');
-
         if($user_mail['userinfo']['mail']=='') {$u_mail_check ='unknown';}
         else {$u_mail_check =$user_mail['userinfo']['mail'];}
+        $user_check = $this->getConf('registered_users');
+                
+        if((($user_check === true) && ($user_mail['perm'] >= 2))||($user_check === false)) {                                 
+$issue_add_comment ='<DIV id=description-open>'.
+                    '<TABLE border=0 cellSpacing=0 cellPadding=4 width="90%" bgColor=#ffffff ><TBODY>'.
+                      '<TR>'.
+                        '<TD bgColor=#bbbbbb width="1%" noWrap align=middle colSpan=2 >&nbsp;<FONT color=#ffffff><B>Add a new comment</B></FONT>&nbsp;</TD>
+                      </TR></TBODY></TABLE>';
+$issue_add_comment .= '<TABLE border=0 cellSpacing=0 cellPadding=0 width="100%">'.
+                      '<script type="text/javascript" src="include/selectupdate.js"></script>'.
+                      '<form class="comments__form" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'">';
 
 $issue_add_comment .= formSecurityToken(false). 
                      '<input type="hidden" name="project" type="text" value="'.$project.'"/>'.
@@ -303,23 +309,27 @@ $issue_add_comment .= formSecurityToken(false).
                      '<input type="hidden" name="comment_issue_ID" type="text" value="'.$issue[$issue_id]['id'].'"/>'.
                      '<input type="hidden" name="author" type="text" value="'.$u_mail_check.'"/>'.        
                      '<input type="hidden" name="timestamp" type="text" value="'.$cur_date.'"/>'.        
-                     '<td><textarea name="comment" type="text" cols="108" rows="7" value="'.$_REQUEST['comment'].'"></textarea></td></TABLE></DIV>';        
+                     '<td><textarea name="comment" type="text" cols="107" rows="7" value="'.$_REQUEST['comment'].'"></textarea></td></TABLE></DIV>';        
              
                       if ($this->getConf('use_captcha')==1) 
-                      {        
-                          $helper = null;
+                      {   $helper = null;
               		        if(@is_dir(DOKU_PLUGIN.'captcha'))
               			         $helper = plugin_load('helper','captcha');
               			         
               		        if(!is_null($helper) && $helper->isEnabled())
-              			      {
-              			         $issue_add_comment .= '<p>'.$helper->getHTML().'</p>';
-              			      }
+              			      {  $issue_add_comment .= '<p>'.$helper->getHTML().'</p>'; }
                       }
-            
-$issue_add_comment .= '<p><input  type="hidden" class="showid__option" name="showid" id="showid" type="text" size="10" value="'.$this->parameter.'"/>'.
-     '<input class="button" id="showcase" type="submit" name="showcase" value="Add" title="Add");/></p>'.
-                           '</form>';
+                      
+                      // check if only registered users are allowed to add comments
+                      // ¦ perm — the user's permissions related to the current page ($ID)
+                      $issue_add_comment .= '<p><input  type="hidden" class="showid__option" name="showid" id="showid" type="text" size="10" value="'.$this->parameter.'"/>'.
+                                            '<input class="button" id="showcase" type="submit" name="showcase" value="Add" title="Add");/></p>'.
+                                            '</form>';
+        }
+        else {
+           $wmsg = '&nbsp;Please Login/Register if you want to add a comment.'; 
+           $issue_add_comment .= '<div style="border: 1px black solid; background-color: #DBDBDB; padding: 3px; width: 89%;">'.$wmsg.'</div>';                      
+        }
                                            
         $ret = $issue_edit_head . $issue_client_details . $issue_initial_description . $issue_attachments . $issue_comments_log . $issue_add_comment;
         return $ret;
@@ -333,19 +343,19 @@ $issue_add_comment .= '<p><input  type="hidden" class="showid__option" name="sho
         {
             $subject='Issue '.$issue['id'].' on '.$project.' was modified';            
             
-            $body = 'Dear user,'.chr(10).chr(13).chr(10).chr(13).'Your reported issue was modified.'.chr(10).chr(13).
-            'ID: '          .$issue['id'].chr(10).chr(13).
-            'Status: '      .$issue['status'].chr(10).chr(13).
-            'Product: '     .$issue['product'].chr(10).chr(13).
-            'Version: '     .$issue['version'].chr(10).chr(13).
-            'Severity: '    .$issue['severity'].chr(10).chr(13).
-            'Creator: '     .$issue['user_name'].chr(10).chr(13).
-            'Title: '       .$issue['title'].chr(10).chr(13).
-            'Comment by: '  .$comment['author'].chr(10).chr(13).
-            'submitted on:' .$comment['timestamp'].chr(10).chr(13).
-            'Comment: '     .$comment['comment'].chr(10).chr(13).
-            'see details:'  .chr(10).chr(13).chr(10).chr(13). 
-            'best regards'.chr(10).chr(13).'Issue Tracker';
+            $body = 'Dear user,'.chr(10).chr(10).'Your reported issue was modified.'.chr(10).chr(13).
+            'ID: '          .$issue['id'].chr(10).
+            'Status: '      .$issue['status'].chr(10).
+            'Product: '     .$issue['product'].chr(10).
+            'Version: '     .$issue['version'].chr(10).
+            'Severity: '    .$issue['severity'].chr(10).
+            'Creator: '     .$issue['user_name'].chr(10).
+            'Title: '       .$issue['title'].chr(10).
+            'Comment by: '  .$comment['author'].chr(10).
+            'submitted on:' .$comment['timestamp'].chr(10).
+            'Comment: '     .$comment['comment'].chr(10).
+            'see details:'  .chr(10).chr(10). 
+            'best regards'.chr(10).'Issue Tracker';
 
             $from=$this->getConf('email_address') ;
             $to=$issue['user_mail'];

@@ -1,27 +1,27 @@
 /** 
 *  IssueTracker Plugin: allows to create simple issue tracker
 *
-* initial code from DokuMicroBugTracker Plugin: allows to create simple bugtracker
-*
 * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
 * @author     Taggic <taggic@t-online.de>
 */
 
 Intro
 ------ 
- Simply spoken a user can easily report an issue for defined products which will be added 
- to an issue log (project). Some checks are implemented to prove if most important values 
- are given. The user will be informed by a green info box if the issue was added successfully 
- to the log file or a red one with details to provide missing information. The issue will 
- be stored to a file of issues and gets an ID. Automatically the configured admin is informed 
- by mail about a new entry to the issue list. The complete issue list delivers a detailed 
- overview to the admin of the reports. The admin is able to easily reduce the visible 
- information (column wise) displayed to the users, which not necessarily of interest by them.
+ Simply spoken a user can easily report an issue for defined products which will
+ be added to an issue log (project). Some checks are implemented to prove if 
+ most important values are given. The user will be informed by a green info box 
+ if the issue was added successfully to the log file or a red one with details 
+ to provide missing information. The issue will be stored to a file of issues 
+ and gets an ID. Automatically the configured admin is informed by mail about a 
+ new entry to the issue list. The complete issue list delivers a detailed
+ overview to the admin of the reports. The admin is able to easily reduce the 
+ visible information (column wise) displayed to the users, which not necessarily
+ of interest by them.
  
- Members of configured 'assign'groups are able to edit the entries of the issue list and see 
- the complete set of details. The issue list is sortable on all columns. The email addresses 
- of this group members are automatically loaded into the lists select box to be easily set as 
- issue related contact.
+ Members of configured 'assign'groups are able to edit the entries of the issue
+ list and see the complete set of details. The issue list is sortable on all 
+ columns. The email addresses of this group members are automatically loaded
+ into the lists select box to be easily set as issue related contact.
  
 Syntax
 ------- 
@@ -40,64 +40,107 @@ Syntax
 
 Installation
 ------------
- Just download and extract it as folder “issuetracker” into your “\lib\plugins” directory.
+ Just download and extract it as folder “issuetracker” into your “\lib\plugins” 
+ directory.
 
 
 Configuration
 --------------
- The following configurations can be done by the configuration manager: 
- Admin ? Configuration Settings ? Issuetracker Plugin Settings
+ The following configurations can be done via the configuration manager: 
+ Admin => Configuration Settings => Issuetracker Plugin Settings
+ 
+^  config item                                    ^  options & defaults        ^
+--------------------------------------------------------------------------------
+ Inform by mail about new issues ?    = on/off
+
+ Who is to be informed ?              = email_address
+
+ Inform user automatically by mail    = on/off
+ about issue mod 
+
+ Configure columns to be shown to     = multi select of columns to be displayed 
+ user as overview                       if non-admin viewing the issue list
+
+ Use captcha                          = on/off
+
+ Define severity levels you will use  = Query,Minor,Medium,Major,Critical,
+ (comma separated)                      Feature Request(defines user options)
+
+ Define issue status levels you       = New,Assigned,External Pending,In 
+ will use(comma separated)              Progress,Solved,Canceled,Double
+                                        (defines assignee's options)
+
+ Define tracked products              = define products of the project where
+ (comma separated)                      users can report issues
+
+ select wiki user groups pre-selected  = admin|user 
+ for assigning issues to
+ (Pipe ”|” separated)
+
+ status text instead of icons at       = little icons will be displayed with
+ Issue list                              status text as tooltip to save space
+                                         on table output but if you switch on
+                                         here the statusis provided as text
+
+ severity text instead of icons at     = little icons will be displayed with 
+ Issue list                              severity text as tooltip to save space
+                                         on table output but if you switch on
+                                         here the severityis provided as text
 
 Examples/Usage
 --------------
- Use this plugin to simply create an issue tracking. It is a further development based on 
- dokumicrobugtracker 2011-04-13  initial code base for corrections, which was not working 
- on my installation (Rincewind + Arctic). Probably you noticed the same problems 
- (e.g. edit of entries does not work) and may find a help with this.
+ Use this plugin to simply create an issue tracking. It is a further development
+ based on dokumicrobugtracker 2011-04-13  initial code base for corrections, 
+ which was not working on my installation (Rincewind + Arctic). Probably you 
+ noticed the same problems (e.g. edit of entries does not work) and may find a 
+ help with this.
+
  
 1. Report an issue
 ------------------
- This is a form shown to the user to provide controls for input of issue information. 
- Following information are handled:
+ This is a form shown to the user to provide controls for input of issue 
+ information. Following information are handled:
  
   {{issuetracker>project=your_project|status=all|display=form}}  
 
-  ID			automatically set 
-  Project 		automatically set (defined by your_project, see Syntax) 
-  Product 		user can select from admin pre-defined set of values 
-  Version		user to enter version info 
-  User name 		name derived from login if registered user, else should be entered by user 
-  User mail		e-mail derived from login if registered user, else should be entered by user 
-  User phone		phonenumber of the user 
-  Add contact 		a further contact can be added if necessary 
-  Severity		user can select from admin pre-defined set of severities
-  Issue Title		the headline of the issue 
+  ID			          automatically set 
+  Project 		      automatically set (defined by your_project, see Syntax) 
+  Product 		      user can select from admin pre-defined set of values 
+  Version		        user to enter version info 
+  User name 		    name derived from login if registered user, else should be entered by user 
+  User mail		      e-mail derived from login if registered user, else should be entered by user 
+  User phone		    phonenumber of the user 
+  Add contact 		  a further contact can be added if necessary 
+  Severity		      user can select from admin pre-defined set of severities
+  Issue Title		    the headline of the issue 
   Issue Description	user to enter the issue details 
-  Symptoms		user may add up to 3 links targeting files on a symptom server 
-  Captcha		user to enter for security reasons (if configured)
+  Symptoms		      user may add up to 3 links targeting files on a symptom server 
+  Captcha		        user to enter for security reasons (if configured)
 
 
 2. Issue List
 -------------
- The Plugin delivers an issue list, where admin can configure a restricted view for users. 
- The admin view delivers more details in the table. Admin is able to modify some entries 
- directly on this output, i.e. admin is able to assign the issue to a member of configured 
- user-groups (see configuration). 
+ The Plugin delivers an issue list, where admin can configure a restricted view 
+ for users. The admin view delivers more details in the table. Admin is able to 
+ modify some entries directly on this output, i.e. admin is able to assign the 
+ issue to a member of configured user-groups (see configuration). 
 
  {{issuetracker>project=your_project|status=all|display=issues}} 
 
 3. Issue Details view
 --------------------- 
- For better handling and also accessible for users there is a details view of an issue. Therefore 
- the Issue List containing a input and button to specify the isuue ID. This will provide a new 
- page displaying all information of an issue and delivering a comment function for interaction 
- between User and Admin/assigned resource. Both (user/assignee) will be informed about issue 
- updates by email, if configured. 
+ For better handling and also accessible for users there is a details view of an
+ issue. Therefore the Issue List containing a input and button to specify the 
+ isuue ID. This will provide a new page displaying all information of an issue 
+ and delivering a comment function for interaction between User and Admin/
+ assigned resource. Both (user/assignee) will be informed about issue updates by
+ email, if configured. 
 
 
 4. General Info 
 ----------------
- There are multiple files created. First there is a project fle containing all issue information 
- except comments. Each issue will have a related comments file where the communication is stored 
- to. All files are stored to data/meta directory with file extension ”.issue” or ”.cmnts”.
+ There are multiple files created. First there is a project fle containing all 
+ issue information except comments. Each issue will have a related comments file
+ where the communication is stored to. All files are stored to data/meta 
+ directory with file extension ”.issue” or ”.cmnts”.
  

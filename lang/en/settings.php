@@ -9,6 +9,7 @@
 // for the configuration manager
 $lang['send_email']     = 'Inform by mail about new issues ?'; 
 $lang['email_address']  = 'Who is to be informed ?';
+$lang['registered_users'] = 'Only registered users with edit permission on issue <br> tracker page are allowed to create reports and add comments';
 $lang['userinfo_email'] = 'Inform user by mail about issue modifications ?';
 $lang['shwtbl_usr']     = 'Configure columns to be shown to user as overview';
 $lang['use_captcha']    = 'Use captcha'; 
