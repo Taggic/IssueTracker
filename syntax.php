@@ -415,27 +415,26 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 foreach ($configs as $config)
                 {
                     $isval = $this->_get_one_value($issue,strtolower($config));
-                    if ($issue == 'status')
+                    if ($config == 'status')
                     {
                         if ($noStatIMG === false) {                    
-                            $status_img = $imgBASE . implode('', explode(' ',strtolower($issue))).'.gif';
-//                            if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
-                            $isval =' align="center"> <IMG border=0 alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$status_img.'" width=16 height=16>';
+                            $status_img = $imgBASE . implode('', explode(' ',strtolower($isval))).'.gif';
+                            $reduced_issues .='<td align="center"> <IMG border=0 alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$status_img.'" width=16 height=16>';
                         }
-                        else { $isval = $style.$isval; }
+                        else { $reduced_issues .= $style.$isval; }
                     }                                            
-                    elseif ($issue == 'severity')
+                    elseif ($config == 'severity')
                     {
                         if ($noSevIMG === false) {                    
-                            $severity_img = $imgBASE . implode('', explode(' ',strtolower($issue))).'.gif';
-    //                        if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
-                            $issue =' align="center"> <IMG border=0 alt="'.$issue.'" title="'.$this->_get_one_value($issue,strtolower($config)).'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$severity_img.'" width=16 height=16>';
+                            $severity_img = $imgBASE . implode('', explode(' ',strtolower($isval))).'.gif';
+                            $reduced_issues .='<td align="center"> <IMG border=0 alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$severity_img.'" width=16 height=16>';
                         }
-                        else { $severity_img = $style.$a_severity; }
-
+                        else { $reduced_issues .= $style.$isval; }
                     }
-                    
-                    $reduced_issues .= '<td'.$style.$isval.'</td>';
+                    else 
+                    {
+                        $reduced_issues .= '<td'.$style.$isval.'</td>';
+                    }
                 }
                 $reduced_issues .= '</tr>';
             }
