@@ -1,5 +1,5 @@
 <?php
-/** 
+/**
 *  IssueTracker Plugin: allows to create simple issue tracker
 *
 * initial code from DokuMicroBugTracker Plugin: allows to create simple bugtracker
@@ -114,16 +114,16 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 $Generated_Header = '';
                 if (isset($_REQUEST['severity'])) 
                 {
- 
                     if ($_REQUEST['severity'])
                       {
- 
-                          if ($this->_captcha_ok())
+                          // check if captcha is to be used by issue tracker in general
+                          if ($this->getConf('use_captcha') === 0) { $captcha_ok = 1;}
+                          else { $captcha_ok = ($this->_captcha_ok());}
+                          
+                          if ($captcha_ok)
                             {
- 
                                 if (checkSecurityToken())
                                 {                                
- 
                                     //Add it to the issue file
                                     $issue_id=count($issues);      
                                     foreach ($issues as $value)
@@ -363,7 +363,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     // check if status image or text to be displayed
                     if ($noStatIMG === false) {                    
                         $status_img = $imgBASE . implode('', explode(' ',strtolower($a_status))).'.gif';
-                        if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
+//                        if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
                         $status_img =' align="center"> <IMG border=0 alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$status_img.'" width=16 height=16>';
                     }                    
                     else { $status_img = $style.$a_status; }
@@ -371,7 +371,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     if ($noSevIMG === false) {                    
                         $severity_img = $imgBASE . implode('', explode(' ',strtolower($a_severity))).'.gif';
 
-                        if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
+//                        if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
                         $severity_img =' align="center"> <IMG border=0 alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$severity_img.'" width=16 height=16>';
                     }
                     else { $severity_img = $style.$a_severity; }
@@ -414,9 +414,30 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                                   '<td'.$style.$this->_get_one_value($issue,'id').'</td>';
                 foreach ($configs as $config)
                 {
-                    $reduced_issues = $reduced_issues.'<td'.$style.$this->_get_one_value($issue,strtolower($config)).'</td>';
+                    $isval = $this->_get_one_value($issue,strtolower($config));
+                    if ($issue == 'status')
+                    {
+                        if ($noStatIMG === false) {                    
+                            $status_img = $imgBASE . implode('', explode(' ',strtolower($issue))).'.gif';
+//                            if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
+                            $isval =' align="center"> <IMG border=0 alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$status_img.'" width=16 height=16>';
+                        }
+                        else { $isval = $style.$isval; }
+                    }                                            
+                    elseif ($issue == 'severity')
+                    {
+                        if ($noSevIMG === false) {                    
+                            $severity_img = $imgBASE . implode('', explode(' ',strtolower($issue))).'.gif';
+    //                        if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
+                            $issue =' align="center"> <IMG border=0 alt="'.$issue.'" title="'.$this->_get_one_value($issue,strtolower($config)).'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$severity_img.'" width=16 height=16>';
+                        }
+                        else { $severity_img = $style.$a_severity; }
+
+                    }
+                    
+                    $reduced_issues .= '<td'.$style.$isval.'</td>';
                 }
-                $reduced_issues = $reduced_issues.'</tr>';
+                $reduced_issues .= '</tr>';
             }
             
             $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$project."' class='sortable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";

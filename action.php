@@ -1,6 +1,6 @@
 <?php
 /******************************************************************************
-**  
+**
 **  action script related to IssueTracker
 **  Action to display details of a selected issue
 */
@@ -90,8 +90,17 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
              //If comment to be added
              if (isset($_REQUEST['comment'])) 
              {  if (($_REQUEST['comment']) && (isset($_REQUEST['comment_issue_ID'])))
-                   {  if ($this->_captcha_ok())
-                         {  if (checkSecurityToken())
+                   {
+
+                   // check if captcha is to be used by issue tracker in general
+                   if ($this->getConf('use_captcha') === 0) { $captcha_ok = 1;}
+                   else { $captcha_ok = ($this->_captcha_ok());}
+                   
+                   
+                   if ($captcha_ok)
+                         {  
+                         
+                            if (checkSecurityToken())
                             {
                                // get comment file contents
                                $comments_file = metaFN("ic_".$_REQUEST['comment_issue_ID'], '.cmnts');
@@ -121,15 +130,15 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                $xvalue = io_saveFile($pfile,serialize($issues));
                                
                               // Cleanup comment variables
-                              unset($_REQUEST['comment']); 
+//                              unset($_REQUEST['comment']); 
                                
                              }
                         }
                    }
              }
-            // Render            
-//            $data->doc .= $Generated_Header.$Generated_Table;
-            echo $Generated_Header.$Generated_Table.$Generated_feedback;
+             // Render            
+             //$data->doc .= $Generated_Header.$Generated_Table.$Generated_feedback;
+             echo $Generated_Header.$Generated_Table.$Generated_feedback;
 //        }
     }
 
@@ -146,7 +155,6 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         $noSevIMG = $this->getConf('noSevIMG');
         
         // get issues file contents
-//        $project = $this->project;
         $pfile = metaFN($project, '.issues');   
         if (@file_exists($pfile))
         	{$issue  = unserialize(@file_get_contents($pfile));}
@@ -160,8 +168,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         $cfile = metaFN("ic_".$issue_id, '.cmnts');
         if (@file_exists($cfile)) {$comments  = unserialize(@file_get_contents($cfile));}
         else {$comments = array();}
-//echo  $cfile . '<br>';
-//echo var_dump($comments) . '<br>';
+
 //--------------------------------------
 // Tables for the Issue details view:
 //--------------------------------------
@@ -276,7 +283,7 @@ $issue_comments_log ='<DIV id=description-open><TABLE border=0 cellSpacing=0 cel
               } 
               $issue_comments_log .= '</DIV>';
 
-        $issue_add_comment ='<DIV id=description-open><TABLE border=0 cellSpacing=0 cellPadding=4 width="90%" bgColor=#ffffff ><TBODY><TR>'.
+$issue_add_comment ='<DIV id=description-open><TABLE border=0 cellSpacing=0 cellPadding=4 width="90%" bgColor=#ffffff ><TBODY><TR>'.
         '<TD bgColor=#bbbbbb width="1%" noWrap align=middle colSpan=2 >&nbsp;<FONT color=#ffffff><B>Add a new comment</B></FONT>&nbsp;</TD></TR></TBODY></TABLE>'.
         '<TABLE border=0 cellSpacing=0 cellPadding=0 width="100%">';
 
@@ -298,19 +305,19 @@ $issue_add_comment .= formSecurityToken(false).
                      '<input type="hidden" name="timestamp" type="text" value="'.$cur_date.'"/>'.        
                      '<td><textarea name="comment" type="text" cols="108" rows="7" value="'.$_REQUEST['comment'].'"></textarea></td></TABLE></DIV>';        
              
-                     if ($this->getConf('use_captcha')==1) 
-                     {        
-                         $helper = null;
-               		      if(@is_dir(DOKU_PLUGIN.'captcha'))
-               			       $helper = plugin_load('helper','captcha');
-               			       
-               		      if(!is_null($helper) && $helper->isEnabled())
-               			    {
-               			       $issue_add_comment .= '<p>'.$helper->getHTML().'</p>';
-               			    }
-                     }
+                      if ($this->getConf('use_captcha')==1) 
+                      {        
+                          $helper = null;
+              		        if(@is_dir(DOKU_PLUGIN.'captcha'))
+              			         $helper = plugin_load('helper','captcha');
+              			         
+              		        if(!is_null($helper) && $helper->isEnabled())
+              			      {
+              			         $issue_add_comment .= '<p>'.$helper->getHTML().'</p>';
+              			      }
+                      }
             
-     $issue_add_comment .= '<p><input  type="hidden" class="showid__option" name="showid" id="showid" type="text" size="10" value="'.$this->parameter.'"/>'.
+$issue_add_comment .= '<p><input  type="hidden" class="showid__option" name="showid" id="showid" type="text" size="10" value="'.$this->parameter.'"/>'.
      '<input class="button" id="showcase" type="submit" name="showcase" value="Add" title="Add");/></p>'.
                            '</form>';
                                            
@@ -360,13 +367,11 @@ $issue_add_comment .= formSecurityToken(false).
 		function _captcha_ok()
 		{        			
 			$helper = null;		
-			if(@is_dir(DOKU_PLUGIN.'captcha'))
-				$helper = plugin_load('helper','captcha');
-			if(!is_null($helper) && $helper->isEnabled())
-				{	
-				return $helper->check();
-				}
-			return ($this->getConf('use_captcha'));
+			if(@is_dir(DOKU_PLUGIN.'captcha'))   $helper = plugin_load('helper','captcha');
+				
+			if(!is_null($helper) && $helper->isEnabled()) {	return $helper->check(); }
+			
+      return ($this->getConf('use_captcha'));
 		}
     
 /******************************************************************************/
