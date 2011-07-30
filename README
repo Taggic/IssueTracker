@@ -55,6 +55,8 @@ Configuration
 
  Who is to be informed ?              = email_address
 
+Edits only by registered users        = on/off
+
  Inform user automatically by mail    = on/off
  about issue mod 
 

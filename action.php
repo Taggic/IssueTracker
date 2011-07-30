@@ -62,7 +62,20 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         } 
         return $res; 
     } 
-
+/******************************************************************************/
+/* improved implode needed
+*/
+    function array_implode($arrays, &$target = array()) 
+    {         
+         foreach ($arrays as $item) {
+             if (is_array($item)) {
+                 $this->array_implode($item, $target);
+             } else {
+                 $target[] = $item;
+             }
+         }
+         return $target;
+    }
 /******************************************************************************
 **  Generate output
 */
@@ -149,6 +162,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
  function _details_render($issues, $project) {        
         // load issue details and display on page
         global $lang;
+        global $auth;
         $issue_id = $this->parameter;
         $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
         $noStatIMG = $this->getConf('noStatIMG');
@@ -183,7 +197,7 @@ $issue_edit_head = '<div><TABLE border=0 cellSpacing=0 cellPadding=4 width="90%"
                    '<TBODY>'. 
                    '<TR bgColor=#f0f0f0 vAlign=center >
                       <TD width="3%"></TD>
-                      <TD  width="10%"><B>ID:</B></TD>
+                      <TD width="13%"><B>ID:</B></TD>
                       <TD width="25%">'.$issue[$issue_id]['id'].'</label></TD>
                       <TD width="25%"></TD>                   
                    <FONT size=1>
@@ -196,7 +210,7 @@ $issue_edit_head = '<div><TABLE border=0 cellSpacing=0 cellPadding=4 width="90%"
                     $severity_img =' <IMG border=0 alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$severity_img.'" width=16 height=16> ';
 $issue_edit_head .= '<TR bgColor=#f0f0f0 vAlign=center>
                       <TD width="3%"></TD>
-                      <TD  width="10%"><B>Severity:</B></TD>
+                      <TD  width="13%"><B>Severity:</B></TD>
                       <TD width="25%">'.$severity_img.$issue[$issue_id]['severity'].'</TD>
                       <TD width="25%"></TD>                   
                    <FONT size=1>'.
@@ -209,28 +223,51 @@ $issue_edit_head .= '<TR bgColor=#f0f0f0 vAlign=center>
                     $status_img =' <IMG border=0 alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$status_img.'" width=16 height=16> ';
 $issue_edit_head .= '<TR bgColor=#f0f0f0 vAlign=center>
                       <TD width="3%"></TD>
-                      <TD  width="10%"><B>Status:</B></TD>
+                      <TD  width="13%"><B>Status:</B></TD>
                       <TD width="25%">'.$status_img.$issue[$issue_id]['status'].'</TD>
                       <TD width="25%"></TD>                   
                    <FONT size=1>
                       <TD width="10%"><B>Version:</B></TD>
                       <TD>'.$issue[$issue_id]['version'].'</TD>
-                   </Font></TR>'.
+                   </Font></TR>';
+
+                    //---------------------------------------------------------------------------------------------------------------------
+                    // do not show personal contact details if issue details not viewed by admin/assignee nor the original reporter itself
+                    //---------------------------------------------------------------------------------------------------------------------
+                    $user_mail = pageinfo();  //to get mail address of reporter
+                    $filter['grps']=$this->getConf('assign');
+                    $target = $auth->retrieveUsers(0,0,$filter);
+                    $target2 = $this->array_implode($target);
+                    $target2 = implode($target2);
+                    
+                    if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
+                    {   $__assigened  = $issue[$issue_id]['assigned'];
+                        $__reportedby = $issue[$issue_id]['user_mail'];
+                    }
+                    else 
+                    {   foreach($target as $_assignee)
+                          { if($_assignee['mail'] === $issue[$issue_id]['assigned'])
+                            {   $__assigened = $_assignee['name'];
+                                break;
+                            }
+                          }
+                        $__reportedby = $issue[$issue_id]['user_name'];
+                    }
                    
-                   '<TR bgColor=#f0f0f0 vAlign=center>                      
+$issue_edit_head .= '<TR bgColor=#f0f0f0 vAlign=center>                      
                       <TD width="3%"></TD>
-                      <TD  width="10%"><B>Assigned:</B></TD>
-                      <TD width="25%"><A  href="mailto:'.$issue[$issue_id]['assigned'].'">'.$issue[$issue_id]['assigned'].'</A></TD>
+                      <TD  width="13%"><B>Reported by:</B></TD>
+                      <TD width="25%"><A  href="mailto:'.$__reportedby.'">'.$__reportedby.'</A></TD>
                       <TD width="25%"></TD>                   
                    <FONT size=1>'.
-                      '<TD width="10%"><B>created:</B></TD>
+                      '<TD width="13%"><B>created:</B></TD>
                       <TD><SPAN class=date>'.$issue[$issue_id]['created'].'</SPAN></TD>
                    </FONT></TR>'.
                    
                    '<TR bgColor=#f0f0f0 vAlign=center>
                       <TD width="3%"></TD>
-                      <TD  width="10%"><B>Reporter:</B></TD>
-                      <TD width="25%"><A  href="mailto:'.$issue[$issue_id]['user_mail'].'">'.$issue[$issue_id]['user_mail'].'</A></TD>
+                      <TD  width="13%"><B>Assigned to:</B></TD>
+                      <TD width="25%"><A  href="mailto:'.$__assigened.'">'.$__assigened.'</A></TD>
                       <TD width="25%"></TD>                   
                    <FONT size=1>'.                   
                       '<TD width="10%"><B>modified:</B></TD>
@@ -239,16 +276,30 @@ $issue_edit_head .= '<TR bgColor=#f0f0f0 vAlign=center>
                    
                    '<TR bgColor=#f0f0f0 vAlign=center><FONT size=1><TD  colSpan=6 >&nbsp;</TD></FONT></TR>'.                       
                    '</TBODY>'.
-                   '</TABLE></BR></div>';
+                   '</TABLE></div>';
 
 
 $issue_client_details = '<DIV id=client_details><TABLE id=tab2 class=gridTabBox border=0 cellSpacing=0 cellPadding=4 width="90%" bgColor=#ffffff ><TBODY>'.
-                        '<TR><TD bgColor=#bbbbbb width="1%" noWrap align=middle colSpan=3><FONT color=#ffffff><B>Client</B></FONT></TD></TR>'.
-                        '<TR id=rowForcustomfield_10020><TD bgColor=#f0f0f0 width="1%"></TD><TD bgColor=#f0f0f0 vAlign=center width="25%"><B>Name:</B></TD><TD bgColor=#f0f0f0 width="75%">'.$issue[$issue_id]['user_name'].'</TD></TR>'.
-                        '<TR id=rowForcustomfield_10030><TD bgColor=#f0f0f0 width="1%"></TD><TD bgColor=#f0f0f0 vAlign=center width="25%"><B>Email:</B></TD><TD bgColor=#f0f0f0 width="75%"><A href="mailto:'.$issue[$issue_id]['user_mail'].'">'.$issue[$issue_id]['user_mail'].'</A> </TD></TR>'.
-                        '<TR id=rowForcustomfield_10040><TD bgColor=#f0f0f0 width="1%"></TD><TD bgColor=#f0f0f0 vAlign=center width="25%"><B>Phone:</B></TD><TD bgColor=#f0f0f0 width="75%">'.$issue[$issue_id]['user_phone'].'</TD></TR>'.
-                        '<TR id=rowForcustomfield_10050><TD bgColor=#f0f0f0 width="1%"></TD><TD bgColor=#f0f0f0 vAlign=center width="25%"><B>Add client contact:</B></TD><TD bgColor=#f0f0f0 width="75%"><A href="mailto:'.$issue[$issue_id]['add_user_mail'].'">'.$issue[$issue_id]['add_user_mail'].'</A></TD></TR>'.
+                        '<TR><TD bgColor=#bbbbbb width="1%" noWrap align=middle colSpan=3><FONT color=#ffffff><B>Reported by</B></FONT></TD></TR>'.
+                        '<TR id=rowForcustomfield_10020><TD bgColor=#f0f0f0 width="3%"></TD><TD bgColor=#f0f0f0 vAlign=center width="13%"><B>Name:</B></TD><TD bgColor=#f0f0f0 width="75%">'.$issue[$issue_id]['user_name'].'</TD></TR>';
+
+                        //--------------------------------------------------------------------------------------------------------------
+                        // do not show personal details if issue details diplayed by neigther admin/assignee nor the original user itself
+                        //--------------------------------------------------------------------------------------------------------------
+/*                        echo "current user = ".$user_mail['userinfo']['mail']."<br>".
+                               "Reporting user = ".$issue[$issue_id]['user_mail']."<br>";
+                          if($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) {echo "current user = Reporting user <br><br>";}
+                             else {echo "current user != Reporting user <br><br>";}
+                          if(strpos($target2,$user_mail['userinfo']['mail']) != false) {echo "current user is a member of assignees <br><br>";}
+                             else {echo "current user is not a member of assignees <br><br>";}
+*/                               
+                        if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
+                        {
+$issue_client_details .= '<TR id=rowForcustomfield_10030><TD bgColor=#f0f0f0 width="3%"></TD><TD bgColor=#f0f0f0 vAlign=center width="13%"><B>Email:</B></TD><TD bgColor=#f0f0f0 width="75%"><A href="mailto:'.$issue[$issue_id]['user_mail'].'">'.$issue[$issue_id]['user_mail'].'</A> </TD></TR>'.
+                        '<TR id=rowForcustomfield_10040><TD bgColor=#f0f0f0 width="3%"></TD><TD bgColor=#f0f0f0 vAlign=center width="13%"><B>Phone:</B></TD><TD bgColor=#f0f0f0 width="75%">'.$issue[$issue_id]['user_phone'].'</TD></TR>'.
+                        '<TR id=rowForcustomfield_10050><TD bgColor=#f0f0f0 width="3%"></TD><TD bgColor=#f0f0f0 vAlign=center width="13%"><B>Add contact:</B></TD><TD bgColor=#f0f0f0 width="75%"><A href="mailto:'.$issue[$issue_id]['add_user_mail'].'">'.$issue[$issue_id]['add_user_mail'].'</A></TD></TR>'.
                         '</TBODY></TABLE></DIV>'; 
+                        }
 
                         $x_comment = $this->convertlabel($issue[$issue_id]['description']);
 $issue_initial_description = '<DIV id=description-open><TABLE border=0 cellSpacing=0 cellPadding=4 width="90%" bgColor=#ffffff ><TBODY><TR>'.
@@ -262,7 +313,7 @@ $issue_attachments = '<DIV id=client_details><TABLE id=tab1 class=gridTabBox bor
                           1. <A href="'.$issue[$issue_id]['attachment1'].'"><IMG border=0 alt="symptoms 1" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment1'].'" href="'.$issue[$issue_id]['attachment1'].'">'.$issue[$issue_id]['attachment1'].'</A>'.
                      '<BR>2. <A href="'.$issue[$issue_id]['attachment2'].'"><IMG border=0 alt="symptoms 2" style="margin-right:0.5em" vspace=1em align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment2'].'" href="'.$issue[$issue_id]['attachment2'].'">'.$issue[$issue_id]['attachment2'].'</A>'.
                      '<BR>3. <A href="'.$issue[$issue_id]['attachment3'].'"><IMG border=0 alt="symptoms 3" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment3'].'" href="'.$issue[$issue_id]['attachment3'].'">'.$issue[$issue_id]['attachment3'].'</A>'.
-                     '<BR><BR></TD></TR></TBODY></TABLE></DIV></BR>';              
+                     '<BR></TD></TR></TBODY></TABLE></DIV>';              
 
 $issue_comments_log ='<DIV id=description-open><TABLE border=0 cellSpacing=0 cellPadding=4 width="90%" bgColor=#ffffff ><TBODY><TR>'.
         '<TD bgColor=#bbbbbb width="1%" noWrap align=middle colSpan=2 >&nbsp;<FONT color=#ffffff><B>Comments (work log)</B></FONT>&nbsp;</TD></TR></TBODY></TABLE>'.
@@ -272,13 +323,20 @@ $issue_comments_log ='<DIV id=description-open><TABLE border=0 cellSpacing=0 cel
                   foreach ($comments as $a_comment)
                   {
                         $x_id = $this->_get_one_value($a_comment,'id');
-                        $x_mail = $this->_get_one_value($a_comment,'author');
                         $x_comment = $this->_get_one_value($a_comment,'comment');
                         $x_comment = $this->convertlabel($x_comment);
+                        
+                        //----------------------------------------------------------------------------------------------------------------
+                        // do not show personal details if issue details diplayed by neigther admin/assignee nor the original user itself
+                        //----------------------------------------------------------------------------------------------------------------
+                        if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
+                        {   $x_mail = '<a href="mailto:'.$this->_get_one_value($a_comment,'author').'">'.$this->_get_one_value($a_comment,'author').'</a>'; }
+                        else {   $x_mail = '<i> (user details hidden) </i>';  }
+
                         $issue_comments_log .= '<TABLE width="85%" style="margin-left:10px; margin-right:10px">'.
                                                '<TR><TD><FONT size=1><I><label>['.$this->_get_one_value($a_comment,'id').'] </label>&nbsp;&nbsp;&nbsp;'.
                                                '<label>'.$this->_get_one_value($a_comment,'timestamp').' </label>&nbsp;&nbsp;&nbsp;'.
-                                               '<label><a href="mailto:'.$x_mail.'">'.$x_mail.'</a></label></I></FONT></TD></TR>'.
+                                               '<label>'.$x_mail.'</label></I></FONT></TD></TR>'.
                                                '<TR><TD>'.$x_comment.'</TD></TR></TABLE><hr width="90%">';
                   }
               } 
@@ -286,14 +344,18 @@ $issue_comments_log ='<DIV id=description-open><TABLE border=0 cellSpacing=0 cel
 
 
                      
+        //--------------------------------------------------------------------------------------------------------------
+        // only admin/assignees and reporter are allowed to add comments if only user edit option is set
+        //--------------------------------------------------------------------------------------------------------------
         // retrive some basic information
-        $user_mail = pageinfo();  //to get mail address of reporter
         $cur_date = date ('Y-m-d G:i:s');
         if($user_mail['userinfo']['mail']=='') {$u_mail_check ='unknown';}
-        else {$u_mail_check =$user_mail['userinfo']['mail'];}
+        else {$u_mail_check = $user_mail['userinfo']['mail'];}
         $user_check = $this->getConf('registered_users');
+        
+//        echo 'user_mail["perm"] = '.$user_mail['perm'].'<br>';
                 
-        if((($user_check === true) && ($user_mail['perm'] >= 2))||($user_check === false)) {                                 
+        if((($user_check === true) and ($user_mail['perm'] >= 2)) or ($user_check === false)) {                                 
 $issue_add_comment ='<DIV id=description-open>'.
                     '<TABLE border=0 cellSpacing=0 cellPadding=4 width="90%" bgColor=#ffffff ><TBODY>'.
                       '<TR>'.
@@ -327,7 +389,7 @@ $issue_add_comment .= formSecurityToken(false).
                                             '</form>';
         }
         else {
-           $wmsg = '&nbsp;Please Login/Register if you want to add a comment.'; 
+           $wmsg = '&nbsp;Please <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">Login/Register</a> if you want to add a comment.'; 
            $issue_add_comment .= '<div style="border: 1px black solid; background-color: #DBDBDB; padding: 3px; width: 89%;">'.$wmsg.'</div>';                      
         }
                                            

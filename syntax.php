@@ -281,7 +281,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         {
                 if (strrpos($x_umail, "@") > 0)
                 {
-                $x_umail_select = $x_umail_select . "['".$x_umail."','".$x_umail."'],";
+                    $x_umail_select = $x_umail_select . "['".$x_umail."','".$x_umail."'],";
                 }
         }      
         
@@ -613,7 +613,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             '</p></form></div>';
         }
         else {
-           $wmsg = '&nbsp;Please Login/Register if you want to report an issue.'; 
+           $wmsg = '&nbsp;Please <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">Login/Register</a> if you want to report an issue.'; 
            $ret .= '<div style="border: 1px black solid; background-color: #DBDBDB; padding: 3px; width: 89%;">'.$wmsg.'</div>';                      
         }
         
