@@ -116,7 +116,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                             if (checkSecurityToken())
                             {
                                // get comment file contents
-                               $comments_file = metaFN("ic_".$_REQUEST['comment_issue_ID'], '.cmnts');
+                               $comments_file = metaFN($project."_".$_REQUEST['comment_issue_ID'], '.cmnts');
   
                                if (@file_exists($comments_file))  {  $comments  = unserialize(@file_get_contents($comments_file));  }
                                else  {  $comments = array();  }
@@ -180,7 +180,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
           }	          
         
         // get detail information from issue comment file
-        $cfile = metaFN("ic_".$issue_id, '.cmnts');
+        $cfile = metaFN($project."_".$issue_id, '.cmnts');
         if (@file_exists($cfile)) {$comments  = unserialize(@file_get_contents($cfile));}
         else {$comments = array();}
 
