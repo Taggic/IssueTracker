@@ -308,8 +308,8 @@ $issue_initial_description = '<DIV id=description-open><TABLE border=0 cellSpaci
         '<TD width="1%"><TD id=descriptionArea>'.$x_comment.'</TD></TR></TBODY></TABLE>';
 
 $issue_attachments = '<DIV id=client_details><TABLE id=tab1 class=gridTabBox border=0 cellSpacing=0 cellPadding=4 width="90%" bgColor=#ffffff ><TBODY>'.
-                     '<TR><TD bgColor=#bbbbbb width="1%" noWrap align=middle colSpan=3><FONT color=#ffffff><B>Links to symptom files</B></FONT></TD></TR>'.
-                     '<TR><TD width="1%"></TD><TD bgColor=#ffffff vAlign=top colSpan=5>
+                     '<TR><TD bgColor=#bbbbbb width="90%" noWrap align=middle colSpan=3><FONT color=#ffffff><B>Links to symptom files</B></FONT></TD></TR>'.
+                     '<TR><TD width="1%"></TD><TD bgColor=#ffffff vAlign=top>
                           1. <A href="'.$issue[$issue_id]['attachment1'].'"><IMG border=0 alt="symptoms 1" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment1'].'" href="'.$issue[$issue_id]['attachment1'].'">'.$issue[$issue_id]['attachment1'].'</A>'.
                      '<BR>2. <A href="'.$issue[$issue_id]['attachment2'].'"><IMG border=0 alt="symptoms 2" style="margin-right:0.5em" vspace=1em align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment2'].'" href="'.$issue[$issue_id]['attachment2'].'">'.$issue[$issue_id]['attachment2'].'</A>'.
                      '<BR>3. <A href="'.$issue[$issue_id]['attachment3'].'"><IMG border=0 alt="symptoms 3" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment3'].'" href="'.$issue[$issue_id]['attachment3'].'">'.$issue[$issue_id]['attachment3'].'</A>'.
