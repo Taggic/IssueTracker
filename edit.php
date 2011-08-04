@@ -42,11 +42,11 @@ require_once(realpath(dirname(__FILE__)).'/../../../inc/init.php');
     
 //    if (($field == 'status') || ($field == 'severity') || ($field == 'version') || ($field == 'description')|| ($field == 'resolution') && (auth_isadmin()==1))
     //admin is allowed to change all field contents
-    if (auth_isadmin() == 1)
-    {
+//    if (auth_isadmin() == 1)
+//    {
         $issues[$id_issue][$field] = $value;
         $issues[$id_issue]['modified'] = date ('Y-m-d G:i:s');
-    }
+//    }
 //        echo $id_issue;
 //        echo $pfile;
     

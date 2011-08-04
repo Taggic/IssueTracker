@@ -158,7 +158,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                         //save issue-file
                                           $xvalue = io_saveFile($pfile,serialize($issues));
 //                                        echo "\$xvalue = ".$xvalue;
-                                          $Generated_Header = '<div style="border: 3px green solid; background-color: lightgreen; margin: 10px; padding: 10px;">Your report have been successfully stored as issue#'.$issue_id.'</div>';
+                                          $Generated_Header = '<div class="it__positive_feedback">Your report has been successfully stored as issue #'.$issue_id.'</div>';
                                           $this->_emailForNewIssue($data['project'],$issues[$issue_id]);
                                           $_REQUEST['description'] = '';
                                     }
@@ -173,13 +173,13 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                         else 
                                             { $wmsg = 'Please provide a better description of your issue.'; }
                                         
-                                        $Generated_Header = '<div style="border: 3px red solid; background-color: #FFAAAD; margin: 10px; padding: 10px;">'.$wmsg.'</div>';
+                                        $Generated_Header = '<div class="it__negative_feedback">'.$wmsg.'</div>';
                                     }
                                 
                                 }
                           else
                                 {
-                                $Generated_Header = ':<div class ="important">Wrong answer to the antispam question.</div>';
+                                $Generated_Header = ':<div class="it__negative_feedback">Wrong answer to the antispam question.</div>';
                                 }  
                           }
                     }            
@@ -315,9 +315,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     {
         global $ID;
         $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
-        $hdr_style="style='text-align:left; font-size:0.85em;'";
+//        $hdr_style="style='text-align:left; font-size:0.85em;'";
         $style =' style="text-align:left; white-space:pre-wrap;">';
-        $date_style =' style="text-align:center; white-space:pre;">';
+//        $date_style =' style="text-align:center; white-space:pre;">';
         $user_grp = pageinfo();
         $noStatIMG = $this->getConf('noStatIMG');
         $noSevIMG = $this->getConf('noSevIMG');
@@ -340,7 +340,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         // members of defined groups allowed changing issue contents 
         if ((strpos($this->getConf('assign'),$user_grps)!== false))       
         {   
-            $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$project."' class='sortable editable resizable inline'>".
+            $head = "<div class='itl__table'><table id='".$project."' class='sortable editable resizable inline'>".
                     "<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".
                     "<th id='created'>Created</th>".
                     "<th id='product'>Product</th>".
@@ -377,17 +377,17 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     else { $severity_img = $style.$a_severity; }
                                             
                     $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'">'.                       
-                             '<td'.$style.$this->_get_one_value($issue,'id').'</td>'.
-                             '<td'.$date_style.$this->_get_one_value($issue,'created').'</td>'.
-                             '<td'.$style.$this->_get_one_value($issue,'product').'</td>'.
-                             '<td'.$style.$this->_get_one_value($issue,'version').'</td>'.
+                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.
+                             '<td class="itl__td_date">'.$this->_get_one_value($issue,'created').'</td>'.
+                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'product').'</td>'.
+                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'version').'</td>'.
                              '<td'.$severity_img.'</td>'.
                              '<td'.$status_img.'</td>'.
-                             '<td'.$style.'<a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$this->_get_one_value($issue,'user_name').'</a></td>'. 
-                             '<td class="canbreak"'.$style.$this->_get_one_value($issue,'title').'</td>'.
-                             '<td'.$style.'<a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$this->_get_one_value($issue,'assigned').'</a></td>'. 
-                             '<td'.$style.$this->_get_one_value($issue,'resolution').'</td>'.
-                             '<td'.$date_style.$this->_get_one_value($issue,'modified').'</td>'.
+                             '<td class="itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$this->_get_one_value($issue,'user_name').'</a></td>'. 
+                             '<td class="canbreak itl__td_standard">'.$this->_get_one_value($issue,'title').'</td>'.
+                             '<td class="itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$this->_get_one_value($issue,'assigned').'</a></td>'. 
+                             '<td class="canbreak itl__td_standard">'.$this->_get_one_value($issue,'resolution').'</td>'.
+                             '<td class="itl__td_date">'.$this->_get_one_value($issue,'modified').'</td>'.
                              '</tr>';        
                 }
             } 
@@ -445,11 +445,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 //        $body = $body . '<p><label> User & Groups : &nbsp;&nbsp;'.$user_grps.' = '.strpos($this->getConf('assign'),$user_grps).'</label></p>';
         
         $ret = $head.$body;
-        $ret = '<form  method="post" action="doku.php?id=' . $ID . '&do=showcase"><p><label> Show details: &nbsp;&nbsp;</label>'.
-               '<input class="showid__option" name="showid" id="showid" type="text" size="10" value="0"/>'.
+        $ret = '<form  method="post" action="doku.php?id=' . $ID . '&do=showcase"><p><label> Show details:</label>'.
+               '<input class="itl__showid_input" name="showid" id="showid" type="text" value="0"/>'.
 //               <input type="hidden" name="pfile" value="'.$project.'" />'.
                '<input type="hidden" name="project" id="project" type="text" value="'.$project.'"/>'.
-               '<input class="button" id="showcase" type="submit" name="showcase" value="Go" title="Go");/>'.
+               '<input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="Go" title="Go");/>'.
                '</form>' . $ret;
         return $ret;
     }
@@ -567,33 +567,69 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             /*--------------------------------------------------------------------*/
             // create the report template
             /*--------------------------------------------------------------------*/
-            $ret = '<div><script type="text/javascript" src="include/selectupdate.js"></script>'.
+            $ret = '<div class="it__cir_form"><script type="text/javascript" src="include/selectupdate.js"></script>'.
                    '<form class="issuetracker__form" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'"><p>';
             $ret .= formSecurityToken(false).
             '<input type="hidden" name="do" value="show" />'.
             '<input type="hidden" name="id" value="'.$ID.'" />'.
             '<input type="hidden" name="created" type="text" value="'.$cur_date.'"/>'.
             '<input type="hidden" name="comments" type="text" value="'.$comments_file.'"/>'.
-            '<p><label> Project &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$project.'</label></p>'.
-            '<p><label> Product &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>'.
-                '  <select class="element select small issuetracker__option" name="product" style="width:208px">'.
-                '       '.$STR_PRODUCTS.
-                '	 </select></p>'.      
-            '<p><label> Version &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>'.
-                '  <input class="element select small issuetracker__option" name="version" type="text" size="30" value="'.$STR_VERSIONS.'"/></p>'.
-            '<p><label> User name &nbsp;&nbsp;&nbsp;&nbsp;</label><input class="issuetracker__option" name="user_name" type="text" size="30" value="'.$user_mail['userinfo']['name'].'"/></p>'.
-            '<p><label> User mail &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label><input class="issuetracker__option" name="user_mail" type="text" size="30" value="'.$user_mail['userinfo']['mail'].'"/></p>'.
-            '<p><label> User phone &nbsp;&nbsp;&nbsp;</label><input class="issuetracker__option" name="user_phone" type="text" size="30" value="'.$user_phone['userinfo']['phone'].'"/></p>'.
-            '<p><label> Add contact &nbsp;&nbsp;</label><input class="issuetracker__option" name="add_user_mail" type="text" size="30" value="'.$_REQUEST['add_user_mail'].'"/></p>'.        
-            '<p><label> Severity &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>'.
-                '  <select class="element select small issuetracker__option" name="severity" style="width:208px">'.
-                '       '.$STR_SEVERITY.
-                '	 </select></p>'.      
-            '<p><label> Issue Title &nbsp;</label><br /><input class="issuetracker__option" name="title" type="text" size="146" value="'.$_REQUEST['title'].'"/></input></p>'.
-            '<p><label> Issue Description : </label><br /><textarea class="issuetracker__option" name="description" cols="109" rows="7">'.$_REQUEST['description'].'</textarea></p>'.
-            '<p><label style="text-align:left;"> Symptom link 1 : </label><input class="issuetracker__option" name="attachment1" type="text" size="126" value="'.$_REQUEST['attachment1'].'"/></p>'.        
-            '<p><label style="text-align:left;"> Symptom link 2 : </label><input class="issuetracker__option" name="attachment2" type="text" size="126" value="'.$_REQUEST['attachment2'].'"/></p>'.        
-            '<p><label style="text-align:left;"> Symptom link 3 : </label><input class="issuetracker__option" name="attachment3" type="text" size="126" value="'.$_REQUEST['attachment3'].'"/></p>'.        
+            '<TABLE>
+              <TR>
+                <TD>Project</TD>
+                <TD><label class="it__cir_projectlabel">'.$project.'</label></TD>
+              </TR>'.
+             '<TR>
+                <TD>Product</TD>
+                <TD><select class="element select small it__cir_select" name="product">'.$STR_PRODUCTS.'</select></TD>
+              </TR>'.
+             '<TR>
+                <TD>Version</TD>
+                <TD><input class="it__cir_input" name="version" value="'.$STR_VERSIONS.'"/></TD>
+              </TR>'.
+             '<TR><TD colspan=2>&nbsp;</TD></TR>'.
+             '<TR>
+                <TD>User name</TD>
+                <TD><input class="it__cir_input" name="user_name" value="'.$user_mail['userinfo']['name'].'"/></TD>
+              </TR>'.
+             '<TR>
+                <TD>User mail</TD>
+                <TD><input class="it__cir_input" name="user_mail" value="'.$user_mail['userinfo']['mail'].'"/></TD>
+              </TR>'.
+             '<TR>
+                <TD>User phone</TD>
+                <TD><input class="it__cir_input" name="user_phone" value="'.$user_phone['userinfo']['phone'].'"/></TD>
+              </TR>'.
+             '<TR>
+                <TD>Add contact</TD>
+                <TD><input class="it__cir_input" name="add_user_mail" value="'.$_REQUEST['add_user_mail'].'"/></TD>        
+              </TR>'.
+            '<TR><TD colspan=2>&nbsp;</TD></TR>'.
+            '<TR>
+                <TD>Severity</TD>
+                <TD><select class="element select small it__cir_select" name="severity">'.$STR_SEVERITY.'</select></TD>
+             </TR>'.
+            '<TR>
+                <TD>Issue Title</TD>
+                <TD><input class="it__cir_linput" name="title" value="'.$_REQUEST['title'].'"/></input></TD>
+             </TR>'.
+            '<TR>
+                <TD>Issue Description</TD>
+                <TD><textarea class="it__cir_linput" name="description" cols="109" rows="7">'.$_REQUEST['description'].'</textarea></TD>
+             </TR>'.
+            '<TR><TD colspan=2>&nbsp;</TD></TR>'. 
+            '<TR>                <TD>Symptom link 1</TD>
+                <TD><input class="it__cir_linput" name="attachment1" value="'.$_REQUEST['attachment1'].'"/></TD>
+             </TR>'.
+            '<TR>
+                <TD>Symptom link 2</TD>
+                <TD><input class="it__cir_linput" name="attachment2" type="text" size="126" value="'.$_REQUEST['attachment2'].'"/></TD>
+             </TR>'.
+            '<TR>
+                <TD>Symptom link 3</TD>
+                <TD><input class="it__cir_linput" name="attachment3" type="text" size="126" value="'.$_REQUEST['attachment3'].'"</TD>
+            </TR></TABLE>'.  
+                  
             '<p><input type="hidden" name="modified" type="text" value="'.$cur_date.'"/>'.
             '<input type="hidden" name="assigned" type="text" value="" />';
     
@@ -614,7 +650,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         }
         else {
            $wmsg = '&nbsp;Please <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">Login/Register</a> if you want to report an issue.'; 
-           $ret .= '<div style="border: 1px black solid; background-color: #DBDBDB; padding: 3px; width: 89%;">'.$wmsg.'</div>';                      
+           $ret .= '<div class="it__standard_feedback">'.$wmsg.'</div>';                      
         }
         
         return $ret;    
