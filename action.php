@@ -94,7 +94,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             	 {  $issues  = unserialize(@file_get_contents($pfile));}
              else
             	 {// promt error message that issue with ID does not exist
-                  echo 'Project file does not exist: ' . $project . '.issues';
+                  echo '<div class="it__negative_feedback">Project file does not exist: ' . $project . '.issues .</div><br>';
                }	                              
              
              $Generated_Header = '';
@@ -125,7 +125,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                    {  if ($value['id'] >= $comment_id) { $comment_id=$value['id'] + 1; } 
                                       if ($_REQUEST['comment'] === $value['comment']) 
                                       {
-                                          $Generated_Header = '<div class="negative_feedback">This comment does already exist and was not added again.</div><br>';
+                                          $Generated_Header = '<div class="it__negative_feedback">This comment does already exist and was not added again.</div><br>';
                                           $checkFlag=true; 
                                           break;
                                       }
@@ -147,7 +147,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                    // update modified date
                                    $issues[$_REQUEST['comment_issue_ID']]['modified'] = date('Y-m-d G:i:s'); 
                                    $xvalue = io_saveFile($pfile,serialize($issues));                                   
-                                   $Generated_Header = '<div class="positive_feedback">Your comment has been successfully stored with ID #'.$comment_id.'.</div><br>';
+                                   $Generated_Header = '<div class="it__positive_feedback">Your comment has been successfully stored with ID #'.$comment_id.'.</div><br>';
                                    
                                 }
                               // Cleanup comment variables
@@ -183,11 +183,13 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         // get issues file contents
         $pfile = metaFN($project, '.issues');   
         if (@file_exists($pfile))
-        	{$issue  = unserialize(@file_get_contents($pfile));}
+        	{  $issue  = unserialize(@file_get_contents($pfile));  }
         else
         	{
               // promt error message that issue with ID does not exist
-              echo 'Project file does not exist: ' . $pfile;
+              $Generated_Header = '<div class="it__negative_feedback">Project file does not exist: '.$pfile.'</div><br>';
+              echo $Generated_Header;
+              return;
           }	          
         
         // get detail information from issue comment file
@@ -328,6 +330,9 @@ $issue_client_details .= '<TR class="itd__tables_tr">
                           </TR>
                           </TBODY></TABLE>'; 
                         }
+                        else {
+                          $issue_client_details .= '</TBODY></TABLE>';
+                        }
 
                         $x_comment = $this->convertlabel($issue[$issue_id]['description']);
 
@@ -343,17 +348,20 @@ $issue_initial_description = '<TABLE class="itd__tables"><TBODY>
 
 $issue_attachments = '<TABLE class="itd__tables"><TBODY>
                       <TR>
-                        <TD class="itd_tables_tdh" colSpan=3>Links to symptom files</TD>
+                        <TD class="itd_tables_tdh">Links to symptom files</TD>
                       </TR>
                       <TR  class="itd__tables_tr">
-                        <TD width="1%"></TD>
-                        <TD>
-                          1. <A href="'.$issue[$issue_id]['attachment1'].'"><IMG border=0 alt="symptoms 1" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment1'].'" href="'.$issue[$issue_id]['attachment1'].'">'.$issue[$issue_id]['attachment1'].'</A>'.
-                     '<BR>2. <A href="'.$issue[$issue_id]['attachment2'].'"><IMG border=0 alt="symptoms 2" style="margin-right:0.5em" vspace=1em align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment2'].'" href="'.$issue[$issue_id]['attachment2'].'">'.$issue[$issue_id]['attachment2'].'</A>'.
-                     '<BR>3. <A href="'.$issue[$issue_id]['attachment3'].'"><IMG border=0 alt="symptoms 3" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment3'].'" href="'.$issue[$issue_id]['attachment3'].'">'.$issue[$issue_id]['attachment3'].'</A>'.
-                     '<BR></TD></TR></TBODY></TABLE>';              
+                        <TD style="padding-left:0.45em;">1. <A href="'.$issue[$issue_id]['attachment1'].'"><IMG border=0 alt="symptoms 1" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment1'].'" href="'.$issue[$issue_id]['attachment1'].'">'.$issue[$issue_id]['attachment1'].'</A></TD>
+                      </TR>'.
+                     '<TR  class="itd__tables_tr">
+                        <TD style="padding-left:0.45em;">2. <A href="'.$issue[$issue_id]['attachment2'].'"><IMG border=0 alt="symptoms 2" style="margin-right:0.5em" vspace=1em align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment2'].'" href="'.$issue[$issue_id]['attachment2'].'">'.$issue[$issue_id]['attachment2'].'</A></TD>
+                      </TR>'.
+                     '<TR  class="itd__tables_tr">
+                        <TD style="padding-left:0.45em;">3. <A href="'.$issue[$issue_id]['attachment3'].'"><IMG border=0 alt="symptoms 3" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment3'].'" href="'.$issue[$issue_id]['attachment3'].'">'.$issue[$issue_id]['attachment3'].'</A></TD>
+                      </TR>'.
+                     '</TBODY></TABLE>';              
 
-$issue_comments_log ='<TABLE class="itd__tables" cellPadding=4><TBODY>
+$issue_comments_log ='<TABLE class="itd__tables"><TBODY>
                       <TR>
                         <TD class="itd_tables_tdh" colSpan=2 >Comments (work log)</TD>
                       </TR>';
@@ -381,7 +389,8 @@ $issue_comments_log ='<TABLE class="itd__tables" cellPadding=4><TBODY>
                                                   <TD class="itd_comment_tr">'.$x_comment.'</TD>
                                                 </TR>';
                   }
-              } 
+              }
+              $issue_comments_log .='</TBODY></TABLE>'; 
 
                      
         //--------------------------------------------------------------------------------------------------------------
@@ -393,13 +402,23 @@ $issue_comments_log ='<TABLE class="itd__tables" cellPadding=4><TBODY>
         else {$u_mail_check = $user_mail['userinfo']['mail'];}
         $user_check = $this->getConf('registered_users');
         
-//        echo "_SERVER['REQUEST_URI'] = ".$_SERVER['REQUEST_URI'].'<br>';
-                
-        if((($user_check === true) and ($user_mail['perm'] >= 2)) or ($user_check === false)) {                                 
-$issue_add_comment ='<TABLE class="itd__tables"><TBODY>'.
+        $_cFlag = false;             
+        if($user_check == false)
+            { $_cFlag = true; } 
+            
+        elseif ($user_check == true) {
+            if ($user_mail['perm'] > 1) 
+            { $_cFlag = true; } }
+
+/*        echo 'result of user_check = '.$user_check.'<br>'.
+             'result of user_mail[perm] = '.$user_mail['perm'].'<br>'.
+             'result of _cFlag = '.$_cFlag.'<br>';
+*/
+        if($_cFlag === true) {
+$issue_add_comment ='<TABLE class="itd__tables">'.
                       '<TR>'.
                         '<TD class="itd_tables_tdh" colSpan=2 >Add a new comment</TD>
-                      </TR><TD>';
+                      </TR><TR><TD>';
                       
 $issue_add_comment .= '<script type="text/javascript" src="include/selectupdate.js"></script>'.
                       '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">';
@@ -425,10 +444,10 @@ $issue_add_comment .= formSecurityToken(false).
                       // ¦ perm — the user's permissions related to the current page ($ID)
                       $issue_add_comment .= '<input  type="hidden" class="showid__option" name="showid" id="showid" type="text" size="10" value="'.$this->parameter.'"/>'.
                                             '<input class="button" id="showcase" type="submit" name="showcase" value="Add" title="Add");/>'.
-                                            '</form></TD></Table>';
+                                            '</form></TD></TR></Table>';
         }
         else {
-           $wmsg = '&nbsp;Please <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">Login/Register</a> if you want to add a comment.'; 
+           $wmsg = 'Please <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">Sign in</a> if you want to add a comment.'; 
            $issue_add_comment .= '<div class="it__standard_feedback">'.$wmsg.'</div>';                      
         }
                                            

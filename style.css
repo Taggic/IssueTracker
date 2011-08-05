@@ -1,208 +1,175 @@
-/**
- * Design Elements - additional  CSS for the IssueTracker plugin
- *
- * @author Taggic <taggic@t-online.de>
- */
-
+/** * Design Elements - additional  CSS for the IssueTracker plugin * * @author Taggic <taggic@t-online.de> */
 /* ----- General Elements ---------- */
-
- .it__negative_feedback {
-  border:            1px red solid; 
-  background-color:          white; 
-  margin:                      0px; 
-  padding:                    10px; 
-  width:                       87%; 
-  border-radius:             0.5em;
+.it__negative_feedback {
+	border:            1px red solid;
+	background-color:          white;
+	margin:                      0px;
+	padding:                    10px;
+	width:                       87%;
+	border-radius:             0.5em;
 }
-
- .it__positive_feedback {
-  border:          1px green solid; 
-  background-color:     lightgreen; 
-  margin:                      0px; 
-  padding:                    10px; 
-  width:                       87%; 
-  border-radius:             0.5em;
+.it__positive_feedback {
+	border:          1px green solid;
+	background-color:     lightgreen;
+	margin:                      0px;
+	padding:                    10px;
+	width:                       87%;
+	border-radius:             0.5em;
 }
-
- .it__standard_feedback  {
-   border:         1px black solid; 
-   background-color:       #DBDBDB; 
-   padding:                    3px; 
-   width:                      89%;
-  border-radius:             0.5em;
- }
-
- .it__left_indent  {
-  border: 0;
-  width: 3%;
-  background-color: #f0f0f0;
+.it__standard_feedback {
+	border:         1px black solid;
+	background-color:       #DBDBDB;
+	padding:                    3px;
+  padding-left:            0.45em;
+	width:                      89%;
+	border-radius:            0.5em;
 }
-
+.it__left_indent {
+	border: 0;
+	width: 3%;
+	background-color: #f0f0f0;
+}
 /* ----- Report Elemnts ------------ */
- div.it__cir_form  { }
- 
- .it__cir_projectlabel  {
-  padding-left:           0.45em;
-  margin-left:               2em;
+div.it__cir_form {
 }
- 
- .it__cir_input, .it__cir_linput  {
-  display:                 block;
-  float:                    left;
-  padding-left:           0.45em;
-  margin-left:               2em;
-  type: "text";
-  width:                    15em; 
-  border:      1px solid #CED2DB;
-  border-radius:             5px;
+.it__cir_projectlabel {
+	padding-left:           0.45em;
+	margin-left:               2em;
 }
-
-.it__cir_linput  {
-  width:                     53em; 
+.it__cir_input, .it__cir_linput {
+	display:                 block;
+	float:                    left;
+	padding-left:           0.45em;
+	margin-left:               2em;
+	type: "text";
+	width:                    15em;
+	border:      1px solid #CED2DB;
+	border-radius:             5px;
 }
-
- .it__cir_select  {
-  display:                 block;
-  float:                    left;
-  padding-left:           0.45em;
-  margin-left:               2em;
-  width:                  15.7em; 
-  border:      1px solid #CED2DB;
-  border-radius:             5px;
+.it__cir_linput {
+	width:                     53em;
 }
-
+.it__cir_select {
+	display:                 block;
+	float:                    left;
+	padding-left:           0.45em;
+	margin-left:               2em;
+	width:                  15.7em;
+	border:      1px solid #CED2DB;
+	border-radius:             5px;
+}
 /* ----- Issue List Elements ------- */
- .itl__showid_input  {
-  width:                     3em;
-  height:                  1.3em;
-  border:      1px solid #CED2DB;
-  text-align:             center;
-  padding-left:           0.15em;
-  margin-left:            0.75em;
-  margin-right:           0.75em;
-  border-radius:             5px;
+.itl__showid_input {
+	width:                     3em;
+	height:                  1.3em;
+	border:      1px solid #CED2DB;
+	text-align:             center;
+	padding-left:           0.15em;
+	margin-left:            0.75em;
+	margin-right:           0.75em;
+	border-radius:             5px;
 }
-
- .itl__showid_button  { 
-  width:                     3em;
+.itl__showid_button {
+	width:                     3em;
 }
-
-div.itl__table  {
-   text-align:              left; 
-   font-size:             0.85em;
+div.itl__table {
+	text-align:              left;
+	font-size:             0.85em;
 }
-
-TABLE.itl__td_standard  {
-   text-align:              left; 
-   white-space:         pre-wrap;
+TABLE.itl__td_standard {
+	text-align:              left;
+	white-space:         pre-wrap;
 }
-
-TABLE.itl__td_date  {
-   text-align:            center; 
-   white-space:              pre;
+TABLE.itl__td_date {
+	text-align:            center;
+	white-space:              pre;
 }
-
 /* ----- Issue Detail Elements ----- */
-TABLE.itd__title  {
-   border:                   0px;
-   margin:                   0px;
-   padding:                  0px;
-   width:                    90%;
-   border-spacing:           0px;
+TABLE.itd__title {
+	border:                   0px;
+	margin:                   0px;
+	padding:                  0px;
+	width:                    90%;
+	border-spacing:           0px;
 }
-
-table.itd__title TR TD  {
-  vertical-align:         center;
+table.itd__title TR TD {
+	vertical-align:         center;
 }
-
-table.itd__title TR TD P  {
-  vertical-align:     center;
-  border-width:          1px; 
-  border-color:      #9999FF; 
-  border-style:       outset; 
-  background-color:  #CED2DB; 
-  padding:               5px; 
-  border-radius:       0.5em;
+table.itd__title TR TD P {
+	vertical-align:         center;
+	border-width:              1px;
+	border-color:          #9999FF;
+	border-style:           outset;
+	background-color:      #CED2DB;
+	padding:                   5px;
+	border-radius:           0.5em;
 }
-
 table.itd_tr_standard {
-  background-color: #f0f0f0;
-  border:               0px;
+	background-color: #f0f0f0;
+	border:                    0px;
 }
-
- .itd__col2, .itd__col3, .itd__col4, .itd__col5, .itd__col6  {
-  border:       0px;
-  background-color: #f0f0f0;
+.itd__col2, .itd__col3, .itd__col4, .itd__col5, .itd__col6 {
+	border:                    0px;
+	background-color:      #f0f0f0;
 }
-
- .itd__col2  {
-  width:        13%;
-  font-weight: bold;
+.itd__col2 {
+	width:                     13%;
+	font-weight:              bold;
 }
-
- .itd__col3, .itd__col4  {
-  width: 25%;
+.itd__col3, .itd__col4 {
+	width:                     25%;
 }
-
- .itd__col5  {
-  width: 10%;
-  font-size: 0.75em;
-  font-weight: bold;
+.itd__col5 {
+	width:                     10%;
+	font-size:              0.75em;
+	font-weight:              bold;
 }
-
- .itd__col6  {
-  width: 25%;
-  font-size: 0.75em;
+.itd__col6 {
+	width:                     25%;
+	font-size:              0.75em;
 }
-
- .itd__tables  {
-  border:               0px;
-  margin:               0px;
-  padding:              4px;
-  width:                90%;
-  border-spacing:       0px;
+.itd__tables {
+	border:                    0px;
+	margin:                    0px;
+	padding:                   4px;
+	width:                     90%;
+	border-spacing:            0px;
 }
-
- .itd_tables_tdh  {
-  background-color: #bbbbbb;
-  width:                90%;
-  border:               0px;
-  color:            #ffffff;
-  font-weight:         bold;
-  white-space:       nowrap; 
-  text-align:        center;
-  vertical-align:    center;
+.itd_tables_tdh {
+	background-color:      #bbbbbb;
+	width:                     90%;
+	border:                    0px;
+	color:                 #ffffff;
+	font-weight:              bold;
+	white-space:            nowrap;
+	text-align:             center;
+	vertical-align:         center;
 }
-
- .itd__tables_tr  {
-  border:                 0;
-  background-color: #f0f0f0;
+.itd__tables_tr {
+	border:                      0;
+	background-color:      #f0f0f0;
 }
-
- .itd_tables_tdc2  {
-  border:         0;
-  width:        13%;
-  font-weight: bold;
+.itd_tables_tdc2 {
+	border:                      0;
+	width:                     13%;
+	font-weight:              bold;
 }
-
- .itd_tables_tdc3  {
-  border:         0;
-  width:        75%;
+.itd_tables_tdc3 {
+	border:                      0;
+	width:                     75%;
 }
-
- .itd_comment_trh  {
-  background-color: #ffffff;
-  padding-top:       0.75em;
-  padding-left:      0.45em;
-  font-size:         0.75em;
-  font-style:        italic;
+.itd_comment_trh {
+	background-color:      #ffffff;
+	padding-top:            0.75em;
+	padding-left:           0.45em;
+	font-size:              0.75em;
+	font-style:             italic;
 }
-
- .itd_comment_tr  {
-  border:         solid 1px;
-  border-bottom:  solid 2px;
-  border-color:     #b0b0b0;
-  background-color: #f0f0f0;
-  padding:          0.75em;
-  border-radius:    0.25em;
+.itd_comment_tr {
+	border:              solid 1px;
+	border-bottom:       solid 2px;
+	border-color:          #b0b0b0;
+	background-color:      #f0f0f0;
+	padding:               0.75em;
+	border-radius:         0.25em;
 }

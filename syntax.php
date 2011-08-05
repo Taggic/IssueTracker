@@ -530,7 +530,15 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $cur_date = date ('Y-m-d G:i:s');
         $user_check = $this->getConf('registered_users');
 
-        if((($user_check === true) && ($user_mail['perm'] >= 2))||($user_check === false)) {         
+        $_cFlag = false;             
+        if($user_check == false) {
+            if ($user_mail['perm'] > 1) 
+            { $_cFlag = true; } }             
+        elseif ($user_check == true) {
+            if ($user_mail['perm'] > 1) 
+            { $_cFlag = true; } }
+
+        if($_cFlag === true) {
             /*--------------------------------------------------------------------*/
             // load set of product names defined by admin
             /*--------------------------------------------------------------------*/
@@ -649,7 +657,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             '</p></form></div>';
         }
         else {
-           $wmsg = '&nbsp;Please <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">Login/Register</a> if you want to report an issue.'; 
+           $wmsg = '&nbsp;Please <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">Sign in</a> if you want to report an issue.'; 
            $ret .= '<div class="it__standard_feedback">'.$wmsg.'</div>';                      
         }
         
