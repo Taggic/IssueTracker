@@ -349,7 +349,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     "<th id='status'>Status</th>".
                     "<th id='user_name'>User name</th>".
                     "<th id='title'>Title</th>".
-                    "<th id='assigned'>assigned to</th>". 
+                    "<th id='assigned'>assigned</th>". 
                     "<th id='resolution'>Resolution</th>".
                     "<th id='modified'>Modified</th></tr></thead>";        
             $body = '<tbody>';
@@ -375,6 +375,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                         $severity_img =' align="center"> <IMG border=0 alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$severity_img.'" width=16 height=16>';
                     }
                     else { $severity_img = $style.$a_severity; }
+                    
+                    // build parameter for $_GET method
+                        $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
+                        $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a>';
+                    
                                             
                     $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'">'.                       
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.
@@ -384,7 +389,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                              '<td'.$severity_img.'</td>'.
                              '<td'.$status_img.'</td>'.
                              '<td class="itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$this->_get_one_value($issue,'user_name').'</a></td>'. 
-                             '<td class="canbreak itl__td_standard">'.$this->_get_one_value($issue,'title').'</td>'.
+                             '<td class="canbreak itl__td_standard">'.$itl_item_title.'</td>'.
                              '<td class="itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$this->_get_one_value($issue,'assigned').'</a></td>'. 
                              '<td class="canbreak itl__td_standard">'.$this->_get_one_value($issue,'resolution').'</td>'.
                              '<td class="itl__td_date">'.$this->_get_one_value($issue,'modified').'</td>'.
@@ -396,7 +401,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 
         else       
         {   
-            //$head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$project."' class=\"sortable resizable inline\"><thead><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Created'>Created</th><th id='Version'>Version</th><th id='User'>User</th><th id='Description'>Description</th><th id='assigned'>assigned to</th><th id='Resolution'>Resolution</th><th id='Modified'>Modified</th></tr></thead>";        
+            //$head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$project."' class=\"sortable resizable inline\"><thead><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Created'>Created</th><th id='Version'>Version</th><th id='User'>User</th><th id='Description'>Description</th><th id='assigned'>assigned</th><th id='Resolution'>Resolution</th><th id='Modified'>Modified</th></tr></thead>";        
 
             //Build table header according settings
             $configs = explode(',', $this->getConf('shwtbl_usr')) ;
@@ -431,6 +436,12 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                         }
                         else { $reduced_issues .= $style.$isval; }
                     }
+                    elseif ($config == 'title')
+                    {   // build parameter for $_GET method
+                        $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
+                        $reduced_issues .='<td>'.
+                                          '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$isval.'">'.$isval.'</a></td>';
+                    }
                     else 
                     {
                         $reduced_issues .= '<td'.$style.$isval.'</td>';
@@ -442,18 +453,26 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$project."' class='sortable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
             $body = '<tbody>'.$reduced_issues.'</tbody></table></div>';
         }
-//        $body = $body . '<p><label> User & Groups : &nbsp;&nbsp;'.$user_grps.' = '.strpos($this->getConf('assign'),$user_grps).'</label></p>';
         
         $ret = $head.$body;
         $ret = '<form  method="post" action="doku.php?id=' . $ID . '&do=showcase"><p><label> Show details:</label>'.
                '<input class="itl__showid_input" name="showid" id="showid" type="text" value="0"/>'.
-//               <input type="hidden" name="pfile" value="'.$project.'" />'.
                '<input type="hidden" name="project" id="project" type="text" value="'.$project.'"/>'.
                '<input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="Go" title="Go");/>'.
                '</form>' . $ret;
         return $ret;
     }
+function itd_show($issueID)  {
+         $_POST['showid'] = $issueID;
+         $_POST['project'] = $this->$project;
+         
+         echo 'issueID = '.$issueID.'<br>'.
+              '_POST["showid"] = '.$_POST['showid'].'<br>'.
+              '_POST["project"]= '.'<br>';
 
+         
+         document.getElementById('showcase').submit();
+}
 /******************************************************************************/
 /* pic-up a single value
 */

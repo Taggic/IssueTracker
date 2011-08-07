@@ -29,6 +29,7 @@
 	width: 3%;
 	background-color: #f0f0f0;
 }
+
 /* ----- Report Elemnts ------------ */
 div.it__cir_form {
 }
@@ -58,6 +59,7 @@ div.it__cir_form {
 	border:      1px solid #CED2DB;
 	border-radius:             5px;
 }
+
 /* ----- Issue List Elements ------- */
 .itl__showid_input {
 	width:                     3em;
@@ -84,6 +86,7 @@ TABLE.itl__td_date {
 	text-align:            center;
 	white-space:              pre;
 }
+
 /* ----- Issue Detail Elements ----- */
 TABLE.itd__title {
 	border:                   0px;

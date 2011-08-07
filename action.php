@@ -23,7 +23,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2011-07-23',
+         'date'   => '2011-08-07',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://forum.dokuwiki.org/thread/2456 '.
@@ -42,10 +42,16 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 **  Handle the action
 */
      function _handle_act(&$event, $param) {
-         if ($event->data != 'showcase') return;
-
-         $this->parameter = $_POST['showid'];
-         $this->project = $_POST['project'];
+         if ($event->data === 'showcase') {
+             $this->parameter = $_POST['showid'];
+             $this->project = $_POST['project'];         
+         }
+         elseif ($event->data === 'showcaselink') {
+            $this->parameter = $_GET['showid'];
+            $this->project = $_GET['project'];
+         }
+         else return;
+         
          $event->preventDefault(); // https://www.dokuwiki.org/devel:events#event_object  
      }
 /******************************************************************************
@@ -81,7 +87,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 */
     function output(&$data) {
 
-         if ($data->data != 'showcase') return;
+         if (($data->data != 'showcase') && ($data->data != 'showcaselink')) return;
          $data->preventDefault();
 //        if ($mode == 'xhtml'){            
              $renderer->info['cache'] = false;         
@@ -175,6 +181,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         global $lang;
         global $auth;
         $issue_id = $this->parameter;
+        
+//        echo 'Project = '.$project.'<br>Issue ID = '. $issue_id.'<br>';
+        
+        if ($issue_id === false) return;
         $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
         $noStatIMG = $this->getConf('noStatIMG');
         $noSevIMG = $this->getConf('noSevIMG');
@@ -183,7 +193,23 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         // get issues file contents
         $pfile = metaFN($project, '.issues');   
         if (@file_exists($pfile))
-        	{  $issue  = unserialize(@file_get_contents($pfile));  }
+        	{  $issue  = unserialize(@file_get_contents($pfile));
+  
+             // check if ID exist
+             $cFlag = false;
+             foreach ($issue as $issue_item)  {
+                if ($issue_item['id'] == $issue_id) {
+                    $cFlag = true;
+                    break;
+                }
+             }
+             if ($cFlag === false) {
+             // promt error message that issue with this ID does not exist
+              $Generated_Header = '<div class="it__negative_feedback">There does no Issue exist with ID '.$issue_id.'.</div><br>';
+              echo $Generated_Header;
+              return;
+             }
+          }
         else
         	{
               // promt error message that issue with ID does not exist
