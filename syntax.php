@@ -489,23 +489,26 @@ function itd_show($issueID)  {
     {
         if ($this->getConf('send_email')==1)
         {
-            $subject=$issue['severity'].' issue reported for '.$project.' on Product:'.$issue['product'].' v'.$issue['version'];            
-            
+            $subject=$issue['severity'].' issue reported for '.$project.' on Product:'.$issue['product'].' ('.$issue['version'].')';            
+            $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
+            global $ID;
+
             $body = 'Dear admin,'.chr(10).chr(10).
-            'A new issue was created in the project'.chr(10).
-            'ID: '          .$issue['id'].chr(10).
-            'Product: '     .$issue['product'].chr(10).
-            'Version: '     .$issue['version'].chr(10).
-            'Severity: '    .$issue['severity'].chr(10).
-            'Creator: '     .$issue['user_name'].chr(10).
-            'Title: '       .$issue['title'].chr(10).
-            'Description: ' .$issue['description'].chr(10).chr(10).
+            'A new issue was created for the project:'.chr(10).
+            'ID:'.chr(9).chr(9).chr(9).chr(9).$issue['id'].chr(10).
+            'Product:'.chr(9).chr(9).chr(9).$issue['product'].chr(10).
+            'Version:'.chr(9).chr(9).chr(9).$issue['version'].chr(10).
+            'Severity:'.chr(9).chr(9).chr(9).$issue['severity'].chr(10).
+            'Creator:'.chr(9).chr(9).chr(9).$issue['user_name'].chr(10).
+            'Title:'.chr(9).chr(9).chr(9).$issue['title'].chr(10).
+            'Description:'.chr(9).chr(9).$issue['description'].chr(10).
+            'see details:'.chr(9).chr(9).DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
             'best regards'.chr(10).'Issue Tracker';
 
             $from=$this->getConf('email_address') ;
             $to=$from;
             mail_send($to, $subject, $body, $from, $cc='', $bcc='', $headers=null, $params=null);
-        }
+        }     
     }
 
 /******************************************************************************/
@@ -516,17 +519,20 @@ function itd_show($issueID)  {
         if ($this->getConf('userinfo_email')==1)
         {
             $subject='Modification info: '.$issue['id'].' was modified';            
-            
+            $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
+            global $ID;
+                        
             $body = 'Dear user,'.chr(10).chr(10).
-            'Your reported issue was modified.'.chr(10).chr(10).
-            'ID: '          .$issue['id'].chr(10).
-            'Status: '      .$issue['status'].chr(10).
-            'Product: '     .$issue['product'].chr(10).
-            'Version: '     .$issue['version'].chr(10).
-            'Severity: '    .$issue['severity'].chr(10).
-            'Creator: '     .$issue['user_name'].chr(10).
-            'Title: '       .$issue['title'].chr(10).chr(10).
-            'best regards'.chr(10).'Issue Tracker';
+            'Your reported issue was modified:'.chr(10).chr(10).
+            'ID:'.chr(9).chr(9).chr(9).chr(9).$issue['id'].chr(10).
+            'Product:'.chr(9).chr(9).chr(9).$issue['product'].chr(10).
+            'Version:'.chr(9).chr(9).chr(9).$issue['version'].chr(10).
+            'Severity:'.chr(9).chr(9).chr(9).$issue['severity'].chr(10).
+            'Creator:'.chr(9).chr(9).chr(9).$issue['user_name'].chr(10).
+            'Title:'.chr(9).chr(9).chr(9).$issue['title'].chr(10).
+            'Description:'.chr(9).chr(9).$issue['description'].chr(10).
+            'see details:'.chr(9).chr(9).DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+            'best regards'.chr(10).$project.' Issue Tracker';
 
             $from=$this->getConf('email_address') ;
             $to=$issue['user_mail'];
