@@ -25,7 +25,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 /* return some info
 */
     function getInfo(){
-        return confToHash(dirname(__FILE__).'/INFO');
+        return confToHash(dirname(__FILE__).'/plugin.info.txt');
     }
 
     function getType(){ return 'substition';}
@@ -193,7 +193,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             // Create table            
             if (($data['display']=='ISSUES') || ($data['display']=='ALL'))
             {
-                $Generated_Table = $this->_table_render($issues,$data); 
+                $Generated_Table = $this->_table_render($issues,$data,$step,$start); 
                 $Generated_Scripts = $this->_scripts_render();
             }
 
@@ -311,9 +311,14 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 /******************************************************************************/
 /* Create list of Issues
 */
-    function _table_render($issues,$data)
+    function _table_render($issues,$data,$step,$start)
     {
         global $ID;
+        if ($step==0) $step=5;
+        if ($start==0) $start=count($issues)-$step;
+        $next_start = $start + $step + 1;
+        if ($next_start>count($issues)) $next_start=count($issues);
+
         $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
 //        $hdr_style="style='text-align:left; font-size:0.85em;'";
         $style =' style="text-align:left; white-space:pre-wrap;">';
@@ -355,45 +360,48 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $body = '<tbody>';
             
             foreach ($issues as $issue)
-            {
-                if (($data['status']=='ALL') || (strtoupper($issue['status'])==$data['status']))
-                {
-                    $a_status = $this->_get_one_value($issue,'status');
-                    $a_severity = $this->_get_one_value($issue,'severity');
-                    // check if status image or text to be displayed
-                    if ($noStatIMG === false) {                    
-                        $status_img = $imgBASE . implode('', explode(' ',strtolower($a_status))).'.gif';
-//                        if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
-                        $status_img =' align="center"> <IMG border=0 alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$status_img.'" width=16 height=16>';
-                    }                    
-                    else { $status_img = $style.$a_status; }
-                    // check if severity image or text to be displayed                                            
-                    if ($noSevIMG === false) {                    
-                        $severity_img = $imgBASE . implode('', explode(' ',strtolower($a_severity))).'.gif';
-
-//                        if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
-                        $severity_img =' align="center"> <IMG border=0 alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$severity_img.'" width=16 height=16>';
+            {   // check start and end of rows to be displayed
+                $i = $i+1;
+                if (($i>=$start) && ($i<=$start+$step)) {
+                    if (($data['status']=='ALL') || (strtoupper($issue['status'])==$data['status']))
+                    {
+                        $a_status = $this->_get_one_value($issue,'status');
+                        $a_severity = $this->_get_one_value($issue,'severity');
+                        // check if status image or text to be displayed
+                        if ($noStatIMG === false) {                    
+                            $status_img = $imgBASE . implode('', explode(' ',strtolower($a_status))).'.gif';
+    //                        if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
+                            $status_img =' align="center"> <IMG border=0 alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$status_img.'" width=16 height=16>';
+                        }                    
+                        else { $status_img = $style.$a_status; }
+                        // check if severity image or text to be displayed                                            
+                        if ($noSevIMG === false) {                    
+                            $severity_img = $imgBASE . implode('', explode(' ',strtolower($a_severity))).'.gif';
+    
+    //                        if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
+                            $severity_img =' align="center"> <IMG border=0 alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$severity_img.'" width=16 height=16>';
+                        }
+                        else { $severity_img = $style.$a_severity; }
+                        
+                        // build parameter for $_GET method
+                            $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
+                            $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a>';
+                        
+                                                
+                        $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'">'.                       
+                                 '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.
+                                 '<td class="itl__td_date">'.$this->_get_one_value($issue,'created').'</td>'.
+                                 '<td class="itl__td_standard">'.$this->_get_one_value($issue,'product').'</td>'.
+                                 '<td class="itl__td_standard">'.$this->_get_one_value($issue,'version').'</td>'.
+                                 '<td'.$severity_img.'</td>'.
+                                 '<td'.$status_img.'</td>'.
+                                 '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$this->_get_one_value($issue,'user_name').'</a></td>'. 
+                                 '<td class="canbreak itl__td_standard">'.$itl_item_title.'</td>'.
+                                 '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$this->_get_one_value($issue,'assigned').'</a></td>'. 
+                                 '<td class="canbreak itl__td_standard">'.$this->_get_one_value($issue,'resolution').'</td>'.
+                                 '<td class="itl__td_date">'.$this->_get_one_value($issue,'modified').'</td>'.
+                                 '</tr>';        
                     }
-                    else { $severity_img = $style.$a_severity; }
-                    
-                    // build parameter for $_GET method
-                        $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
-                        $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a>';
-                    
-                                            
-                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'">'.                       
-                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.
-                             '<td class="itl__td_date">'.$this->_get_one_value($issue,'created').'</td>'.
-                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'product').'</td>'.
-                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'version').'</td>'.
-                             '<td'.$severity_img.'</td>'.
-                             '<td'.$status_img.'</td>'.
-                             '<td class="itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$this->_get_one_value($issue,'user_name').'</a></td>'. 
-                             '<td class="canbreak itl__td_standard">'.$itl_item_title.'</td>'.
-                             '<td class="itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$this->_get_one_value($issue,'assigned').'</a></td>'. 
-                             '<td class="canbreak itl__td_standard">'.$this->_get_one_value($issue,'resolution').'</td>'.
-                             '<td class="itl__td_date">'.$this->_get_one_value($issue,'modified').'</td>'.
-                             '</tr>';        
                 }
             } 
             $body .= '</tbody></table></div>';          
@@ -415,64 +423,90 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $reduced_issues='';
             foreach ($issues as $issue)
             {
-                $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'">'.
-                                                  '<td'.$style.$this->_get_one_value($issue,'id').'</td>';
-                foreach ($configs as $config)
-                {
-                    $isval = $this->_get_one_value($issue,strtolower($config));
-                    if ($config == 'status')
+                $i = $i+1;
+                if (($i>=$start) && ($i<=$start+$step)) {
+                    $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'">'.
+                                                      '<td'.$style.$this->_get_one_value($issue,'id').'</td>';
+                    foreach ($configs as $config)
                     {
-                        if ($noStatIMG === false) {                    
-                            $status_img = $imgBASE . implode('', explode(' ',strtolower($isval))).'.gif';
-                            $reduced_issues .='<td align="center"> <IMG border=0 alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$status_img.'" width=16 height=16>';
+                        $isval = $this->_get_one_value($issue,strtolower($config));
+                        if ($config == 'status')
+                        {
+                            if ($noStatIMG === false) {                    
+                                $status_img = $imgBASE . implode('', explode(' ',strtolower($isval))).'.gif';
+                                $reduced_issues .='<td align="center"> <IMG border=0 alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$status_img.'" width=16 height=16>';
+                            }
+                            else { $reduced_issues .= '<td'.$style.$isval; }
+                        }                                            
+                        elseif ($config == 'severity')
+                        {
+                            if ($noSevIMG === false) {                    
+                                $severity_img = $imgBASE . implode('', explode(' ',strtolower($isval))).'.gif';
+                                $reduced_issues .='<td align="center"> <IMG border=0 alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$severity_img.'" width=16 height=16>';
+                            }
+                            else { $reduced_issues .= '<td'.$style.$isval; }
                         }
-                        else { $reduced_issues .= $style.$isval; }
-                    }                                            
-                    elseif ($config == 'severity')
-                    {
-                        if ($noSevIMG === false) {                    
-                            $severity_img = $imgBASE . implode('', explode(' ',strtolower($isval))).'.gif';
-                            $reduced_issues .='<td align="center"> <IMG border=0 alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$severity_img.'" width=16 height=16>';
+                        elseif ($config == 'title')
+                        {   // build parameter for $_GET method
+                            $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
+                            $reduced_issues .='<td>'.
+                                              '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$isval.'">'.$isval.'</a></td>';
                         }
-                        else { $reduced_issues .= $style.$isval; }
+                        else 
+                        {
+                            $reduced_issues .= '<td'.$style.$isval.'</td>';
+                        }
                     }
-                    elseif ($config == 'title')
-                    {   // build parameter for $_GET method
-                        $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
-                        $reduced_issues .='<td>'.
-                                          '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$isval.'">'.$isval.'</a></td>';
-                    }
-                    else 
-                    {
-                        $reduced_issues .= '<td'.$style.$isval.'</td>';
-                    }
+                    $reduced_issues .= '</tr>';
                 }
-                $reduced_issues .= '</tr>';
             }
             
             $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$project."' class='sortable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
             $body = '<tbody>'.$reduced_issues.'</tbody></table></div>';
         }
         
-        $ret = $head.$body;
-        $ret = '<form  method="post" action="doku.php?id=' . $ID . '&do=showcase"><p><label> Show details:</label>'.
-               '<input class="itl__showid_input" name="showid" id="showid" type="text" value="0"/>'.
-               '<input type="hidden" name="project" id="project" type="text" value="'.$project.'"/>'.
-               '<input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="Go" title="Go");/>'.
-               '</form>' . $ret;
+        $start = $next_start;
+        $next_start = $next_start + $step;
+
+        $ret = '<TABLE class="itl__t1"><THEAD><TH colspan=5></TH></THEAD><TFOOT><TD colspan=5></TD></TFOOT><TBODY>'.
+               '<TR class="itd__tables_tr">'.
+                  '<TD colspan="5" align="left"   valign="center" height="40">'.
+                      '<label class="it__cir_projectlabel">Quantity of Issues:&nbsp;'.count($issues).'</label>'.
+                  '</TD>'.
+               '</TR>'.
+               '<TR class="itd__tables_tr">'.
+                 '<TD align ="left">'.
+                     '<form  method="post" action="doku.php?id=' . $ID . '&do=issuelist_previous"><p>'.
+                         '<label class="it__cir_projectlabel">Scroll issue List &nbsp;&nbsp;&nbsp;</label>'.
+                         '<input type="hidden" name="itl_start" id="itl_start" type="text" value="'.$start.'"/>'.
+                         '<input type="hidden" name="itl_step" id="itl_step" type="text" value="'.$step.'"/>'.
+                         '<input type="hidden" name="itl_next" id="itl_next" type="text" value="'.$next_start.'"/>'.
+                         '<input type="hidden" name="itl_project" id="itl_project" type="text" value="'.$project.'"/>'.
+                         '<input id="showprevious" type="submit" name="showprevious" align="right" value="<<<" title="previous Issues");/>'.
+                     '</form>'.
+                  '</TD>'.
+                  '<TD align ="left" width="20%">'.
+                     '<form  method="post" action="doku.php?id=' . $ID . '&do=issuelist_next"><p>'.
+                         '<input type="hidden" name="itl_start" id="itl_start" type="text" value="'.$start.'"/>'.
+                         '<input class="itl__step_input" name="itl_step" id="itl_step" type="text" value="'.$step.'"/>'.
+                         '<input type="hidden" name="itl_next" id="itl_next" type="text" value="'.$next_start.'"/>'.
+                         '<input type="hidden" name="itl_project" id="itl_project" type="text" value="'.$project.'"/>'.
+                         '<label>&nbsp;&nbsp; </label><input id="shownext" type="submit" name="shownext" value=">>>" title="next Issues");/>'.
+                     '</form>'.
+                 '</TD>'.
+                 '<TD width="10%">&nbsp;</TD>'.
+                 '<TD align ="left" width="30%"><form  method="post" action="doku.php?id=' . $ID . '&do=showcase"><p><label class="it__cir_projectlabel"> Show details of Issue:</label>'.
+                     '<input class="itl__showid_input" name="showid" id="showid" type="text" value="0"/>'.
+                     '<input type="hidden" name="project" id="project" type="text" value="'.$project.'"/>'.
+                     '<input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="Go" title="Go");/>'.
+                     '</form>'.
+                 '</TD>'.
+                 '<TD width="20%"></TD>'.
+               '</TR></TBODY><TFOOT></TFOOT></TABLE>';
+               
+         $ret = $ret.$head.$body;              
         return $ret;
     }
-function itd_show($issueID)  {
-         $_POST['showid'] = $issueID;
-         $_POST['project'] = $this->$project;
-         
-         echo 'issueID = '.$issueID.'<br>'.
-              '_POST["showid"] = '.$_POST['showid'].'<br>'.
-              '_POST["project"]= '.'<br>';
-
-         
-         document.getElementById('showcase').submit();
-}
 /******************************************************************************/
 /* pic-up a single value
 */

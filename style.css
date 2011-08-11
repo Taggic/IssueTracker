@@ -74,6 +74,18 @@ div.it__cir_form {
 .itl__showid_button {
 	width:                     3em;
 }
+
+.itl__step_input {
+	width:                     6em;
+	height:                  1.3em;
+	border:      1px solid #CED2DB;
+	text-align:             center;
+	padding-left:           0.15em;
+	margin-left:            0.75em;
+	margin-right:           0.75em;
+	border-radius:             5px;
+}
+
 div.itl__table {
 	text-align:              left;
 	font-size:             0.85em;
@@ -85,6 +97,13 @@ TABLE.itl__td_standard {
 TABLE.itl__td_date {
 	text-align:            center;
 	white-space:              pre;
+}
+
+TABLE.itl__t1 {
+  width:                   100%;
+  background-color:     #f0f0f0;
+  border:     1px solid #CED2DB;
+  rules:                 groups;
 }
 
 /* ----- Issue Detail Elements ----- */
