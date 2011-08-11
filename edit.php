@@ -31,11 +31,9 @@ require_once(DOKU_PLUGIN.'syntax.php');
             'best regards'.chr(10).$project.' Issue Tracker'.chr(10).chr(10);
 
 
-            $from= $conf['plugin']['issuetracker']['email_address'];
-            $to=$issue['user_mail'];
-            $cc=$issue['add_user_mail'];
-            $from='taggic@t-online.de';
-            $to=$from;
+            $from = $conf['plugin']['issuetracker']['email_address'];
+            $to   = $issue['user_mail'];
+            $cc   = $issue['add_user_mail'];
 
             mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
 
