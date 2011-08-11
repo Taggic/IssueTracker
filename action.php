@@ -469,8 +469,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 
 //        $start = $next_start;
 //        $next_start = $next_start + $step;
-        echo 'start = ' . $start . '<br>';
-        echo 'next_start = ' . $next_start . '<br><br>';
+
         $step = $step+1;
         $ret = '<TABLE class="itl__t1"><THEAD><TH colspan=5></TH></THEAD><TFOOT><TD colspan=5></TD></TFOOT><TBODY>'.
                '<TR class="itd__tables_tr">'.
