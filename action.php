@@ -191,7 +191,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 if (@file_exists($pfile))
                 	{$issues  = unserialize(@file_get_contents($pfile));}
                 else
-                	{$issues = array();}            	          
+                	{   // promt error message that issue with ID does not exist
+                      echo '<div class="it__negative_feedback">Project file does not exist: ' . $project . '.issues .</div><br>';
+                      return;
+                  }            	          
 
                  if ($data->data == 'issuelist_next') { 
                     if ($itl_next + $step>count($issues)) {
@@ -216,7 +219,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     if($next_start<=0) $next_start=$step;
                  }
                  // get issues file contents
-                 $pfile = metaFN($project, '.issues');   
+/*                 $pfile = metaFN($project, '.issues');   
                  if (@file_exists($pfile))
                 	 {  $issues  = unserialize(@file_get_contents($pfile));}
                  else
@@ -224,7 +227,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                       echo '<div class="it__negative_feedback">Project file does not exist: ' . $project . '.issues .</div><br>';
                       return;
                    }	                              
-                 
+*/                 
                 $Generated_Header = '';                        
                 $Generated_Table = $this->_table_render($a,$step,$start,$next_start); 
                 $Generated_Scripts = $this->_scripts_render();
