@@ -362,9 +362,22 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                '<form class="issuetracker__form2" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'"><p>';
         $ret .= formSecurityToken(false).'<input type="hidden" name="do" value="show" />';        
 
-        // members of defined groups allowed changing issue contents 
-        if ((strpos($this->getConf('assign'),$user_grps)!== false))       
+        // the user maybe member of different user groups
+        // check if one of its assigned groups match with configuration
+        $allowed_users = explode('|', $this->getConf('assign'));
+        $cFlag = false;
+        foreach ($allowed_users as $w) 
+        { // check if one of the assigned user roles does match with current user roles
+
+            if (strpos($user_grps,$w)!== false)
+            {   $cFlag = true;
+                break;  } 
+        }      
+        
+        // members of defined groups allowed$user_grps changing issue contents 
+        if ($cFlag === true)       
         {   
+
             $head = "<div class='itl__table'><table id='".$project."' class='sortable editable resizable inline'>".
                     "<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".
                     "<th id='created'>Created</th>".

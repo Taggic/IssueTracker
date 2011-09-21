@@ -1,7 +1,7 @@
 <?php
 /**
  * Metadata for configuration manager plugin
- * Additions for the dokubugtracker plugin
+ * Additions for the issuetracker plugin
  *
  * @author   Taggic@t-online.de 
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * English language file
+ * English language file for issuetracker plugin
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Taggic@t-online.de
