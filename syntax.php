@@ -52,6 +52,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $data['display'] = 'ISSUES';
         $data['status'] = 'ALL';
         $data['severity'] = 'ALL';
+        $data['view'] = '10';
         
         foreach($params as $param){            
             $splitparam = explode('=',$param);
@@ -74,6 +75,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 if ($splitparam[0]=='display')
                 	{$data['display'] = strtoupper($splitparam[1]);
                 	 if ($data['display'] == '') {$data['display'] = 'ISSUES';}
+                   /*continue;*/}  
+                                                    
+                if ($splitparam[0]=='view')
+                	{$data['view'] = strtoupper($splitparam[1]);
+                	 if ($data['view'] == '') {$data['view'] = '10';}
                    /*continue;*/}                                   
                 }
         }
@@ -202,7 +208,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             }
             // Create issue list            
             elseif (stristr($data['display'],'ISSUES')!= false)
-            {
+            {   $step = $data['view'];
                 $Generated_Table = $this->_table_render($issues,$data,$step,$start); 
                 $Generated_Scripts = $this->_scripts_render();
             }
