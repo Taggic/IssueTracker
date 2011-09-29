@@ -46,13 +46,14 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $match = substr($match,15,-2); //strip markup from start and end
         //handle params
         $data = array();
-        $params = explode('|',$match,4);
+        $params = explode('|',$match);
         
         //Default Value
-        $data['display'] = 'ISSUES';
-        $data['status'] = 'ALL';
+        $data['display']  = 'ISSUES';
+        $data['status']   = 'ALL';
         $data['severity'] = 'ALL';
-        $data['view'] = '10';
+        $data['view']     = '10';
+        $data['controls'] = 'ON';
         
         foreach($params as $param){            
             $splitparam = explode('=',$param);
@@ -80,6 +81,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 if ($splitparam[0]=='view')
                 	{$data['view'] = strtoupper($splitparam[1]);
                 	 if ($data['view'] == '') {$data['view'] = '10';}
+                   /*continue;*/}
+                   
+                 if ($splitparam[0]=='controls')
+                	{$data['controls'] = strtoupper($splitparam[1]);
+                	 if ($data['controls'] == '') {$data['controls'] = 'ON';}
                    /*continue;*/}                                   
                 }
         }
@@ -497,14 +503,16 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$project."' class='sortable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
             $body = '<tbody>'.$reduced_issues.'</tbody></table></div>';
         }
-        
-        $ret = '<TABLE class="itl__t1"><THEAD><TH colspan=5></TH></THEAD><TFOOT><TD colspan=5></TD></TFOOT><TBODY>'.
-               '<TR class="itd__tables_tr">'.
-                  '<TD colspan="5" align="left"   valign="center" height="40">'.
+
+
+        if (strtolower($data['controls'])==='on') {
+        $ret = '<table class="itl__t1"><thead><th colspan=5></th></thead><tfoot><td colspan=5></td></tfoot><tbody>'.
+               '<tr class="itd__tables_tr">'.
+                  '<td colspan="5" align="left"   valign="center" height="40">'.
                       '<label class="it__cir_projectlabel">Quantity of Issues:&nbsp;'.count($issues).'</label>'.
-                  '</TD>'.
-               '</TR>'.
-               '<TR>'.
+                  '</td>'.
+               '</tr>'.
+               '<tr>'.
                     '<script> 
                        function changeAction(where) { 
                           if(where==1) { 
@@ -520,7 +528,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                        } 
                     </script>
                     <form name="myForm" action="" method="post"> 
-                      <TD align ="left" valign="top" width="20%">
+                      <td align ="left" valign="top" width="20%">
                          <label class="it__cir_projectlabel">Scroll issue List &nbsp;&nbsp;&nbsp;</label>
                          <input type="hidden" name="itl_start" id="itl_start" type="text" value="'.$start.'"/>
                          <input type="hidden" name="itl_step" id="itl_step" type="text" value="'.$step.'"/>
@@ -528,18 +536,18 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                          <input type="hidden" name="itl_project" id="itl_project" type="text" value="'.$project.'"/>
                          <label class="it__cir_projectlabel">Filter Severity: </label>
                          <label class="it__cir_projectlabel">Filter Status: </label>
-                      </TD>
-                      <TD align ="left" width="20%">
-                         <INPUT TYPE="button" NAME="showprevious" VALUE="<<<" TITLE="previous Issues" onClick="changeAction(1)">
+                      </td>
+                      <td align ="left" width="20%">
+                         <input type="button" name="showprevious" value="<<<" title="previous Issues" onClick="changeAction(1)">
                          <input class="itl__step_input" name="itl_step" id="itl_step" type="text" value="'.$step.'"/>
-                         <INPUT TYPE="button" NAME="shownext" VALUE=">>>" TITLE="next Issues" onClick="changeAction(2)"/><br>
-                         <input class="itl__sev_filter" name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br>
+                         <input type="button" name="shownext" value=">>>" title="next Issues" onClick="changeAction(2)"/><br />
+                         <input class="itl__sev_filter" name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br />
                          <input class="itl__stat_filter" name="itl_stat_filter" id="itl_stat_filter" type="text" value="'.$stat_filter.'"/>
-                         <INPUT TYPE="button" NAME="go" VALUE="Go" TITLE="Go" onClick="changeAction(3)"/><br>
-                      </TD>
+                         <input type="button" name="go" value="Go" title="Go" onClick="changeAction(3)"/><br />
+                      </td>
                     </form>'.
-                 '<TD width="10%">&nbsp;</TD>'.
-                 '<TD align ="left" width="30%">'.
+                 '<td width="10%">&nbsp;</td>'.
+                 '<td align ="left" width="30%">'.
                      '<form  method="post" action="doku.php?id=' . $ID . '&do=showcase"><label class="it__cir_projectlabel"> Show details of Issue:</label>'.
                          '<input class="itl__showid_input" name="showid" id="showid" type="text" value="0"/>'.
                          '<input type="hidden" name="project" id="project" type="text" value="'.$project.'"/>'.
@@ -547,10 +555,10 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                          '<input type="hidden" name="itl_stat_filter" id="itl_stat_filter" type="text" value="'.$stat_filter.'"/>'.
                          '<input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="Go" title="Go");/>'.
                      '</form>'.
-                 '</TD>'.
-                 '<TD width="20%"></TD>'.
-               '</TR></TBODY><TFOOT></TFOOT></TABLE>';
-
+                 '</td>'.
+                 '<td width="20%"></td>'.
+               '</tr></tbody><tfoot></tfoot></table>';
+         }
                
          $ret = $ret.$head.$body;              
         return $ret;
@@ -689,61 +697,61 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             '<input type="hidden" name="id" value="'.$ID.'" />'.
             '<input type="hidden" name="created" type="text" value="'.$cur_date.'"/>'.
             '<input type="hidden" name="comments" type="text" value="'.$comments_file.'"/>'.
-            '<TABLE>
-              <TR>
-                <TD>Project</TD>
-                <TD><label class="it__cir_projectlabel">'.$project.'</label></TD>
-              </TR>'.
-             '<TR>
-                <TD>Product</TD>
-                <TD><select class="element select small it__cir_select" name="product">'.$STR_PRODUCTS.'</select></TD>
-              </TR>'.
-             '<TR>
-                <TD>Version</TD>
-                <TD><input class="it__cir_input" name="version" value="'.$STR_VERSIONS.'"/></TD>
-              </TR>'.
-             '<TR><TD colspan=2>&nbsp;</TD></TR>'.
-             '<TR>
-                <TD>User name</TD>
-                <TD><input class="it__cir_input" name="user_name" value="'.$user_mail['userinfo']['name'].'"/></TD>
-              </TR>'.
-             '<TR>
-                <TD>User mail</TD>
-                <TD><input class="it__cir_input" name="user_mail" value="'.$user_mail['userinfo']['mail'].'"/></TD>
-              </TR>'.
-             '<TR>
-                <TD>User phone</TD>
-                <TD><input class="it__cir_input" name="user_phone" value="'.$user_phone['userinfo']['phone'].'"/></TD>
-              </TR>'.
-             '<TR>
-                <TD>Add contact</TD>
-                <TD><input class="it__cir_input" name="add_user_mail" value="'.$_REQUEST['add_user_mail'].'"/></TD>        
-              </TR>'.
-            '<TR><TD colspan=2>&nbsp;</TD></TR>'.
-            '<TR>
-                <TD>Severity</TD>
-                <TD><select class="element select small it__cir_select" name="severity">'.$STR_SEVERITY.'</select></TD>
-             </TR>'.
-            '<TR>
-                <TD>Issue Title</TD>
-                <TD><input class="it__cir_linput" name="title" value="'.$_REQUEST['title'].'"/></input></TD>
-             </TR>'.
-            '<TR>
-                <TD>Issue Description</TD>
-                <TD><textarea class="it__cir_linput" name="description" cols="109" rows="7">'.$_REQUEST['description'].'</textarea></TD>
-             </TR>'.
-            '<TR><TD colspan=2>&nbsp;</TD></TR>'. 
-            '<TR>                <TD>Symptom link 1</TD>
-                <TD><input class="it__cir_linput" name="attachment1" value="'.$_REQUEST['attachment1'].'"/></TD>
-             </TR>'.
-            '<TR>
-                <TD>Symptom link 2</TD>
-                <TD><input class="it__cir_linput" name="attachment2" type="text" size="126" value="'.$_REQUEST['attachment2'].'"/></TD>
-             </TR>'.
-            '<TR>
-                <TD>Symptom link 3</TD>
-                <TD><input class="it__cir_linput" name="attachment3" type="text" size="126" value="'.$_REQUEST['attachment3'].'"</TD>
-            </TR></TABLE>'.  
+            '<table>
+              <tr>
+                <td>Project</td>
+                <td><label class="it__cir_projectlabel">'.$project.'</label></td>
+              </tr>'.
+             '<tr>
+                <td>Product</td>
+                <td><select class="element select small it__cir_select" name="product">'.$STR_PRODUCTS.'</select></td>
+              </tr>'.
+             '<tr>
+                <td>Version</td>
+                <td><input class="it__cir_input" name="version" value="'.$STR_VERSIONS.'"/></td>
+              </tr>'.
+             '<tr><td colspan=2>&nbsp;</td></tr>'.
+             '<tr>
+                <td>User name</td>
+                <td><input class="it__cir_input" name="user_name" value="'.$user_mail['userinfo']['name'].'"/></td>
+              </tr>'.
+             '<tr>
+                <td>User mail</td>
+                <td><input class="it__cir_input" name="user_mail" value="'.$user_mail['userinfo']['mail'].'"/></td>
+              </tr>'.
+             '<tr>
+                <td>User phone</td>
+                <td><input class="it__cir_input" name="user_phone" value="'.$user_phone['userinfo']['phone'].'"/></td>
+              </tr>'.
+             '<tr>
+                <td>Add contact</td>
+                <td><input class="it__cir_input" name="add_user_mail" value="'.$_REQUEST['add_user_mail'].'"/></td>        
+              </tr>'.
+            '<tr><td colspan=2>&nbsp;</td></tr>'.
+            '<tr>
+                <td>Severity</td>
+                <td><select class="element select small it__cir_select" name="severity">'.$STR_SEVERITY.'</select></td>
+             </tr>'.
+            '<tr>
+                <td>Issue Title</td>
+                <td><input class="it__cir_linput" name="title" value="'.$_REQUEST['title'].'"/></input></td>
+             </tr>'.
+            '<tr>
+                <td>Issue Description</td>
+                <td><textarea class="it__cir_linput" name="description" cols="109" rows="7">'.$_REQUEST['description'].'</textarea></td>
+             </tr>'.
+            '<tr><td colspan=2>&nbsp;</td></tr>'. 
+            '<tr>                <td>Symptom link 1</td>
+                <td><input class="it__cir_linput" name="attachment1" value="'.$_REQUEST['attachment1'].'"/></td>
+             </tr>'.
+            '<tr>
+                <td>Symptom link 2</td>
+                <td><input class="it__cir_linput" name="attachment2" type="text" size="126" value="'.$_REQUEST['attachment2'].'"/></td>
+             </tr>'.
+            '<tr>
+                <td>Symptom link 3</td>
+                <td><input class="it__cir_linput" name="attachment3" type="text" size="126" value="'.$_REQUEST['attachment3'].'"</td>
+            </tr></table>'.  
                   
             '<p><input type="hidden" name="modified" type="text" value="'.$cur_date.'"/>'.
             '<input type="hidden" name="assigned" type="text" value="" />';
