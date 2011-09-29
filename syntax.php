@@ -216,7 +216,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             elseif (stristr($data['display'],'ISSUES')!= false)
             {   $step = $data['view'];
                 $Generated_Table = $this->_table_render($issues,$data,$step,$start); 
-                $Generated_Scripts = $this->_scripts_render();
+                if (strtolower($data['controls'])==='on') {
+                    $Generated_Scripts = $this->_scripts_render();
+                }
             }
             // Count only ...        
             elseif (stristr($data['display'],'COUNT')!= false) 
@@ -358,10 +360,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         else
         {   $user_grps = 'all';  }
         
+        if (strtolower($data['controls'])==='on') {
         $ret = '<br /><br /><script type="text/javascript" src="include/selectupdate.js"></script>'.
                '<form class="issuetracker__form2" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'"><p>';
         $ret .= formSecurityToken(false).'<input type="hidden" name="do" value="show" />';        
-        
+        }
         // the user maybe member of different user groups
         // check if one of its assigned groups match with configuration
         $allowed_users = explode('|', $this->getConf('assign'));
@@ -377,7 +380,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         // members of defined groups allowed$user_grps changing issue contents 
         if ($cFlag === true)       
         {   
-            $head = "<div class='itl__table'><table id='".$project."' class='sortable editable resizable inline'>".
+            $dynatable_id = "t_".uniqid((double)microtime()*1000000,1);
+            $head = "<div class='itl__table'><table id='".$dynatable_id."' class='sortable editable resizable inline'>".
                     "<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".
                     "<th id='created'>Created</th>".
                     "<th id='product'>Product</th>".
@@ -411,7 +415,6 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     // check if severity image or text to be displayed                                            
                     if ($noSevIMG === false) {                    
                         $severity_img = $imgBASE . implode('', explode(' ',strtolower($a_severity))).'.gif';
-
 //                                if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
                         $severity_img =' align="center"> <IMG border=0 alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$severity_img.'" width=16 height=16>';
                     }
@@ -500,13 +503,13 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 }
             }
             
-            $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$project."' class='sortable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
+            $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$dynatable_id."' class='sortable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
             $body = '<tbody>'.$reduced_issues.'</tbody></table></div>';
         }
 
 
         if (strtolower($data['controls'])==='on') {
-        $ret = '<table class="itl__t1"><thead><th colspan=5></th></thead><tfoot><td colspan=5></td></tfoot><tbody>'.
+        $ret = '<div><table class="itl__t1"><thead><th colspan=5></th></thead><tfoot><td colspan=5></td></tfoot><tbody>'.
                '<tr class="itd__tables_tr">'.
                   '<td colspan="5" align="left"   valign="center" height="40">'.
                       '<label class="it__cir_projectlabel">Quantity of Issues:&nbsp;'.count($issues).'</label>'.
@@ -557,7 +560,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                      '</form>'.
                  '</td>'.
                  '<td width="20%"></td>'.
-               '</tr></tbody><tfoot></tfoot></table>';
+               '</tr></tbody><tfoot></tfoot></table></div>';
          }
                
          $ret = $ret.$head.$body;              
