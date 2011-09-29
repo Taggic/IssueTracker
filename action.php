@@ -86,7 +86,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         for($i = 0; $i < $len; ++$i) { 
             $ord = ord($txt{$i}); 
             // replace all linefeeds          
-            if($ord === 10){ $res .= "<br>";  } 
+            if($ord === 10){ $res .= "<br />";  } 
             else { $res .= $txt{$i}; }                    
         } 
         return $res; 
@@ -123,7 +123,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 	 {  $issues  = unserialize(@file_get_contents($pfile));}
                  else
                 	 {// promt error message that issue with ID does not exist
-                      echo '<div class="it__negative_feedback">Project file does not exist: ' . $project . '.issues .</div><br>';
+                      echo '<div class="it__negative_feedback">Project file does not exist: ' . $project . '.issues .</div><br />';
                    }	                              
                  
                  $Generated_Header = '';
@@ -154,7 +154,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                        {  if ($value['id'] >= $comment_id) { $comment_id=$value['id'] + 1; } 
                                           if ($_REQUEST['comment'] === $value['comment']) 
                                           {
-                                              $Generated_Header = '<div class="it__negative_feedback">This comment does already exist and was not added again.</div><br>';
+                                              $Generated_Header = '<div class="it__negative_feedback">This comment does already exist and was not added again.</div><br />';
                                               $checkFlag=true; 
                                               break;
                                           }
@@ -176,7 +176,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                        // update modified date
                                        $issues[$_REQUEST['comment_issue_ID']]['modified'] = date('Y-m-d G:i:s'); 
                                        $xvalue = io_saveFile($pfile,serialize($issues));                                   
-                                       $Generated_Header = '<div class="it__positive_feedback">Your comment has been successfully stored with ID #'.$comment_id.'.</div><br>';
+                                       $Generated_Header = '<div class="it__positive_feedback">Your comment has been successfully stored with ID #'.$comment_id.'.</div><br />';
                                        
                                     }
                                  }
@@ -205,7 +205,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 	{$issues  = unserialize(@file_get_contents($pfile));}
                 else
                 	{   // prompt error message that issue with ID does not exist
-                      echo '<div class="it__negative_feedback">Project file does not exist: ' . $project . '.issues .</div><br>';
+                      echo '<div class="it__negative_feedback">Project file does not exist: ' . $project . '.issues .</div><br />';
                       return;
                   }            	          
 
@@ -218,7 +218,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                       $start = $next_start - $step;
                       if ($start<0) { $start='0'; }
                       }
-//                    echo 'start = '.$start.';  step = '.$step.';  next_start = '.$next_start.'<br>';
+//                    echo 'start = '.$start.';  step = '.$step.';  next_start = '.$next_start.'<br />';
                  }
                  elseif ($data->data == 'issuelist_previous') {
                     $start = $itl_start - $step;
@@ -229,7 +229,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                       $start = $next_start - $step;
                       if ($start<0) { $start='0'; }
                       }
-//                    echo 'start = '.$start.';  step = '.$step.';  next_start = '.$next_start.'<br>';
+//                    echo 'start = '.$start.';  step = '.$step.';  next_start = '.$next_start.'<br />';
                  }
                  elseif ($data->data == 'issuelist_filter') {
                     $start = $itl_start;
@@ -304,9 +304,9 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         }      
         
         $BASE = DOKU_BASE."lib/plugins/issuetracker/";
-        return    "<script type=\"text/javascript\" src=\"".$BASE."prototype.js\"></script><script type=\"text/javascript\" src=\"".$BASE."fabtabulous.js\"></script>
-        <script type=\"text/javascript\" src=\"".$BASE."tablekit.js\"></script>
-        <script type=\"text/javascript\">
+        return    "<script type='text/javascript' src=\"".$BASE."prototype.js\"></script><script type='text/javascript' src=\"".$BASE."fabtabulous.js\"></script>
+        <script type='text/javascript' src=\"".$BASE."tablekit.js\"></script>
+        <script type='text/javascript'>
             TableKit.options.editAjaxURI = '".$BASE."edit.php';
             TableKit.Editable.selectInput('status',{}, [".$x_status_select."]);
             TableKit.Editable.selectInput('product',{}, [".$x_products_select."]);
@@ -406,7 +406,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     if ($noStatIMG === false) {                    
                         $status_img = $imgBASE . implode('', explode(' ',strtolower($a_status))).'.gif';
 //                        if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
-                        $status_img =' align="center"> <IMG border=0 alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$status_img.'" width=16 height=16>';
+                        $status_img =' align="center"> <img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16">';
                     }                    
                     else { $status_img = $style.$a_status; }
                     // check if severity image or text to be displayed                                            
@@ -414,7 +414,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         $severity_img = $imgBASE . implode('', explode(' ',strtolower($a_severity))).'.gif';
 
 //                        if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
-                        $severity_img =' align="center"> <IMG border=0 alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$severity_img.'" width=16 height=16>';
+                        $severity_img =' align="center"> <img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16">';
                     }
                     else { $severity_img = $style.$a_severity; }
                     
@@ -423,7 +423,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a>';
                     
                                             
-                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'">'.                       
+                    $body .= '<tr id = "'.$project.'_'.$this->_get_one_value($issue,'id').'">'.                       
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.
                              '<td class="itl__td_date">'.$this->_get_one_value($issue,'created').'</td>'.
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'product').'</td>'.
@@ -443,8 +443,6 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 
         else       
         {   
-            //$head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$project."' class=\"sortable resizable inline\"><thead><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Created'>Created</th><th id='Version'>Version</th><th id='User'>User</th><th id='Description'>Description</th><th id='assigned'>assigned</th><th id='Resolution'>Resolution</th><th id='Modified'>Modified</th></tr></thead>";        
-
             //Build table header according settings
             $configs = explode(',', $this->getConf('shwtbl_usr')) ;
             $reduced_header = '';
@@ -466,7 +464,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     if ($y>=$step) break;
                     $y=$y+1;
                     
-                    $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'">'.
+                    $reduced_issues = $reduced_issues.'<tr id = "'.$project.'_'.$this->_get_one_value($issue,'id').'">'.
                                                       '<td'.$style.$this->_get_one_value($issue,'id').'</td>';
                     foreach ($configs as $config)
                     {
@@ -476,7 +474,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         {
                             if ($noStatIMG === false) {                    
                                 $status_img = $imgBASE . implode('', explode(' ',strtolower($isval))).'.gif';
-                                $reduced_issues .='<td align="center"> <IMG border=0 alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$status_img.'" width=16 height=16>';
+                                $reduced_issues .='<td align="center"> <img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"></td>';
                             }
                             else { $reduced_issues .= '<td'.$style.$isval; }
                         }                                            
@@ -485,9 +483,9 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         {
                             if ($noSevIMG === false) {                    
                                 $severity_img = $imgBASE . implode('', explode(' ',strtolower($isval))).'.gif';
-                                $reduced_issues .='<td align="center"> <IMG border=0 alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$severity_img.'" width=16 height=16>';
+                                $reduced_issues .='<td align="center"> <img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"></td>';
                             }
-                            else { $reduced_issues .= '<td'.$style.$isval; }
+                            else { $reduced_issues .= '<td'.$style.$isval.'</td>'; }
                         }
                         elseif ($config == 'title')
                         {   // build parameter for $_GET method
@@ -504,18 +502,12 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 }
             }
             
-            $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$project."' class='sortable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
+            $head = "<div class='issuetracker_div'><table id='".$project."' class='sortable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
             $body = '<tbody>'.$reduced_issues.'</tbody></table></div>';
         }
 
-        $ret = '<TABLE class="itl__t1"><THEAD><TH colspan=5></TH></THEAD><TFOOT><TD colspan=5></TD></TFOOT><TBODY>'.
-               '<TR class="itd__tables_tr">'.
-                  '<TD colspan="5" align="left"   valign="center" height="40">'.
-                      '<label class="it__cir_projectlabel">Quantity of Issues:&nbsp;'.count($issues).'</label>'.
-                  '</TD>'.
-               '</TR>'.
-               '<TR>'.
-                    '<script> 
+        $ret = '<div>'.
+               '<script  type="text/javascript"> 
                        function changeAction(where) { 
                           if(where==1) { 
                              document.forms["myForm"].action = "doku.php?id=' . $ID . '&do=issuelist_previous"; 
@@ -528,38 +520,45 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                           } 
                           document.forms["myForm"].submit(); 
                        } 
-                    </script>
-                    <form name="myForm" action="" method="post"> 
-                      <TD align ="left" valign="top" width="20%">
+                    </script>'.                    
+               '<table class="itl__t1"><tbody>'.
+               '<tr class="itd__tables_tr">'.
+                  '<td colspan="5" align="left"   valign="middle" height="40">'.
+                      '<label class="it__cir_projectlabel">Quantity of Issues:&nbsp;'.count($issues).'</label>'.
+                  '</td>'.
+               '</tr>'.
+               '<tr>'.
+                    '<form name="myForm" action="" method="post"> 
+                      <td align ="left" valign="top" width="20%">
                          <label class="it__cir_projectlabel">Scroll issue List &nbsp;&nbsp;&nbsp;</label>
-                         <input type="hidden" name="itl_start" id="itl_start" type="text" value="'.$start.'"/>
-                         <input type="hidden" name="itl_step" id="itl_step" type="text" value="'.$step.'"/>
-                         <input type="hidden" name="itl_next" id="itl_next" type="text" value="'.$next_start.'"/>
-                         <input type="hidden" name="itl_project" id="itl_project" type="text" value="'.$project.'"/>
+                         <input type="hidden" name="itl_start" id="itl_start" value="'.$start.'"/>
+                         <input type="hidden" name="itl_step" id="itl_step" value="'.$step.'"/>
+                         <input type="hidden" name="itl_next" id="itl_next" value="'.$next_start.'"/>
+                         <input type="hidden" name="itl_project" id="itl_project" value="'.$project.'"/>
                          <label class="it__cir_projectlabel">Filter Severity: </label>
                          <label class="it__cir_projectlabel">Filter Status: </label>
-                      </TD>
-                      <TD align ="left" width="20%">
-                         <INPUT TYPE="button" NAME="showprevious" VALUE="<<<" TITLE="previous Issues" onClick="changeAction(1)">
+                      </td>
+                      <td align ="left" width="20%">
+                         <input type="button" name="showprevious" value="<<<" title="previous Issues" onClick="changeAction(1)"/>
                          <input class="itl__step_input" name="itl_step" id="itl_step" type="text" value="'.$step.'"/>
-                         <INPUT TYPE="button" NAME="shownext" VALUE=">>>" TITLE="next Issues" onClick="changeAction(2)"/><br>
-                         <input class="itl__sev_filter" name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br>
+                         <input type="button" name="shownext" value=">>>" title="next Issues" onClick="changeAction(2)"/><br />
+                         <input class="itl__sev_filter" name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br />
                          <input class="itl__stat_filter" name="itl_stat_filter" id="itl_stat_filter" type="text" value="'.$stat_filter.'"/>
-                         <INPUT TYPE="button" NAME="go" VALUE="Go" TITLE="Go" onClick="changeAction(3)"/><br>
-                      </TD>
+                         <input type="button" name="go" value="Go" title="Go" onClick="changeAction(3)"/><br />
+                      </td>
                     </form>'.
-                 '<TD width="10%">&nbsp;</TD>'.
-                 '<TD align ="left" width="30%">'.
+                 '<td width="10%">&nbsp;</td>'.
+                 '<td align ="left" width="30%">'.
                      '<form  method="post" action="doku.php?id=' . $ID . '&do=showcase"><label class="it__cir_projectlabel"> Show details of Issue:</label>'.
                          '<input class="itl__showid_input" name="showid" id="showid" type="text" value="0"/>'.
-                         '<input type="hidden" name="project" id="project" type="text" value="'.$project.'"/>'.
-                         '<input type="hidden" name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/>'.
-                         '<input type="hidden" name="itl_stat_filter" id="itl_stat_filter" type="text" value="'.$stat_filter.'"/>'.
-                         '<input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="Go" title="Go");/>'.
+                         '<input type="hidden" name="project" id="project" value="'.$project.'"/>'.
+                         '<input type="hidden" name="itl_sev_filter" id="itl_sev_filter" value="'.$sev_filter.'"/>'.
+                         '<input type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$stat_filter.'"/>'.
+                         '<input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="Go" title="Go"/>'.
                      '</form>'.
-                 '</TD>'.
-                 '<TD width="20%"></TD>'.
-               '</TR></TBODY><TFOOT></TFOOT></TABLE>';
+                 '</td>'.
+                 '<td width="20%"></td>'.
+               '</tr></tbody></table></div>';
 
                             
          $ret = $ret.$head.$body;              
@@ -574,8 +573,9 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         global $lang;
         global $auth;
         $issue_id = $this->parameter;
+        if (!$issue_id) { $issue_id = '0'; }
         
-//        echo 'Project = '.$project.'<br>Issue ID = '. $issue_id.'<br>';
+//        echo 'Project = '.$project.'<br />Issue ID = '. $issue_id.'<br />';
         
         if ($issue_id === false) return;
         $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
@@ -598,7 +598,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
              }
              if ($cFlag === false) {
              // promt error message that issue with this ID does not exist
-              $Generated_Header = '<div class="it__negative_feedback">There does no Issue exist with ID '.$issue_id.'.</div><br>';
+              $Generated_Header = '<div class="it__negative_feedback">There does no Issue exist with ID '.$issue_id.'.</div><br />';
               echo $Generated_Header;
               return;
              }
@@ -606,7 +606,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         else
         	{
               // promt error message that issue with ID does not exist
-              $Generated_Header = '<div class="it__negative_feedback">Project file does not exist: '.$pfile.'</div><br>';
+              $Generated_Header = '<div class="it__negative_feedback">Project file does not exist: '.$pfile.'</div><br />';
               echo $Generated_Header;
               return;
           }	          
@@ -618,10 +618,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 
         $a_severity = $issue[$issue_id]['severity'];                  
         $severity_img = $imgBASE . implode('', explode(' ',strtolower($a_severity))).'.gif';
-        $severity_img =' <IMG border=0 alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$severity_img.'" width=16 height=16> ';
+        $severity_img =' <img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"> ';
         $a_status = $issue[$issue_id]['status'];
         $status_img = $imgBASE . implode('', explode(' ',strtolower($a_status))).'.gif';
-        $status_img =' <IMG border=0 alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$status_img.'" width=16 height=16> ';
+        $status_img =' <img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"> ';
 
 
         //---------------------------------------------------------------------------------------------------------------------
@@ -651,139 +651,139 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 //--------------------------------------
 // Tables for the Issue details view:
 //--------------------------------------
-$issue_edit_head = '<TABLE class="itd__title">'.
-                   '<TR>
-                      <TD colSpan=6 >
-                      <P>
-                        <FONT size=1><I>&nbsp['.$issue[$issue_id]['id'].']&nbsp;&nbsp;</I></FONT>
-                        <FONT size=3 color=#00008f>'.
-                          '<B><I><H class="itd_formtitle">'.$issue[$issue_id]['title'].'</H></I></B>
+$issue_edit_head = '<table class="itd__title">'.
+                   '<tr>
+                      <td colSpan="6" >
+                      <p>
+                        <font size="1"><i>&nbsp['.$issue[$issue_id]['id'].']&nbsp;&nbsp;</i></font>
+                        <font size="3" color=#00008f>'.
+                          '<b><i><h class="itd_formtitle">'.$issue[$issue_id]['title'].'</h></i></b>
                         </FONT>
-                      </P>
-                      </TD>
-                    </TR>'.                  
-                   '<TBODY class="itd__details">'.                    
-                   '<TR class="itd_tr_standard">
-                      <TD class="it__left_indent"></TD>
-                      <TD class="itd__col2">ID:</TD>
-                      <TD class="itd__col3">'.$issue[$issue_id]['id'].'</TD>
-                      <TD class="itd__col4"></TD>                   
-                      <TD class="itd__col5">Project:</TD>
-                      <TD class="itd__col6">'.$project.'</TD>
-                    </TR>';
+                      </p>
+                      </td>
+                    </tr>'.                  
+                   '<tbody class="itd__details">'.                    
+                   '<tr class="itd_tr_standard">
+                      <td class="it__left_indent"></td>
+                      <td class="itd__col2">ID:</td>
+                      <td class="itd__col3">'.$issue[$issue_id]['id'].'</td>
+                      <td class="itd__col4"></td>                   
+                      <td class="itd__col5">Project:</td>
+                      <td class="itd__col6">'.$project.'</td>
+                    </tr>';
                    
-$issue_edit_head .= '<TR class="itd_tr_standard">
-                      <TD class="it__left_indent"></TD>
-                      <TD class="itd__col2">Severity:</TD>
-                      <TD class="itd__col3">'.$severity_img.$issue[$issue_id]['severity'].'</TD>
-                      <TD class="itd__col4"></TD>                   
-                      <TD class="itd__col5">Product:</TD>
-                      <TD class="itd__col6">'.$issue[$issue_id]['product'].'</TD>
-                    </TR>';
+$issue_edit_head .= '<tr class="itd_tr_standard">
+                      <td class="it__left_indent"></td>
+                      <td class="itd__col2">Severity:</td>
+                      <td class="itd__col3">'.$severity_img.$issue[$issue_id]['severity'].'</td>
+                      <td class="itd__col4"></td>                   
+                      <td class="itd__col5">Product:</td>
+                      <td class="itd__col6">'.$issue[$issue_id]['product'].'</td>
+                    </tr>';
                    
-$issue_edit_head .= '<TR class="itd_tr_standard">
-                      <TD class="it__left_indent"></TD>
-                      <TD class="itd__col2">Status:</TD>
-                      <TD class="itd__col3">'.$status_img.$issue[$issue_id]['status'].'</TD>
-                      <TD class="itd__col4"></TD>                   
-                      <TD class="itd__col5">Version:</TD>
-                      <TD class="itd__col6">'.$issue[$issue_id]['version'].'</TD>
-                    </TR>';
+$issue_edit_head .= '<tr class="itd_tr_standard">
+                      <td class="it__left_indent"></td>
+                      <td class="itd__col2">Status:</td>
+                      <td class="itd__col3">'.$status_img.$issue[$issue_id]['status'].'</td>
+                      <td class="itd__col4"></td>                   
+                      <td class="itd__col5">Version:</td>
+                      <td class="itd__col6">'.$issue[$issue_id]['version'].'</td>
+                    </tr>';
 
-$issue_edit_head .= '<TR class="itd_tr_standard">                      
-                      <TD class="it__left_indent"></TD>
-                      <TD class="itd__col2">Reported by:</TD>
-                      <TD class="itd__col3"><A  href="mailto:'.$__reportedby.'">'.$__reportedby.'</A></TD>
-                      <TD class="itd__col4"></TD>                   
-                      <TD class="itd__col5">created:</TD>
-                      <TD class="itd__col6">'.$issue[$issue_id]['created'].'</TD>
-                    </TR>
+$issue_edit_head .= '<tr class="itd_tr_standard">                      
+                      <td class="it__left_indent"></td>
+                      <td class="itd__col2">Reported by:</td>
+                      <td class="itd__col3"><a href="mailto:'.$__reportedby.'">'.$__reportedby.'</a></td>
+                      <td class="itd__col4"></td>                   
+                      <td class="itd__col5">created:</td>
+                      <td class="itd__col6">'.$issue[$issue_id]['created'].'</td>
+                    </tr>
                    
-                    <TR class="itd_tr_standard">
-                      <TD class="it__left_indent"></TD>
-                      <TD class="itd__col2">Assigned to:</TD>
-                      <TD class="itd__col3"><A  href="mailto:'.$__assigened.'">'.$__assigened.'</A></TD>
-                      <TD class="itd__col4"></TD>                   
-                      <TD class="itd__col5">modified:</TD>
-                      <TD class="itd__col6">'.$issue[$issue_id]['modified'].'</TD>
-                    </TR>
-                    </TBODY></TABLE>';
+                    <tr class="itd_tr_standard">
+                      <td class="it__left_indent"></td>
+                      <td class="itd__col2">Assigned to:</td>
+                      <td class="itd__col3"><a href="mailto:'.$__assigened.'">'.$__assigened.'</a></td>
+                      <td class="itd__col4"></td>                   
+                      <td class="itd__col5">modified:</td>
+                      <td class="itd__col6">'.$issue[$issue_id]['modified'].'</td>
+                    </tr>
+                    </tbody></table>';
 
 
-$issue_client_details = '<TABLE class="itd__tables"><TBODY>
-                        <TR>
-                           <TD class="itd_tables_tdh" colSpan=3>Reporter Details</TD>
-                        </TR>
-                        <TR class="itd__tables_tr">
-                           <TD class="it__left_indent"></TD>
-                           <TD class="itd_tables_tdc2">Name:</TD>
-                           <TD class="itd_tables_tdc3">'.$issue[$issue_id]['user_name'].'</TD>
-                        </TR>';
+$issue_client_details = '<table class="itd__tables"><tbody>
+                        <tr>
+                           <td class="itd_tables_tdh" colSpan="3">Reporter Details</td>
+                        </tr>
+                        <tr class="itd__tables_tr">
+                           <td class="it__left_indent"></td>
+                           <td class="itd_tables_tdc2">Name:</td>
+                           <td class="itd_tables_tdc3">'.$issue[$issue_id]['user_name'].'</td>
+                        </tr>';
 
                         //--------------------------------------------------------------------------------------------------------------
                         // do not show personal details if issue details diplayed by neigther admin/assignee nor the original user itself
                         //--------------------------------------------------------------------------------------------------------------
-/*                        echo "current user = ".$user_mail['userinfo']['mail']."<br>".
-                               "Reporting user = ".$issue[$issue_id]['user_mail']."<br>";
-                          if($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) {echo "current user = Reporting user <br><br>";}
-                             else {echo "current user != Reporting user <br><br>";}
-                          if(strpos($target2,$user_mail['userinfo']['mail']) != false) {echo "current user is a member of assignees <br><br>";}
-                             else {echo "current user is not a member of assignees <br><br>";}
+/*                        echo "current user = ".$user_mail['userinfo']['mail']."<br />".
+                               "Reporting user = ".$issue[$issue_id]['user_mail']."<br />";
+                          if($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) {echo "current user = Reporting user <br /><br />";}
+                             else {echo "current user != Reporting user <br /><br />";}
+                          if(strpos($target2,$user_mail['userinfo']['mail']) != false) {echo "current user is a member of assignees <br /><br />";}
+                             else {echo "current user is not a member of assignees <br /><br />";}
 */                               
                         if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
                         {
-$issue_client_details .= '<TR class="itd__tables_tr">
-                            <TD class="it__left_indent"></TD>
-                            <TD class="itd_tables_tdc2">Email:</TD>
-                            <TD class="itd_tables_tdc3"><A href="mailto:'.$issue[$issue_id]['user_mail'].'">'.$issue[$issue_id]['user_mail'].'</A></TD>
-                          </TR>
-                          <TR class="itd__tables_tr">
-                            <TD class="it__left_indent"></TD>
-                            <TD class="itd_tables_tdc2">Phone:</TD>
-                            <TD class="itd_tables_tdc3">'.$issue[$issue_id]['user_phone'].'</TD>
-                          </TR>
-                          <TR class="itd__tables_tr">
-                            <TD class="it__left_indent"></TD>
-                            <TD class="itd_tables_tdc2">Add contact:</TD>
-                            <TD class="itd_tables_tdc3"><A href="mailto:'.$issue[$issue_id]['add_user_mail'].'">'.$issue[$issue_id]['add_user_mail'].'</A></TD>
-                          </TR>
-                          </TBODY></TABLE>'; 
+$issue_client_details .= '<tr class="itd__tables_tr">
+                            <td class="it__left_indent"></td>
+                            <td class="itd_tables_tdc2">Email:</td>
+                            <td class="itd_tables_tdc3"><a href="mailto:'.$issue[$issue_id]['user_mail'].'">'.$issue[$issue_id]['user_mail'].'</a></td>
+                          </tr>
+                          <tr class="itd__tables_tr">
+                            <td class="it__left_indent"></td>
+                            <td class="itd_tables_tdc2">Phone:</td>
+                            <td class="itd_tables_tdc3">'.$issue[$issue_id]['user_phone'].'</td>
+                          </tr>
+                          <tr class="itd__tables_tr">
+                            <td class="it__left_indent"></td>
+                            <td class="itd_tables_tdc2">Add contact:</td>
+                            <td class="itd_tables_tdc3"><a href="mailto:'.$issue[$issue_id]['add_user_mail'].'">'.$issue[$issue_id]['add_user_mail'].'</a></td>
+                          </tr>
+                          </tbody></table>'; 
                         }
                         else {
-                          $issue_client_details .= '</TBODY></TABLE>';
+                          $issue_client_details .= '</tbody></table>';
                         }
 
                         $x_comment = $this->convertlabel($issue[$issue_id]['description']);
 
-$issue_initial_description = '<TABLE class="itd__tables"><TBODY>
-                                <TR>
-                                  <TD class="itd_tables_tdh" colSpan=2 >Initial description</TD>
-                                </TR>
-                                <TR class="itd__tables_tr">
-                                  <TD width="1%"></TD>
-                                  <TD>'.$x_comment.'</TD>
-                                </TR>
-                              </TBODY></TABLE>';
+$issue_initial_description = '<table class="itd__tables"><tbody>
+                                <tr>
+                                  <td class="itd_tables_tdh" colSpan="2" >Initial description</td>
+                                </tr>
+                                <tr class="itd__tables_tr">
+                                  <td width="1%"></td>
+                                  <td>'.$x_comment.'</td>
+                                </tr>
+                              </tbody></table>';
 
-$issue_attachments = '<TABLE class="itd__tables"><TBODY>
-                      <TR>
-                        <TD class="itd_tables_tdh">Links to symptom files</TD>
-                      </TR>
-                      <TR  class="itd__tables_tr">
-                        <TD style="padding-left:0.45em;">1. <A href="'.$issue[$issue_id]['attachment1'].'"><IMG border=0 alt="symptoms 1" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment1'].'" href="'.$issue[$issue_id]['attachment1'].'">'.$issue[$issue_id]['attachment1'].'</A></TD>
-                      </TR>'.
-                     '<TR  class="itd__tables_tr">
-                        <TD style="padding-left:0.45em;">2. <A href="'.$issue[$issue_id]['attachment2'].'"><IMG border=0 alt="symptoms 2" style="margin-right:0.5em" vspace=1em align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment2'].'" href="'.$issue[$issue_id]['attachment2'].'">'.$issue[$issue_id]['attachment2'].'</A></TD>
-                      </TR>'.
-                     '<TR  class="itd__tables_tr">
-                        <TD style="padding-left:0.45em;">3. <A href="'.$issue[$issue_id]['attachment3'].'"><IMG border=0 alt="symptoms 3" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$imgBASE.'sympt.gif" width=16 height=16></A><A title="'.$issue[$issue_id]['attachment3'].'" href="'.$issue[$issue_id]['attachment3'].'">'.$issue[$issue_id]['attachment3'].'</A></TD>
-                      </TR>'.
-                     '</TBODY></TABLE>';              
+$issue_attachments = '<table class="itd__tables"><tbody>
+                      <tr>
+                        <td class="itd_tables_tdh">Links to symptom files</td>
+                      </tr>
+                      <tr  class="itd__tables_tr">
+                        <td style="padding-left:0.45em;">1. <a href="'.$issue[$issue_id]['attachment1'].'"><img border="0" alt="symptoms 1" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment1'].'" href="'.$issue[$issue_id]['attachment1'].'">'.$issue[$issue_id]['attachment1'].'</a></td>
+                      </tr>'.
+                     '<tr  class="itd__tables_tr">
+                        <td style="padding-left:0.45em;">2. <a href="'.$issue[$issue_id]['attachment2'].'"><img border="0" alt="symptoms 2" style="margin-right:0.5em" vspace=1em align=absMiddle src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment2'].'" href="'.$issue[$issue_id]['attachment2'].'">'.$issue[$issue_id]['attachment2'].'</a></td>
+                      </tr>'.
+                     '<tr  class="itd__tables_tr">
+                        <td style="padding-left:0.45em;">3. <a href="'.$issue[$issue_id]['attachment3'].'"><img border="0" alt="symptoms 3" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment3'].'" href="'.$issue[$issue_id]['attachment3'].'">'.$issue[$issue_id]['attachment3'].'</a></td>
+                      </tr>'.
+                     '</tbody></table>';              
 
-$issue_comments_log ='<TABLE class="itd__tables"><TBODY>
-                      <TR>
-                        <TD class="itd_tables_tdh" colSpan=2 >Comments (work log)</TD>
-                      </TR>';
+$issue_comments_log ='<table class="itd__tables"><tbody>
+                      <tr>
+                        <td class="itd_tables_tdh" colSpan="2" >Comments (work log)</td>
+                      </tr>';
               // loop through the comments
               if ($comments!=false) {              
                   foreach ($comments as $a_comment)
@@ -799,17 +799,17 @@ $issue_comments_log ='<TABLE class="itd__tables"><TBODY>
                         {   $x_mail = '<a href="mailto:'.$this->_get_one_value($a_comment,'author').'">'.$this->_get_one_value($a_comment,'author').'</a>'; }
                         else {   $x_mail = '<i> (user details hidden) </i>';  }
 
-                        $issue_comments_log .= '<TR  class="itd__tables_tr">
-                                                  <TD class="itd_comment_trh"><label>['.$this->_get_one_value($a_comment,'id').'] </label>&nbsp;&nbsp;&nbsp;
+                        $issue_comments_log .= '<tr  class="itd__tables_tr">
+                                                  <td class="itd_comment_trh"><label>['.$this->_get_one_value($a_comment,'id').'] </label>&nbsp;&nbsp;&nbsp;
                                                                             <label>'.$this->_get_one_value($a_comment,'timestamp').' </label>&nbsp;&nbsp;&nbsp;
-                                                                            <label>'.$x_mail.'</label></TD>
-                                                </TR>
-                                                <TR  class="itd__tables_tr">
-                                                  <TD class="itd_comment_tr">'.$x_comment.'</TD>
-                                                </TR>';
+                                                                            <label>'.$x_mail.'</label></td>
+                                                </tr>
+                                                <tr  class="itd__tables_tr">
+                                                  <td class="itd_comment_tr">'.$x_comment.'</td>
+                                                </tr>';
                   }
               }
-              $issue_comments_log .='</TBODY></TABLE>'; 
+              $issue_comments_log .='</tbody></table>'; 
 
                      
         //--------------------------------------------------------------------------------------------------------------
@@ -829,15 +829,15 @@ $issue_comments_log ='<TABLE class="itd__tables"><TBODY>
             if ($user_mail['perm'] > 1) 
             { $_cFlag = true; } }
 
-/*        echo 'result of user_check = '.$user_check.'<br>'.
-             'result of user_mail[perm] = '.$user_mail['perm'].'<br>'.
-             'result of _cFlag = '.$_cFlag.'<br>';
+/*        echo 'result of user_check = '.$user_check.'<br />'.
+             'result of user_mail[perm] = '.$user_mail['perm'].'<br />'.
+             'result of _cFlag = '.$_cFlag.'<br />';
 */
         if($_cFlag === true) {
-$issue_add_comment ='<TABLE class="itd__tables">'.
-                      '<TR>'.
-                        '<TD class="itd_tables_tdh" colSpan=2 >Add a new comment</TD>
-                      </TR><TR><TD>';
+$issue_add_comment ='<table class="itd__tables">'.
+                      '<tr>'.
+                        '<td class="itd_tables_tdh" colSpan="2" >Add a new comment</td>
+                      </tr><tr><td>';
                       
 $issue_add_comment .= '<script type="text/javascript" src="include/selectupdate.js"></script>'.
                       '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">';
@@ -863,7 +863,7 @@ $issue_add_comment .= formSecurityToken(false).
                       // ¦ perm — the user's permissions related to the current page ($ID)
                       $issue_add_comment .= '<input  type="hidden" class="showid__option" name="showid" id="showid" type="text" size="10" value="'.$this->parameter.'"/>'.
                                             '<input class="button" id="showcase" type="submit" name="showcase" value="Add" title="Add");/>'.
-                                            '</form></TD></TR></Table>';
+                                            '</form></td></tr></table>';
         }
         else {
            $wmsg = 'Please <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">Sign in</a> if you want to add a comment.'; 

@@ -306,9 +306,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         }      
         
         $BASE = DOKU_BASE."lib/plugins/issuetracker/";
-        return    "<script type=\"text/javascript\" src=\"".$BASE."prototype.js\"></script><script type=\"text/javascript\" src=\"".$BASE."fabtabulous.js\"></script>
-        <script type=\"text/javascript\" src=\"".$BASE."tablekit.js\"></script>
-        <script type=\"text/javascript\">
+        return    "<script type='text/javascript' src=\"".$BASE."prototype.js\"></script><script type='text/javascript' src=\"".$BASE."fabtabulous.js\"></script>
+        <script type='text/javascript' src='".$BASE."tablekit.js\'></script>
+        <script type='text/javascript'>
             TableKit.options.editAjaxURI = '".$BASE."edit.php';
             TableKit.Editable.selectInput('status',{}, [".$x_status_select."]);
             TableKit.Editable.selectInput('product',{}, [".$x_products_select."]);
@@ -340,7 +340,6 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         if ($next_start>count($issues)) $next_start=count($issues);
 
         $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
-//        $hdr_style="style='text-align:left; font-size:0.85em;'";
         $style =' style="text-align:left; white-space:pre-wrap;">';
 //        $date_style =' style="text-align:center; white-space:pre;">';
         $user_grp = pageinfo();
@@ -409,23 +408,23 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     if ($noStatIMG === false) {                    
                         $status_img = $imgBASE . implode('', explode(' ',strtolower($a_status))).'.gif';
 //                                if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
-                        $status_img =' align="center"> <IMG border=0 alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$status_img.'" width=16 height=16>';
+                        $status_img =' align="center"> <img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/></td>';
                     }                    
                     else { $status_img = $style.$a_status; }
                     // check if severity image or text to be displayed                                            
                     if ($noSevIMG === false) {                    
                         $severity_img = $imgBASE . implode('', explode(' ',strtolower($a_severity))).'.gif';
 //                                if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
-                        $severity_img =' align="center"> <IMG border=0 alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$severity_img.'" width=16 height=16>';
+                        $severity_img =' align="center"> <img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/></td>';
                     }
                     else { $severity_img = $style.$a_severity; }
                     
                     // build parameter for $_GET method
                         $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
-                        $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a>';
+                        $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a></td>';
                     
                                             
-                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'">'.                       
+                    $body .= '<tr id = "'.$project.'_'.$this->_get_one_value($issue,'id').'">'.                       
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.
                              '<td class="itl__td_date">'.$this->_get_one_value($issue,'created').'</td>'.
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'product').'</td>'.
@@ -467,7 +466,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     if ($y>=$step) break;
                     $y=$y+1;
 
-                    $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'">'.
+                    $reduced_issues = $reduced_issues.'<tr id = "'.$project.'_'.$this->_get_one_value($issue,'id').'">'.
                                                       '<td'.$style.$this->_get_one_value($issue,'id').'</td>';
                     foreach ($configs as $config)
                     {
@@ -476,17 +475,17 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                         {
                             if ($noStatIMG === false) {                    
                                 $status_img = $imgBASE . implode('', explode(' ',strtolower($isval))).'.gif';
-                                $reduced_issues .='<td align="center"> <IMG border=0 alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$status_img.'" width=16 height=16>';
+                                $reduced_issues .='<td align="center"> <img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/></td>';
                             }
-                            else { $reduced_issues .= '<td'.$style.$isval; }
+                            else { $reduced_issues .= '<td'.$style.$isval.'</td>'; }
                         }                                            
                         elseif ($config == 'severity')
                         {
                             if ($noSevIMG === false) {                    
                                 $severity_img = $imgBASE . implode('', explode(' ',strtolower($isval))).'.gif';
-                                $reduced_issues .='<td align="center"> <IMG border=0 alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace=1 align=absMiddle src="'.$severity_img.'" width=16 height=16>';
+                                $reduced_issues .='<td align="center"> <img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/></td>';
                             }
-                            else { $reduced_issues .= '<td'.$style.$isval; }
+                            else { $reduced_issues .= '<td'.$style.$isval.'</td>'; }
                         }
                         elseif ($config == 'title')
                         {   // build parameter for $_GET method
@@ -503,20 +502,14 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 }
             }
             
-            $head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$dynatable_id."' class='sortable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
+            $head = "<div class='issuetracker_div'><table id='".$dynatable_id."' class='sortable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
             $body = '<tbody>'.$reduced_issues.'</tbody></table></div>';
         }
 
 
         if (strtolower($data['controls'])==='on') {
-        $ret = '<div><table class="itl__t1"><thead><th colspan=5></th></thead><tfoot><td colspan=5></td></tfoot><tbody>'.
-               '<tr class="itd__tables_tr">'.
-                  '<td colspan="5" align="left"   valign="center" height="40">'.
-                      '<label class="it__cir_projectlabel">Quantity of Issues:&nbsp;'.count($issues).'</label>'.
-                  '</td>'.
-               '</tr>'.
-               '<tr>'.
-                    '<script> 
+        $ret = '<div>'.
+               '<script  type="text/javascript"> 
                        function changeAction(where) { 
                           if(where==1) { 
                              document.forms["myForm"].action = "doku.php?id=' . $ID . '&do=issuelist_previous"; 
@@ -529,38 +522,47 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                           } 
                           document.forms["myForm"].submit(); 
                        } 
-                    </script>
-                    <form name="myForm" action="" method="post"> 
-                      <td align ="left" valign="top" width="20%">
-                         <label class="it__cir_projectlabel">Scroll issue List &nbsp;&nbsp;&nbsp;</label>
-                         <input type="hidden" name="itl_start" id="itl_start" type="text" value="'.$start.'"/>
-                         <input type="hidden" name="itl_step" id="itl_step" type="text" value="'.$step.'"/>
-                         <input type="hidden" name="itl_next" id="itl_next" type="text" value="'.$next_start.'"/>
-                         <input type="hidden" name="itl_project" id="itl_project" type="text" value="'.$project.'"/>
-                         <label class="it__cir_projectlabel">Filter Severity: </label>
-                         <label class="it__cir_projectlabel">Filter Status: </label>
+                    </script>'.
+               '<table class="itl__t1"><tbody>'.
+               '<tr class="itd__tables_tr">'.
+                  '<td colspan="5" align="left"   valign="middle" height="40">'.
+                      '<label class="it__cir_projectlabel">Quantity of Issues:&nbsp;'.count($issues).'</label>'.
+                  '</td>'.
+               '</tr>'.
+               '<tr>'.
+                    
+ 
+                      '<td align ="left" valign="top" width="20%">
+                         <p class="it__cir_projectlabel">Scroll issue List &nbsp;&nbsp;&nbsp;<br />
+                                                         Filter Severity: <br />
+                                                         Filter Status: </p>
                       </td>
-                      <td align ="left" width="20%">
-                         <input type="button" name="showprevious" value="<<<" title="previous Issues" onClick="changeAction(1)">
+                      <td align ="left" valign="top" width="20%">
+                      <form name="myForm" action="" method="post">
+                         <input type="hidden" name="itl_start" id="itl_start" value="'.$start.'"/>
+                         <input type="hidden" name="itl_step" id="itl_step" value="'.$step.'"/>
+                         <input type="hidden" name="itl_next" id="itl_next" value="'.$next_start.'"/>
+                         <input type="hidden" name="itl_project" id="itl_project" value="'.$project.'"/>
+                         <input type="button" name="showprevious" value="<<<" title="previous Issues" onClick="changeAction(1)"/>
                          <input class="itl__step_input" name="itl_step" id="itl_step" type="text" value="'.$step.'"/>
                          <input type="button" name="shownext" value=">>>" title="next Issues" onClick="changeAction(2)"/><br />
-                         <input class="itl__sev_filter" name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br />
+                         <input class="itl__sev_filter" name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br />                         
                          <input class="itl__stat_filter" name="itl_stat_filter" id="itl_stat_filter" type="text" value="'.$stat_filter.'"/>
                          <input type="button" name="go" value="Go" title="Go" onClick="changeAction(3)"/><br />
-                      </td>
-                    </form>'.
+                      </form>                      
+                      </td>'.
                  '<td width="10%">&nbsp;</td>'.
                  '<td align ="left" width="30%">'.
                      '<form  method="post" action="doku.php?id=' . $ID . '&do=showcase"><label class="it__cir_projectlabel"> Show details of Issue:</label>'.
                          '<input class="itl__showid_input" name="showid" id="showid" type="text" value="0"/>'.
-                         '<input type="hidden" name="project" id="project" type="text" value="'.$project.'"/>'.
-                         '<input type="hidden" name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/>'.
-                         '<input type="hidden" name="itl_stat_filter" id="itl_stat_filter" type="text" value="'.$stat_filter.'"/>'.
-                         '<input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="Go" title="Go");/>'.
+                         '<input type="hidden" name="project" id="project" value="'.$project.'"/>'.
+                         '<input type="hidden" name="itl_sev_filter" id="itl_sev_filter" value="'.$sev_filter.'"/>'.
+                         '<input type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$stat_filter.'"/>'.
+                         '<input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="Go" title="Go"/>'.
                      '</form>'.
                  '</td>'.
                  '<td width="20%"></td>'.
-               '</tr></tbody><tfoot></tfoot></table></div>';
+               '</tr></tbody></table></div>';
          }
                
          $ret = $ret.$head.$body;              
