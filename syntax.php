@@ -306,9 +306,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         }      
         
         $BASE = DOKU_BASE."lib/plugins/issuetracker/";
-        return    "<script type='text/javascript' src=\"".$BASE."prototype.js\"></script><script type='text/javascript' src=\"".$BASE."fabtabulous.js\"></script>
-        <script type='text/javascript' src='".$BASE."tablekit.js\'></script>
-        <script type='text/javascript'>
+        return    "<script type=\"text/javascript\" src=\"".$BASE."prototype.js\"></script><script type=\"text/javascript\" src=\"".$BASE."fabtabulous.js\"></script>
+        <script type=\"text/javascript\" src=\"".$BASE."tablekit.js\"></script>
+        <script type=\"text/javascript\">
             TableKit.options.editAjaxURI = '".$BASE."edit.php';
             TableKit.Editable.selectInput('status',{}, [".$x_status_select."]);
             TableKit.Editable.selectInput('product',{}, [".$x_products_select."]);
@@ -424,7 +424,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                         $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a></td>';
                     
                                             
-                    $body .= '<tr id = "'.$project.'_'.$this->_get_one_value($issue,'id').'">'.                       
+                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'">'.                       
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.
                              '<td class="itl__td_date">'.$this->_get_one_value($issue,'created').'</td>'.
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'product').'</td>'.
@@ -466,7 +466,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     if ($y>=$step) break;
                     $y=$y+1;
 
-                    $reduced_issues = $reduced_issues.'<tr id = "'.$project.'_'.$this->_get_one_value($issue,'id').'">'.
+                    $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'">'.
                                                       '<td'.$style.$this->_get_one_value($issue,'id').'</td>';
                     foreach ($configs as $config)
                     {

@@ -3,7 +3,7 @@
 base    issuetracker
 author  Taggic
 email   taggic@t-online.de
-date    2011-09-29
+date    2011-10-04
 name    IssueTracker
 desc    provides a simple issue tracker
 url     http://www.dokuwiki.org/plugin:issuetracker
