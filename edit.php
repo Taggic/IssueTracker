@@ -2,7 +2,7 @@
 
   require_once(realpath(dirname(__FILE__)).'/../../../inc/init.php');
   if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
-require_once(DOKU_PLUGIN.'syntax.php');  
+  require_once(DOKU_PLUGIN.'syntax.php');  
   
 // POST Sent by the edited array
 //    * &row=n: The row index of the edited cell
@@ -16,10 +16,10 @@ require_once(DOKU_PLUGIN.'syntax.php');
 /* send an e-mail to user due to issue modificaion
 */                                          
     function _emailForIssueMod($project, $issue, $old_value, $column, $new_value)
-    {
+    {     global $conf;
 //        if ($conf['plugin']['issuetracker']['userinfo_email']==1)
         {   global $ID;
-            global $conf;
+            
             $subject='Issue '.$issue['id'].' on '.$project.' was modified';            
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
             
@@ -34,13 +34,36 @@ require_once(DOKU_PLUGIN.'syntax.php');
             $from = $conf['plugin']['issuetracker']['email_address'];
             $to   = $issue['user_mail'];
             $cc   = $issue['add_user_mail'];
-
+            
             mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
 
         }
     }
 /******************************************************************************/
-    global $ID;    
+/* send an e-mail to assignee about routed service request
+*/                                          
+    function _emailToAssigneeMod($project,$issue,$value)
+    {       
+            global $ID;
+            global $conf;
+            $subject='('.$project.') issue '.$issue['id'].' was assigned to you';;
+            $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
+
+            $body .= "You are now assigned to following service request:".chr(10).
+                    'ID:'.chr(9).chr(9).chr(9).chr(9).$issue['id'].chr(10).
+                    'see details:'.chr(9).chr(9).DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+                    'best regards'.chr(10).$project.' Issue Tracker'.chr(10).chr(10);
+
+            $from = $conf['plugin']['issuetracker']['email_address'];
+            $to   = $value;
+
+            mail_send($to, $subject, $body, $from, $cc='', $bcc='', $headers=null, $params=null);
+
+    }
+/******************************************************************************/
+    global $ID;
+    global $conf;
+        
     $exploded = explode(' ',htmlspecialchars(stripslashes($_POST['id'])));
     $project = $exploded[0];
     $id_issue = intval($exploded[1]);
@@ -56,13 +79,21 @@ require_once(DOKU_PLUGIN.'syntax.php');
     $field = strtolower(htmlspecialchars(stripslashes($_POST['field'])));
     $value = htmlspecialchars(stripslashes($_POST['value']));
     
-        _emailForIssueMod($project, $issues[$id_issue], $issues[$id_issue][$field], $field, $value);
-        $issues[$id_issue][$field] = $value;
-        $issues[$id_issue]['modified'] = date ('Y-m-d G:i:s');
+    _emailForIssueMod($project, $issues[$id_issue], $issues[$id_issue][$field], $field, $value);
+    
+    $issues[$id_issue][$field] = $value;
+    $issues[$id_issue]['modified'] = date ('Y-m-d G:i:s');
     
     // Save issues file contents
     $fh = fopen($pfile, 'w');
     fwrite($fh, serialize($issues));
     fclose($fh);
     echo $_POST['value'];    
+
+        // inform assigned workforce
+    if ($field == 'assigned') {
+        $issues[$id_issue]['assigned'] = $_POST['value'];
+        _emailToAssigneeMod($project, $issues[$id_issue], $value);
+    }
+
 ?>

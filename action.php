@@ -23,7 +23,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2011-09-29',
+         'date'   => '2011-10-20',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -123,7 +123,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 	 {  $issues  = unserialize(@file_get_contents($pfile));}
                  else
                 	 {// promt error message that issue with ID does not exist
-                      echo '<div class="it__negative_feedback">Project file does not exist: ' . $project . '.issues .</div><br />';
+                      echo '<div class="it__negative_feedback">'.sprintf($this->getLang('msg_pfilemissing'), $project) . '</div><br />';
                    }	                              
                  
                  $Generated_Header = '';
@@ -154,7 +154,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                        {  if ($value['id'] >= $comment_id) { $comment_id=$value['id'] + 1; } 
                                           if ($_REQUEST['comment'] === $value['comment']) 
                                           {
-                                              $Generated_Header = '<div class="it__negative_feedback">This comment does already exist and was not added again.</div><br />';
+                                              $Generated_Header = '<div class="it__negative_feedback">'.$this->getLang('msg_commentfalse').'</div><br />';
                                               $checkFlag=true; 
                                               break;
                                           }
@@ -176,7 +176,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                        // update modified date
                                        $issues[$_REQUEST['comment_issue_ID']]['modified'] = date('Y-m-d G:i:s'); 
                                        $xvalue = io_saveFile($pfile,serialize($issues));                                   
-                                       $Generated_Header = '<div class="it__positive_feedback">Your comment has been successfully stored with ID #'.$comment_id.'.</div><br />';
+                                       $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_commenttrue').$comment_id.'.</div><br />';
                                        
                                     }
                                  }
@@ -205,7 +205,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 	{$issues  = unserialize(@file_get_contents($pfile));}
                 else
                 	{   // prompt error message that issue with ID does not exist
-                      echo '<div class="it__negative_feedback">Project file does not exist: ' . $project . '.issues .</div><br />';
+                      echo '<div class="it__negative_feedback">'.printf($this->getLang('msg_pfilemissing'), $project).'</div><br />';
                       return;
                   }            	          
 
@@ -377,20 +377,19 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         // members of defined groups allowed$user_grps changing issue contents 
         if ($cFlag === true)       
         {   
-
-            $head = "<div class='itl__table'><table id='".$project."' class='sortable editable resizable inline'>".
-                    "<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".
-                    "<th id='created'>Created</th>".
-                    "<th id='product'>Product</th>".
-                    "<th id='version'>Version</th>".
-                    "<th id='severity'>Severity</th>".
-                    "<th id='status'>Status</th>".
-                    "<th id='user_name'>User name</th>".
-                    "<th id='title'>Title</th>".
-                    "<th id='assigned'>assigned</th>". 
-                    "<th id='resolution'>Resolution</th>".
-                    "<th id='modified'>Modified</th></tr></thead>";        
-            $body = '<tbody>';
+            $head = "<div class='itl__table'><table id='".$project."' class='sortable editable resizable inline'>".NL.
+                    "<thead><tr><th class=\"sortfirstdesc\" id='id'>.$this->getLang('th_id').</th>".NL.
+                    "<th id='created'>".$this->getLang('th_created')."</th>".NL.
+                    "<th id='product'>".$this->getLang('th_product')."</th>".NL.
+                    "<th id='version'>".$this->getLang('th_version')."</th>".NL.
+                    "<th id='severity'>".$this->getLang('th_severity')."</th>".NL.
+                    "<th id='status'>".$this->getLang('th_status')."</th>".NL.
+                    "<th id='user_name'>".$this->getLang('th_username')."</th>".NL.
+                    "<th id='title'>".$this->getLang('th_title')."</th>".NL.
+                    "<th id='assigned'>".$this->getLang('th_assigned')."</th>".NL. 
+                    "<th id='resolution'>".$this->getLang('th_resolution')."</th>".NL.
+                    "<th id='modified'>".$this->getLang('th_modified')."</th></tr></thead>".NL;        
+            $body = '<tbody>'.NL;
         
             for ($i=$next_start-1;$i>=0;$i=$i-1)
             {   // check start and end of rows to be displayed
@@ -524,43 +523,42 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                '<table class="itl__t1"><tbody>'.
                '<tr class="itd__tables_tr">'.
                   '<td colspan="5" align="left"   valign="middle" height="40">'.
-                      '<label class="it__cir_projectlabel">Quantity of Issues:&nbsp;'.count($issues).'</label>'.
+                      '<label class="it__cir_projectlabel">'.$this->getLang('lbl_issueqty').count($issues).'</label>'.
                   '</td>'.
                '</tr>'.
                '<tr>'.
                     '<form name="myForm" action="" method="post"> 
                       <td align ="left" valign="top" width="20%">
-                         <label class="it__cir_projectlabel">Scroll issue List &nbsp;&nbsp;&nbsp;</label>
+                         <p class="it__cir_projectlabel">'.$this->getLang('lbl_scroll').' <br />
+                                                         '.$this->getLang('lbl_filtersev').' <br />
+                                                         '.$this->getLang('lbl_filterstat').' </p>
+                      <td align ="left" valign="top" width="20%">
+                      <form name="myForm" action="" method="post">
                          <input type="hidden" name="itl_start" id="itl_start" value="'.$start.'"/>
                          <input type="hidden" name="itl_step" id="itl_step" value="'.$step.'"/>
                          <input type="hidden" name="itl_next" id="itl_next" value="'.$next_start.'"/>
                          <input type="hidden" name="itl_project" id="itl_project" value="'.$project.'"/>
-                         <label class="it__cir_projectlabel">Filter Severity: </label>
-                         <label class="it__cir_projectlabel">Filter Status: </label>
-                      </td>
-                      <td align ="left" width="20%">
-                         <input type="button" name="showprevious" value="<<<" title="previous Issues" onClick="changeAction(1)"/>
+                         <input type="button" name="showprevious" value="'.$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>
                          <input class="itl__step_input" name="itl_step" id="itl_step" type="text" value="'.$step.'"/>
-                         <input type="button" name="shownext" value=">>>" title="next Issues" onClick="changeAction(2)"/><br />
-                         <input class="itl__sev_filter" name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br />
+                         <input type="button" name="shownext" value="'.$this->getLang('btn_next').'" title="'.$this->getLang('btn_next_title').'" onClick="changeAction(2)"/><br />
+                         <input class="itl__sev_filter" name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br />                         
                          <input class="itl__stat_filter" name="itl_stat_filter" id="itl_stat_filter" type="text" value="'.$stat_filter.'"/>
-                         <input type="button" name="go" value="Go" title="Go" onClick="changeAction(3)"/><br />
-                      </td>
-                    </form>'.
+                         <input type="button" name="go" value="'.$this->getLang('btn_go').'" title="'.$this->getLang('btn_go').'" onClick="changeAction(3)"/><br />
+                      </form>                      
+                      </td>'.
                  '<td width="10%">&nbsp;</td>'.
                  '<td align ="left" width="30%">'.
-                     '<form  method="post" action="doku.php?id=' . $ID . '&do=showcase"><label class="it__cir_projectlabel"> Show details of Issue:</label>'.
+                     '<form  method="post" action="doku.php?id=' . $ID . '&do=showcase"><label class="it__cir_projectlabel"> '.$this->getLang('lbl_showid').'</label>'.
                          '<input class="itl__showid_input" name="showid" id="showid" type="text" value="0"/>'.
                          '<input type="hidden" name="project" id="project" value="'.$project.'"/>'.
                          '<input type="hidden" name="itl_sev_filter" id="itl_sev_filter" value="'.$sev_filter.'"/>'.
                          '<input type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$stat_filter.'"/>'.
-                         '<input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="Go" title="Go"/>'.
+                         '<input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="'.$this->getLang('btn_showid').'" title="'.$this->getLang('btn_showid_title').'"/>'.
                      '</form>'.
                  '</td>'.
                  '<td width="20%"></td>'.
                '</tr></tbody></table></div>';
 
-                            
          $ret = $ret.$head.$body;              
         return $ret;
     }
@@ -598,7 +596,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
              }
              if ($cFlag === false) {
              // promt error message that issue with this ID does not exist
-              $Generated_Header = '<div class="it__negative_feedback">There does no Issue exist with ID '.$issue_id.'.</div><br />';
+              $Generated_Header = '<div class="it__negative_feedback">'.$this->getLang('msg_issuemissing').$issue_id.'.</div><br />';
               echo $Generated_Header;
               return;
              }
@@ -606,7 +604,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         else
         	{
               // promt error message that issue with ID does not exist
-              $Generated_Header = '<div class="it__negative_feedback">Project file does not exist: '.$pfile.'</div><br />';
+              $Generated_Header = '<div class="it__negative_feedback">'.sprintf($this->getLang('msg_pfilemissing'),$pfile).'</div><br />';
               echo $Generated_Header;
               return;
           }	          
@@ -665,46 +663,46 @@ $issue_edit_head = '<table class="itd__title">'.
                    '<tbody class="itd__details">'.                    
                    '<tr class="itd_tr_standard">
                       <td class="it__left_indent"></td>
-                      <td class="itd__col2">ID:</td>
+                      <td class="itd__col2">'.$this->getLang('lbl_issueid').'</td>
                       <td class="itd__col3">'.$issue[$issue_id]['id'].'</td>
                       <td class="itd__col4"></td>                   
-                      <td class="itd__col5">Project:</td>
+                      <td class="itd__col5">'.$this->getLang('lbl_project').'</td>
                       <td class="itd__col6">'.$project.'</td>
                     </tr>';
                    
 $issue_edit_head .= '<tr class="itd_tr_standard">
                       <td class="it__left_indent"></td>
-                      <td class="itd__col2">Severity:</td>
+                      <td class="itd__col2">'.$this->getLang('th_severity').':</td>
                       <td class="itd__col3">'.$severity_img.$issue[$issue_id]['severity'].'</td>
                       <td class="itd__col4"></td>                   
-                      <td class="itd__col5">Product:</td>
+                      <td class="itd__col5">'.$this->getLang('th_product').':</td>
                       <td class="itd__col6">'.$issue[$issue_id]['product'].'</td>
                     </tr>';
                    
 $issue_edit_head .= '<tr class="itd_tr_standard">
                       <td class="it__left_indent"></td>
-                      <td class="itd__col2">Status:</td>
+                      <td class="itd__col2">'.$this->getLang('th_status').':</td>
                       <td class="itd__col3">'.$status_img.$issue[$issue_id]['status'].'</td>
                       <td class="itd__col4"></td>                   
-                      <td class="itd__col5">Version:</td>
+                      <td class="itd__col5">'.$this->getLang('th_version').':</td>
                       <td class="itd__col6">'.$issue[$issue_id]['version'].'</td>
                     </tr>';
 
 $issue_edit_head .= '<tr class="itd_tr_standard">                      
                       <td class="it__left_indent"></td>
-                      <td class="itd__col2">Reported by:</td>
+                      <td class="itd__col2">'.$this->getLang('lbl_reporter').'</td>
                       <td class="itd__col3"><a href="mailto:'.$__reportedby.'">'.$__reportedby.'</a></td>
                       <td class="itd__col4"></td>                   
-                      <td class="itd__col5">created:</td>
+                      <td class="itd__col5">'.$this->getLang('th_created').':</td>
                       <td class="itd__col6">'.$issue[$issue_id]['created'].'</td>
                     </tr>
                    
                     <tr class="itd_tr_standard">
                       <td class="it__left_indent"></td>
-                      <td class="itd__col2">Assigned to:</td>
+                      <td class="itd__col2">'.$this->getLang('th_assigned').':</td>
                       <td class="itd__col3"><a href="mailto:'.$__assigened.'">'.$__assigened.'</a></td>
                       <td class="itd__col4"></td>                   
-                      <td class="itd__col5">modified:</td>
+                      <td class="itd__col5">'.$this->getLang('th_modified').':</td>
                       <td class="itd__col6">'.$issue[$issue_id]['modified'].'</td>
                     </tr>
                     </tbody></table>';
@@ -712,11 +710,11 @@ $issue_edit_head .= '<tr class="itd_tr_standard">
 
 $issue_client_details = '<table class="itd__tables"><tbody>
                         <tr>
-                           <td class="itd_tables_tdh" colSpan="3">Reporter Details</td>
+                           <td class="itd_tables_tdh" colSpan="3">'.$this->getLang('lbl_reporterdtls').'</td>
                         </tr>
                         <tr class="itd__tables_tr">
                            <td class="it__left_indent"></td>
-                           <td class="itd_tables_tdc2">Name:</td>
+                           <td class="itd_tables_tdc2">'.$this->getLang('lbl_reportername').'</td>
                            <td class="itd_tables_tdc3">'.$issue[$issue_id]['user_name'].'</td>
                         </tr>';
 
@@ -734,17 +732,17 @@ $issue_client_details = '<table class="itd__tables"><tbody>
                         {
 $issue_client_details .= '<tr class="itd__tables_tr">
                             <td class="it__left_indent"></td>
-                            <td class="itd_tables_tdc2">Email:</td>
+                            <td class="itd_tables_tdc2">'.$this->getLang('lbl_reportermail').'</td>
                             <td class="itd_tables_tdc3"><a href="mailto:'.$issue[$issue_id]['user_mail'].'">'.$issue[$issue_id]['user_mail'].'</a></td>
                           </tr>
                           <tr class="itd__tables_tr">
                             <td class="it__left_indent"></td>
-                            <td class="itd_tables_tdc2">Phone:</td>
+                            <td class="itd_tables_tdc2">'.$this->getLang('lbl_reporterphone').'</td>
                             <td class="itd_tables_tdc3">'.$issue[$issue_id]['user_phone'].'</td>
                           </tr>
                           <tr class="itd__tables_tr">
                             <td class="it__left_indent"></td>
-                            <td class="itd_tables_tdc2">Add contact:</td>
+                            <td class="itd_tables_tdc2">'.$this->getLang('lbl_reporteradcontact').'</td>
                             <td class="itd_tables_tdc3"><a href="mailto:'.$issue[$issue_id]['add_user_mail'].'">'.$issue[$issue_id]['add_user_mail'].'</a></td>
                           </tr>
                           </tbody></table>'; 
@@ -767,7 +765,7 @@ $issue_initial_description = '<table class="itd__tables"><tbody>
 
 $issue_attachments = '<table class="itd__tables"><tbody>
                       <tr>
-                        <td class="itd_tables_tdh">Links to symptom files</td>
+                        <td class="itd_tables_tdh">'.$this->getLang('lbl_symptlinks').'</td>
                       </tr>
                       <tr  class="itd__tables_tr">
                         <td style="padding-left:0.45em;">1. <a href="'.$issue[$issue_id]['attachment1'].'"><img border="0" alt="symptoms 1" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment1'].'" href="'.$issue[$issue_id]['attachment1'].'">'.$issue[$issue_id]['attachment1'].'</a></td>
@@ -782,7 +780,7 @@ $issue_attachments = '<table class="itd__tables"><tbody>
 
 $issue_comments_log ='<table class="itd__tables"><tbody>
                       <tr>
-                        <td class="itd_tables_tdh" colSpan="2" >Comments (work log)</td>
+                        <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_cmts_wlog').'</td>
                       </tr>';
               // loop through the comments
               if ($comments!=false) {              
@@ -836,7 +834,7 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
         if($_cFlag === true) {
 $issue_add_comment ='<table class="itd__tables">'.
                       '<tr>'.
-                        '<td class="itd_tables_tdh" colSpan="2" >Add a new comment</td>
+                        '<td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_cmts_adcmt').'</td>
                       </tr><tr><td>';
                       
 $issue_add_comment .= '<script type="text/javascript" src="include/selectupdate.js"></script>'.
@@ -862,11 +860,11 @@ $issue_add_comment .= formSecurityToken(false).
                       // check if only registered users are allowed to add comments
                       // ¦ perm — the user's permissions related to the current page ($ID)
                       $issue_add_comment .= '<input  type="hidden" class="showid__option" name="showid" id="showid" type="text" size="10" value="'.$this->parameter.'"/>'.
-                                            '<input class="button" id="showcase" type="submit" name="showcase" value="Add" title="Add");/>'.
+                                            '<input class="button" id="showcase" type="submit" name="showcase" value="'.$this->getLang('btn_add').'" title="'.$this->getLang('btn_add_title').'");/>'.
                                             '</form></td></tr></table>';
         }
         else {
-           $wmsg = 'Please <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">Sign in</a> if you want to add a comment.'; 
+           $wmsg = 'Please <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">'.$this->getLang('lbl_signin'); 
            $issue_add_comment .= '<div class="it__standard_feedback">'.$wmsg.'</div>';                      
         }
                                            
@@ -880,23 +878,23 @@ $issue_add_comment .= formSecurityToken(false).
     {
         if ($this->getConf('userinfo_email')==1)
         {
-            $subject='Issue '.$issue['id'].' on '.$project.' was modified';            
+            $subject = sprintf($this->getLang('issuemod_subject'),$issue['id'], $project);            
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
             global $ID;
             
-            $body = 'Dear user,'.chr(10).chr(10).'Your reported issue got a new comment.'.chr(10).chr(13).
-            'ID:'.chr(9).chr(9).chr(9).chr(9).$issue['id'].chr(10).
-            'Status:'.chr(9).chr(9).chr(9).$issue['status'].chr(10).
-            'Product:'.chr(9).chr(9).chr(9).$issue['product'].chr(10).
-            'Version:'.chr(9).chr(9).chr(9).$issue['version'].chr(10).
-            'Severity:'.chr(9).chr(9).chr(9).$issue['severity'].chr(10).
-            'Creator:'.chr(9).chr(9).chr(9).$issue['user_name'].chr(10).
-            'Title:'.chr(9).chr(9).chr(9).$issue['title'].chr(10).
-            'Comment by:'.chr(9).chr(9).$comment['author'].chr(10).
-            'submitted on:'.chr(9).$comment['timestamp'].chr(10).
-            'Comment:'.chr(9).chr(9).$comment['comment'].chr(10).
-            'see details:'.chr(9).chr(9).DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
-            'best regards'.chr(10).$project.' Issue Tracker';
+            $body = $this->getLang('issuemod_head').chr(10).chr(10).$this->getLang('issuemod_intro').chr(10).chr(13).
+            $this->getLang('issuemod_issueid').$issue['id'].chr(10).
+            $this->getLang('issuemod_status').$issue['status'].chr(10).
+            $this->getLang('issuemod_product').$issue['product'].chr(10).
+            $this->getLang('issuemod_version').$issue['version'].chr(10).
+            $this->getLang('issuemod_severity').$issue['severity'].chr(10).
+            $this->getLang('issuemod_creator').$issue['user_name'].chr(10).
+            $this->getLang('issuemod_title').$issue['title'].chr(10).
+            $this->getLang('issuemod_cmntauthor').$comment['author'].chr(10).
+            $this->getLang('issuemod_date').$comment['timestamp'].chr(10).
+            $this->getLang('issuemod_cmnt').$comment['comment'].chr(10).
+            $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+            $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
 
             $from=$this->getConf('email_address') ;
             $to=$issue['user_mail'];

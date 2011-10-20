@@ -183,7 +183,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                         //save issue-file
                                           $xvalue = io_saveFile($pfile,serialize($issues));
 //                                        echo "\$xvalue = ".$xvalue;
-                                          $Generated_Header = '<div class="it__positive_feedback">Your report has been successfully stored as issue #'.$issue_id.'</div>';
+                                          $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_reporttrue').$issue_id.'</div>';
                                           $this->_emailForNewIssue($data['project'],$issues[$issue_id]);
                                           $_REQUEST['description'] = '';
                                     }
@@ -192,11 +192,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                     {
                                         $wmsg ='';
                                         if ($valid_umail == false) 
-                                            { $wmsg = 'Please enter valid eMail address, preferrably your own, for clarifications and/or feedback regarding your reported issue.'; }
+                                            { $wmsg = $this->getLang('wmsg1'); }
                                         elseif (strlen($issues[$issue_id]['version']) <1)
-                                            { $wmsg = 'Please enter a valid product version to relate this issue properly.'; }
+                                            { $wmsg = $this->getLang('wmsg2'); }
                                         else 
-                                            { $wmsg = 'Please provide a better description of your issue.'; }
+                                            { $wmsg = $this->getLang('wmsg3'); }
                                         
                                         $Generated_Header = '<div class="it__negative_feedback">'.$wmsg.'</div>';
                                     }
@@ -204,7 +204,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                 }
                           else
                                 {
-                                $Generated_Header = ':<div class="it__negative_feedback">Wrong answer to the antispam question.</div>';
+                                $Generated_Header = ':<div class="it__negative_feedback">'.$this->getLang('msg_captchawrong').'</div>';
                                 }  
                           }
                     }            
@@ -382,17 +382,17 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $dynatable_id = "t_".uniqid((double)microtime()*1000000,1);
             $head = "<div class='itl__table'><table id='".$dynatable_id."' class='sortable editable resizable inline'>".
                     "<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".
-                    "<th id='created'>Created</th>".
-                    "<th id='product'>Product</th>".
-                    "<th id='version'>Version</th>".
-                    "<th id='severity'>Severity</th>".
-                    "<th id='status'>Status</th>".
-                    "<th id='user_name'>User name</th>".
-                    "<th id='title'>Title</th>".
-                    "<th id='assigned'>assigned</th>". 
-                    "<th id='resolution'>Resolution</th>".
-                    "<th id='modified'>Modified</th></tr></thead>";        
-            $body = '<tbody>';
+                    "<th id='created'>".$this->getLang('th_created')."</th>".NL.
+                    "<th id='product'>".$this->getLang('th_product')."</th>".NL.
+                    "<th id='version'>".$this->getLang('th_version')."</th>".NL.
+                    "<th id='severity'>".$this->getLang('th_severity')."</th>".NL.
+                    "<th id='status'>".$this->getLang('th_status')."</th>".NL.
+                    "<th id='user_name'>".$this->getLang('th_username')."</th>".NL.
+                    "<th id='title'>".$this->getLang('th_title')."</th>".NL.
+                    "<th id='assigned'>".$this->getLang('th_assigned')."</th>".NL. 
+                    "<th id='resolution'>".$this->getLang('th_resolution')."</th>".NL.
+                    "<th id='modified'>".$this->getLang('th_modified')."</th></tr></thead>".NL;        
+            $body = '<tbody>'.NL;
             
             for ($i=$next_start-1;$i>=0;$i=$i-1)
             {   // check start and end of rows to be displayed
@@ -526,16 +526,16 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                '<table class="itl__t1"><tbody>'.
                '<tr class="itd__tables_tr">'.
                   '<td colspan="5" align="left"   valign="middle" height="40">'.
-                      '<label class="it__cir_projectlabel">Quantity of Issues:&nbsp;'.count($issues).'</label>'.
+                      '<label class="it__cir_projectlabel">'.$this->getLang('lbl_issueqty').count($issues).'</label>'.
                   '</td>'.
                '</tr>'.
                '<tr>'.
                     
  
                       '<td align ="left" valign="top" width="20%">
-                         <p class="it__cir_projectlabel">Scroll issue List &nbsp;&nbsp;&nbsp;<br />
-                                                         Filter Severity: <br />
-                                                         Filter Status: </p>
+                         <p class="it__cir_projectlabel">'.$this->getLang('lbl_scroll').' <br />
+                                                         '.$this->getLang('lbl_filtersev').' <br />
+                                                         '.$this->getLang('lbl_filterstat').' </p>
                       </td>
                       <td align ="left" valign="top" width="20%">
                       <form name="myForm" action="" method="post">
@@ -543,22 +543,22 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                          <input type="hidden" name="itl_step" id="itl_step" value="'.$step.'"/>
                          <input type="hidden" name="itl_next" id="itl_next" value="'.$next_start.'"/>
                          <input type="hidden" name="itl_project" id="itl_project" value="'.$project.'"/>
-                         <input type="button" name="showprevious" value="<<<" title="previous Issues" onClick="changeAction(1)"/>
+                         <input type="button" name="showprevious" value="'.$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>
                          <input class="itl__step_input" name="itl_step" id="itl_step" type="text" value="'.$step.'"/>
-                         <input type="button" name="shownext" value=">>>" title="next Issues" onClick="changeAction(2)"/><br />
+                         <input type="button" name="shownext" value="'.$this->getLang('btn_next').'" title="'.$this->getLang('btn_next_title').'" onClick="changeAction(2)"/><br />
                          <input class="itl__sev_filter" name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br />                         
                          <input class="itl__stat_filter" name="itl_stat_filter" id="itl_stat_filter" type="text" value="'.$stat_filter.'"/>
-                         <input type="button" name="go" value="Go" title="Go" onClick="changeAction(3)"/><br />
+                         <input type="button" name="go" value="'.$this->getLang('btn_go').'" title="'.$this->getLang('btn_go').'" onClick="changeAction(3)"/><br />
                       </form>                      
                       </td>'.
                  '<td width="10%">&nbsp;</td>'.
                  '<td align ="left" width="30%">'.
-                     '<form  method="post" action="doku.php?id=' . $ID . '&do=showcase"><label class="it__cir_projectlabel"> Show details of Issue:</label>'.
+                     '<form  method="post" action="doku.php?id=' . $ID . '&do=showcase"><label class="it__cir_projectlabel"> '.$this->getLang('lbl_showid').'</label>'.
                          '<input class="itl__showid_input" name="showid" id="showid" type="text" value="0"/>'.
                          '<input type="hidden" name="project" id="project" value="'.$project.'"/>'.
                          '<input type="hidden" name="itl_sev_filter" id="itl_sev_filter" value="'.$sev_filter.'"/>'.
                          '<input type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$stat_filter.'"/>'.
-                         '<input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="Go" title="Go"/>'.
+                         '<input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="'.$this->getLang('btn_showid').'" title="'.$this->getLang('btn_showid_title').'"/>'.
                      '</form>'.
                  '</td>'.
                  '<td width="20%"></td>'.
@@ -584,21 +584,21 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     {
         if ($this->getConf('send_email')==1)
         {
-            $subject=$issue['severity'].' issue reported for '.$project.' on Product:'.$issue['product'].' ('.$issue['version'].')';            
+            $subject=sprintf($this->getLang('issuenew_subject'),$issue['severity'], $project, $issue['product'],$issue['version']);
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
             global $ID;
 
-            $body = 'Dear admin,'.chr(10).chr(10).
-            'A new issue was created for the project:'.chr(10).
-            'ID:'.chr(9).chr(9).chr(9).chr(9).$issue['id'].chr(10).
-            'Product:'.chr(9).chr(9).chr(9).$issue['product'].chr(10).
-            'Version:'.chr(9).chr(9).chr(9).$issue['version'].chr(10).
-            'Severity:'.chr(9).chr(9).chr(9).$issue['severity'].chr(10).
-            'Creator:'.chr(9).chr(9).chr(9).$issue['user_name'].chr(10).
-            'Title:'.chr(9).chr(9).chr(9).$issue['title'].chr(10).
-            'Description:'.chr(9).chr(9).$issue['description'].chr(10).
-            'see details:'.chr(9).chr(9).DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
-            'best regards'.chr(10).'Issue Tracker';
+            $body = $this->getLang('issuenew_head').chr(10).chr(10).
+            $this->getLang('issuenew_intro').chr(10).
+            $this->getLang('issuemod_issueid').$issue['id'].chr(10).
+            $this->getLang('issuemod_product').$issue['product'].chr(10).
+            $this->getLang('issuemod_version').$issue['version'].chr(10).
+            $this->getLang('issuemod_severity').$issue['severity'].chr(10).
+            $this->getLang('issuemod_creator').$issue['user_name'].chr(10).
+            $this->getLang('issuemod_title').$issue['title'].chr(10).
+            $this->getLang('issuenew_descr').$issue['description'].chr(10).
+            $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+            $this->getLang('issuemod_br').chr(10).$this->getLang('issuemod_end');
 
             $from=$this->getConf('email_address') ;
             $to=$from;
@@ -613,21 +613,23 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     {
         if ($this->getConf('userinfo_email')==1)
         {
-            $subject='Modification info: '.$issue['id'].' was modified';            
+            $subject = sprintf($this->getLang('issuemod_subject'),$issue['id'], $project);            
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
             global $ID;
-                        
-            $body = 'Dear user,'.chr(10).chr(10).
-            'Your reported issue was modified:'.chr(10).chr(10).
-            'ID:'.chr(9).chr(9).chr(9).chr(9).$issue['id'].chr(10).
-            'Product:'.chr(9).chr(9).chr(9).$issue['product'].chr(10).
-            'Version:'.chr(9).chr(9).chr(9).$issue['version'].chr(10).
-            'Severity:'.chr(9).chr(9).chr(9).$issue['severity'].chr(10).
-            'Creator:'.chr(9).chr(9).chr(9).$issue['user_name'].chr(10).
-            'Title:'.chr(9).chr(9).chr(9).$issue['title'].chr(10).
-            'Description:'.chr(9).chr(9).$issue['description'].chr(10).
-            'see details:'.chr(9).chr(9).DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
-            'best regards'.chr(10).$project.' Issue Tracker';
+            
+            $body = $this->getLang('issuemod_head').chr(10).chr(10).$this->getLang('issuemod_intro').chr(10).chr(13).
+            $this->getLang('issuemod_issueid').$issue['id'].chr(10).
+            $this->getLang('issuemod_status').$issue['status'].chr(10).
+            $this->getLang('issuemod_product').$issue['product'].chr(10).
+            $this->getLang('issuemod_version').$issue['version'].chr(10).
+            $this->getLang('issuemod_severity').$issue['severity'].chr(10).
+            $this->getLang('issuemod_creator').$issue['user_name'].chr(10).
+            $this->getLang('issuemod_title').$issue['title'].chr(10).
+            $this->getLang('issuemod_cmntauthor').$comment['author'].chr(10).
+            $this->getLang('issuemod_date').$comment['timestamp'].chr(10).
+            $this->getLang('issuemod_cmnt').$comment['comment'].chr(10).
+            $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+            $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
 
             $from=$this->getConf('email_address') ;
             $to=$issue['user_mail'];
@@ -635,7 +637,6 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
         }
     }
-
 /******************************************************************************/
 /*  Report an Issue 
 */
@@ -704,57 +705,58 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             '<input type="hidden" name="comments" type="text" value="'.$comments_file.'"/>'.
             '<table>
               <tr>
-                <td>Project</td>
+                <td>'.$this->getLang('th_project').'</td>
                 <td><label class="it__cir_projectlabel">'.$project.'</label></td>
               </tr>'.
              '<tr>
-                <td>Product</td>
+                <td>'.$this->getLang('th_product').'</td>
                 <td><select class="element select small it__cir_select" name="product">'.$STR_PRODUCTS.'</select></td>
               </tr>'.
              '<tr>
-                <td>Version</td>
+                <td>'.$this->getLang('th_version').'</td>
                 <td><input class="it__cir_input" name="version" value="'.$STR_VERSIONS.'"/></td>
               </tr>'.
              '<tr><td colspan=2>&nbsp;</td></tr>'.
              '<tr>
-                <td>User name</td>
+                <td>'.$this->getLang('th_username').'</td>
                 <td><input class="it__cir_input" name="user_name" value="'.$user_mail['userinfo']['name'].'"/></td>
               </tr>'.
              '<tr>
-                <td>User mail</td>
+                <td>'.$this->getLang('th_usermail').'</td>
                 <td><input class="it__cir_input" name="user_mail" value="'.$user_mail['userinfo']['mail'].'"/></td>
               </tr>'.
              '<tr>
-                <td>User phone</td>
+                <td>'.$this->getLang('th_userphone').'</td>
                 <td><input class="it__cir_input" name="user_phone" value="'.$user_phone['userinfo']['phone'].'"/></td>
               </tr>'.
              '<tr>
-                <td>Add contact</td>
+                <td>'.$this->getLang('th_reporteradcontact').'</td>
                 <td><input class="it__cir_input" name="add_user_mail" value="'.$_REQUEST['add_user_mail'].'"/></td>        
               </tr>'.
             '<tr><td colspan=2>&nbsp;</td></tr>'.
             '<tr>
-                <td>Severity</td>
+                <td>'.$this->getLang('th_severity').'</td>
                 <td><select class="element select small it__cir_select" name="severity">'.$STR_SEVERITY.'</select></td>
              </tr>'.
             '<tr>
-                <td>Issue Title</td>
+                <td>'.$this->getLang('th_title').'</td>
                 <td><input class="it__cir_linput" name="title" value="'.$_REQUEST['title'].'"/></input></td>
              </tr>'.
             '<tr>
-                <td>Issue Description</td>
+                <td>'.$this->getLang('th_descr').'</td>
                 <td><textarea class="it__cir_linput" name="description" cols="109" rows="7">'.$_REQUEST['description'].'</textarea></td>
              </tr>'.
             '<tr><td colspan=2>&nbsp;</td></tr>'. 
-            '<tr>                <td>Symptom link 1</td>
+            '<tr>                
+                <td>'.$this->getLang('th_sympt').'1</td>
                 <td><input class="it__cir_linput" name="attachment1" value="'.$_REQUEST['attachment1'].'"/></td>
              </tr>'.
             '<tr>
-                <td>Symptom link 2</td>
+                <td>'.$this->getLang('th_sympt').'2</td>
                 <td><input class="it__cir_linput" name="attachment2" type="text" size="126" value="'.$_REQUEST['attachment2'].'"/></td>
              </tr>'.
             '<tr>
-                <td>Symptom link 3</td>
+                <td>'.$this->getLang('th_sympt').'3</td>
                 <td><input class="it__cir_linput" name="attachment3" type="text" size="126" value="'.$_REQUEST['attachment3'].'"</td>
             </tr></table>'.  
                   
@@ -773,12 +775,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
       			    }
             }
          //<input name="do[save]" type="submit" value="Save" class="button" id="edbtn__save" accesskey="s" tabindex="4" title="Save [S]" />
-            $ret .= '<p><input name="submit" type="submit" value="submit" class="button" id="edbtn__save" title="Save [S]"/>'.
+            $ret .= '<p><input name="submit" type="submit" value="submit" class="button" id="edbtn__save" title="'.$this->getLang('btn_reportsave').'"/>'.
             '</p></form></div>';
         }
-        else {
-           $wmsg = '&nbsp;Please <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">Sign in</a> if you want to report an issue.'; 
-           $ret .= '<div class="it__standard_feedback">'.$wmsg.'</div>';                      
+        else { 
+           $ret .= '<div class="it__standard_feedback">'.$this->getLang('wmsg4').'</div>';                      
         }
         
         return $ret;    
