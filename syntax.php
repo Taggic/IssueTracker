@@ -645,10 +645,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         global $lang;
         global $ID;
         $project = $data['project'];
-
         // retrive some basic information
         $user_mail = pageinfo();  //to get mail address of reporter
-        $cur_date = date ('Y-m-d G:i:s');
+        $cur_date = date ($this->getConf('d_format'));
         $user_check = $this->getConf('registered_users');
 
         $_cFlag = false;             

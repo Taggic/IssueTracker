@@ -174,7 +174,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 
                                    
                                        // update modified date
-                                       $issues[$_REQUEST['comment_issue_ID']]['modified'] = date('Y-m-d G:i:s'); 
+                                       $issues[$_REQUEST['comment_issue_ID']]['modified'] = date($this->getConf('d_format')); 
                                        $xvalue = io_saveFile($pfile,serialize($issues));                                   
                                        $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_commenttrue').$comment_id.'.</div><br />';
                                        
@@ -814,7 +814,7 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
         // only admin/assignees and reporter are allowed to add comments if only user edit option is set
         //--------------------------------------------------------------------------------------------------------------
         // retrive some basic information
-        $cur_date = date ('Y-m-d G:i:s');
+        $cur_date = date ($this->getConf('d_format'));
         if($user_mail['userinfo']['mail']=='') {$u_mail_check ='unknown';}
         else {$u_mail_check = $user_mail['userinfo']['mail'];}
         $user_check = $this->getConf('registered_users');
