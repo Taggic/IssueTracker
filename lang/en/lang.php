@@ -102,3 +102,11 @@ $lang['issuenew_intro']      = 'a new issue was created for the project:';
 $lang['issuenew_descr']      = 'Description:  ';
 
 /******************************************************************************/
+/* deviations from before for send an e-mail to assignee
+/* _emailForNewIssue
+*/
+$lang['issueassigned_subject']    = ' issue %s assigned to you';
+$lang['issueassigned_head']       = 'Hi,';
+$lang['issueassigned_intro']      = 'you are assigned to following service request:';
+
+/******************************************************************************/

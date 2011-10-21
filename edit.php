@@ -19,17 +19,24 @@
     {     global $conf;
 //        if ($conf['plugin']['issuetracker']['userinfo_email']==1)
         {   global $ID;
+        
+            // Include the language file  
+            include 'lang/'.$conf['lang'].'/lang.php';
             
-            $subject='Issue '.$issue['id'].' on '.$project.' was modified';            
+            $subject= sprintf($lang['issuemod_subject'], $issue['id'], $project);
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
-            
-            $body = 'Dear user,'.chr(10).chr(10).'Your reported issue was modified.'.chr(10).chr(13).
-            'ID:'.chr(9).chr(9).chr(9).chr(9).$issue['id'].chr(10).
-            $column.' (old): '.$old_value.chr(10).
-            $column.' (new): '.$new_value.chr(10).
-            'see details:'.chr(9).chr(9).DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
-            'best regards'.chr(10).$project.' Issue Tracker'.chr(10).chr(10);
 
+            $body = $lang['issuemod_head'].chr(10).chr(10).
+                    $lang['issuemod_intro'].chr(10).
+                    $lang['issuemod_issueid'].$issue['id'].chr(10).
+                    $lang['issuemod_product'].$issue['product'].chr(10).
+                    $lang['issuemod_version'].$issue['version'].chr(10).
+                    $lang['issuemod_severity'].$issue['severity'].chr(10).
+                    $lang['issuemod_creator'].$issue['user_name'].chr(10).
+                    $lang['issuemod_title'].$issue['title'].chr(10).
+                    $lang['issuenew_descr'].$issue['description'].chr(10).
+                    $lang['issuemod_see'].DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+                    $lang['issuemod_br'].chr(10).$lang['issuemod_end'];
 
             $from = $conf['plugin']['issuetracker']['email_address'];
             $to   = $issue['user_mail'];
@@ -46,14 +53,25 @@
     {       
             global $ID;
             global $conf;
-            $subject='('.$project.') issue '.$issue['id'].' was assigned to you';;
+        
+            // Include the language file  
+            include 'lang/'.$conf['lang'].'/lang.php';
+            
+            $subject= $project.sprintf($lang['issueassigned_subject'],$issue['id']);
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
 
-            $body .= "You are now assigned to following service request:".chr(10).
-                    'ID:'.chr(9).chr(9).chr(9).chr(9).$issue['id'].chr(10).
-                    'see details:'.chr(9).chr(9).DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
-                    'best regards'.chr(10).$project.' Issue Tracker'.chr(10).chr(10);
-
+            $body = $lang['issueassigned_head'].chr(10).chr(10).
+                    $lang['issueassigned_intro'].chr(10).
+                    $lang['issuemod_issueid'].$issue['id'].chr(10).
+                    $lang['issuemod_product'].$issue['product'].chr(10).
+                    $lang['issuemod_version'].$issue['version'].chr(10).
+                    $lang['issuemod_severity'].$issue['severity'].chr(10).
+                    $lang['issuemod_creator'].$issue['user_name'].chr(10).
+                    $lang['issuemod_title'].$issue['title'].chr(10).
+                    $lang['issuenew_descr'].$issue['description'].chr(10).
+                    $lang['issuemod_see'].DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+                    $lang['issuemod_br'].chr(10).$lang['issuemod_end'];
+                        
             $from = $conf['plugin']['issuetracker']['email_address'];
             $to   = $value;
 

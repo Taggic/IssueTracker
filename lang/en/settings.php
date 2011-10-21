@@ -7,6 +7,7 @@
  */
  
 // for the configuration manager
+$lang['d_format']       = 'Y-m-d G:i:s';
 $lang['send_email']     = 'Inform by mail about new issues ?'; 
 $lang['email_address']  = 'Who is to be informed ?';
 $lang['registered_users'] = 'Only registered users with edit permission on issue <br> tracker page are allowed to create reports and add comments';
