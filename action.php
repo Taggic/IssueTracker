@@ -378,7 +378,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         if ($cFlag === true)       
         {   
             $head = "<div class='itl__table'><table id='".$project."' class='sortable editable resizable inline'>".NL.
-                    "<thead><tr><th class=\"sortfirstdesc\" id='id'>.$this->getLang('th_id').</th>".NL.
+                    "<thead><tr><th class=\"sortfirstdesc\" id='id'>".$this->getLang('th_id')."</th>".NL.
                     "<th id='created'>".$this->getLang('th_created')."</th>".NL.
                     "<th id='product'>".$this->getLang('th_product')."</th>".NL.
                     "<th id='version'>".$this->getLang('th_version')."</th>".NL.
@@ -422,7 +422,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a>';
                     
                                             
-                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'">'.                       
+                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" onMouseover="this.bgColor=\'#DDDDDD\'" onMouseout="this.bgColor=\'#FFFFFF\'">'.                       
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.
                              '<td class="itl__td_date">'.$this->_get_one_value($issue,'created').'</td>'.
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'product').'</td>'.
@@ -463,7 +463,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     if ($y>=$step) break;
                     $y=$y+1;
                     
-                    $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'">'.
+                    $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" onMouseover="this.bgColor=\'#DDDDDD\'" onMouseout="this.bgColor=\'#FFFFFF\'">'.
                                                       '<td'.$style.$this->_get_one_value($issue,'id').'</td>';
                     foreach ($configs as $config)
                     {
@@ -538,26 +538,26 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                          <input type="hidden" name="itl_step" id="itl_step" value="'.$step.'"/>
                          <input type="hidden" name="itl_next" id="itl_next" value="'.$next_start.'"/>
                          <input type="hidden" name="itl_project" id="itl_project" value="'.$project.'"/>
-                         <input type="button" name="showprevious" value="'.$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>
-                         <input class="itl__step_input" name="itl_step" id="itl_step" type="text" value="'.$step.'"/>
-                         <input type="button" name="shownext" value="'.$this->getLang('btn_next').'" title="'.$this->getLang('btn_next_title').'" onClick="changeAction(2)"/><br />
-                         <input class="itl__sev_filter" name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br />                         
-                         <input class="itl__stat_filter" name="itl_stat_filter" id="itl_stat_filter" type="text" value="'.$stat_filter.'"/>
-                         <input type="button" name="go" value="'.$this->getLang('btn_go').'" title="'.$this->getLang('btn_go').'" onClick="changeAction(3)"/><br />
+                         <input class="itl__buttons" type="button" name="showprevious" value="'.$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>
+                         <input class="itl__step_input"      name="itl_step" id="itl_step" type="text" value="'.$step.'"/>
+                         <input class="itl__buttons" type="button" name="shownext" value="'.$this->getLang('btn_next').'" title="'.$this->getLang('btn_next_title').'" onClick="changeAction(2)"/><br />
+                         <input class="itl__sev_filter"      name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br />                         
+                         <input class="itl__stat_filter"     name="itl_stat_filter" id="itl_stat_filter" type="text" value="'.$stat_filter.'"/>
+                         <input class="itl__buttons" type="button" name="go" value="'.$this->getLang('btn_go').'" title="'.$this->getLang('btn_go').'" onClick="changeAction(3)"/><br />
                       </form>                      
-                      </td>'.
-                 '<td width="10%">&nbsp;</td>'.
-                 '<td align ="left" width="30%">'.
-                     '<form  method="post" action="doku.php?id=' . $ID . '&do=showcase"><label class="it__cir_projectlabel"> '.$this->getLang('lbl_showid').'</label>'.
-                         '<input class="itl__showid_input" name="showid" id="showid" type="text" value="0"/>'.
-                         '<input type="hidden" name="project" id="project" value="'.$project.'"/>'.
-                         '<input type="hidden" name="itl_sev_filter" id="itl_sev_filter" value="'.$sev_filter.'"/>'.
-                         '<input type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$stat_filter.'"/>'.
-                         '<input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="'.$this->getLang('btn_showid').'" title="'.$this->getLang('btn_showid_title').'"/>'.
-                     '</form>'.
-                 '</td>'.
-                 '<td width="20%"></td>'.
-               '</tr></tbody></table></div>';
+                      </td>'.NL.
+                 '<td width="10%">&nbsp;</td>'.NL.
+                 '<td align ="left" width="30%">'.NL.
+                     '<form  method="post" action="doku.php?id=' . $ID . '&do=showcase"><label class="it__cir_projectlabel"> '.$this->getLang('lbl_showid').'</label>'.NL.
+                         '<input class="itl__showid_input" name="showid" id="showid" type="text" value="0"/>'.NL.
+                         '<input type="hidden" name="project" id="project" value="'.$project.'"/>'.NL.
+                         '<input type="hidden" name="itl_sev_filter" id="itl_sev_filter" value="'.$sev_filter.'"/>'.NL.
+                         '<input type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$stat_filter.'"/>'.NL.
+                         '<input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="'.$this->getLang('btn_showid').'" title="'.$this->getLang('btn_showid_title').'"/>'.NL.
+                     '</form>'.NL.
+                 '</td>'.NL.
+                 '<td width="20%"></td>'.NL.
+               '</tr></tbody></table></div>'.NL;
 
          $ret = $ret.$head.$body;              
         return $ret;

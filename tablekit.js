@@ -679,9 +679,10 @@ TableKit.Resizable = {
 			TableKit.Resizable._handle = $(document.createElement('div')).addClassName('resize-handle').setStyle({
 				'top' : cell.cumulativeOffset()[1] + 'px',
 				'left' : Event.pointerX(e) + 'px',
-				'height' : table.getDimensions().height + 'px'
+				'height' : table.getDimensions().height + 'px', 
 			});
-			document.body.appendChild(TableKit.Resizable._handle);
+			document.body.style.cursor = 'w-resize';
+      document.body.appendChild(TableKit.Resizable._handle);
 		}
 		Event.observe(document, 'mousemove', TableKit.Resizable.drag);
 		Event.observe(document, 'mouseup', TableKit.Resizable.endResize);
@@ -699,6 +700,7 @@ TableKit.Resizable = {
 			});
 		}
 		Event.observe(cell, 'mouseout', TableKit.Resizable.killDetect);
+		document.body.style.cursor = 'auto';
 		TableKit.Resizable._tbl = TableKit.Resizable._handle = TableKit.Resizable._cell = null;
 		Event.stop(e);
 	},
