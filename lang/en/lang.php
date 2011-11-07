@@ -42,6 +42,7 @@ $lang['lbl_project']        = 'Project:';
 $lang['lbl_issueid']        = 'ID:';
 $lang['lbl_reporter']       = 'Reported by:';
 $lang['lbl_reporterdtls']   = 'Reporter Details';
+$lang['lbl_initdescr']      = 'Initial description';
 $lang['lbl_reportername']   = 'Name:';
 $lang['lbl_reportermail']   = 'eMail:';
 $lang['lbl_reporterphone']  = 'Phone:';
@@ -52,7 +53,6 @@ $lang['lbl_cmts_adcmt']     = 'Add a new comment';
 $lang['btn_add']            = 'Add';
 $lang['btn_add_title']      = 'Add';
 $lang['lbl_signin']         = 'Sign in</a> if you want to add a comment.';       // </a> necessary to close the link tag
-
 
 $lang['th_project']         = 'Project';
 $lang['th_id']              = 'Id';

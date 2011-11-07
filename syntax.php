@@ -246,12 +246,12 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 else
                     {$count[$status][0] += 1;}                                
         }
-        $rendered_count = '<ul>';
+        $rendered_count = '<div>'.'<table>';
         foreach ($count as $value)
         {
-            $rendered_count .= '<li>'.$value[1].' : '.$value[0].'</li>';
+            $rendered_count .= '<tr><td>'.$value[1].'&nbsp;</td><td>&nbsp;'.$value[0].'</td></tr>';
         }
-        $rendered_count .= '</ul>';
+        $rendered_count .= '</table></div>';
         return $rendered_count;
     }
    
@@ -380,8 +380,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         if ($cFlag === true)       
         {   
             $dynatable_id = "t_".uniqid((double)microtime()*1000000,1);
-            $head = "<div class='itl__table'><table id='".$dynatable_id."' class='sortable editable resizable inline'>".
-                    "<thead><tr><th class=\"sortfirstdesc\" id='id'>".$this->getLang('th_id')."</th>".
+            $head = "<div class='itl__table'><table id='".$dynatable_id."' class='sortable editable resizable inline' width='100%'>".NL.
+                    "<thead><tr><th class=\"sortfirstdesc\" id='id'>".$this->getLang('th_id')."</th>".NL.
                     "<th id='created'>".$this->getLang('th_created')."</th>".NL.
                     "<th id='product'>".$this->getLang('th_product')."</th>".NL.
                     "<th id='version'>".$this->getLang('th_version')."</th>".NL.
@@ -408,38 +408,38 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     if ($noStatIMG === false) {                    
                         $status_img = $imgBASE . implode('', explode(' ',strtolower($a_status))).'.gif';
 //                                if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
-                        $status_img =' align="center"> <img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/></td>';
+                        $status_img =' align="center"> <img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/></td>'.NL;
                     }                    
                     else { $status_img = $style.$a_status; }
                     // check if severity image or text to be displayed                                            
                     if ($noSevIMG === false) {                    
                         $severity_img = $imgBASE . implode('', explode(' ',strtolower($a_severity))).'.gif';
 //                                if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
-                        $severity_img =' align="center"> <img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/></td>';
+                        $severity_img =' align="center"> <img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/></td>'.NL;
                     }
                     else { $severity_img = $style.$a_severity; }
                     
                     // build parameter for $_GET method
                         $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
-                        $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a></td>';
+                        $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a></td>'.NL;
                     
-                                            
-                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" onMouseover="this.bgColor=\'#DDDDDD\'" onMouseout="this.bgColor=\'#FFFFFF\'">'.                       
-                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.
-                             '<td class="itl__td_date">'.$this->_get_one_value($issue,'created').'</td>'.
-                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'product').'</td>'.
-                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'version').'</td>'.
-                             '<td'.$severity_img.'</td>'.
-                             '<td'.$status_img.'</td>'.
-                             '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$this->_get_one_value($issue,'user_name').'</a></td>'. 
-                             '<td class="canbreak itl__td_standard">'.$itl_item_title.'</td>'.
-                             '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$this->_get_one_value($issue,'assigned').'</a></td>'. 
-                             '<td class="canbreak itl__td_standard">'.$this->_get_one_value($issue,'resolution').'</td>'.
-                             '<td class="itl__td_date">'.$this->_get_one_value($issue,'modified').'</td>'.
-                             '</tr>';        
+                    
+                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" onMouseover="this.bgColor=\'#DDDDDD\'" onMouseout="this.bgColor=\'#FFFFFF\'">'.NL.                       
+                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.NL.
+                             '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.NL.
+                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'product').'</td>'.NL.
+                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'version').'</td>'.NL.
+                             '<td'.$severity_img.'</td>'.NL.
+                             '<td'.$status_img.'</td>'.NL.
+                             '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$this->_get_one_value($issue,'user_name').'</a></td>'.NL. 
+                             '<td class="canbreak itl__td_standard">'.$itl_item_title.'</td>'.NL.
+                             '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$this->_get_one_value($issue,'assigned').'</a></td>'.NL. 
+                             '<td class="canbreak itl__td_standard">'.$this->_get_one_value($issue,'resolution').'</td>'.NL.
+                             '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.NL.
+                             '</tr>'.NL;        
                 }
             } 
-            $body .= '</tbody></table></div>';          
+            $body .= '</tbody></table></div>'.NL;          
         } 
 
         else       
@@ -466,8 +466,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     if ($y>=$step) break;
                     $y=$y+1;
 
-                    $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" onMouseover="this.bgColor=\'#DDDDDD\'" onMouseout="this.bgColor=\'#FFFFFF\'">'.
-                                                      '<td'.$style.$this->_get_one_value($issue,'id').'</td>';
+                    $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" onMouseover="this.bgColor=\'#DDDDDD\'" onMouseout="this.bgColor=\'#FFFFFF\'">'.NL.
+                                                      '<td'.$style.$this->_get_one_value($issue,'id').'</td>'.NL;
                     foreach ($configs as $config)
                     {
                         $isval = $this->_get_one_value($issue,strtolower($config));
@@ -475,94 +475,101 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                         {
                             if ($noStatIMG === false) {                    
                                 $status_img = $imgBASE . implode('', explode(' ',strtolower($isval))).'.gif';
-                                $reduced_issues .='<td align="center"> <img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/></td>';
+                                $reduced_issues .='<td align="center"> <img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/></td>'.NL;
                             }
-                            else { $reduced_issues .= '<td'.$style.$isval.'</td>'; }
+                            else { $reduced_issues .= '<td'.$style.$isval.'</td>'.NL; }
                         }                                            
                         elseif ($config == 'severity')
                         {
                             if ($noSevIMG === false) {                    
                                 $severity_img = $imgBASE . implode('', explode(' ',strtolower($isval))).'.gif';
-                                $reduced_issues .='<td align="center"> <img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/></td>';
+                                $reduced_issues .='<td align="center"> <img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/></td>'.NL;
                             }
-                            else { $reduced_issues .= '<td'.$style.$isval.'</td>'; }
+                            else { $reduced_issues .= '<td'.$style.$isval.'</td>'.NL; }
                         }
                         elseif ($config == 'title')
                         {   // build parameter for $_GET method
                             $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
                             $reduced_issues .='<td>'.
-                                              '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$isval.'">'.$isval.'</a></td>';
+                                              '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$isval.'">'.$isval.'</a></td>'.NL;
+                        }
+                        elseif ($config == 'created')
+                        {   $reduced_issues .='<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.NL;
+                        }
+                        elseif ($config == 'modified')
+                        {   $reduced_issues .='<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.NL;
                         }
                         else 
                         {
-                            $reduced_issues .= '<td'.$style.$isval.'</td>';
+                            $reduced_issues .= '<td'.$style.$isval.'</td>'.NL;
                         }
                     }
-                    $reduced_issues .= '</tr>';
+                    $reduced_issues .= '</tr>'.NL;
                 }
             }
             
-            $head = "<div class='issuetracker_div'><table id='".$dynatable_id."' class='sortable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
-            $body = '<tbody>'.$reduced_issues.'</tbody></table></div>';
+            $head = "<div class='issuetracker_div'>".NL."<table id='".$dynatable_id."' class='sortable resizable inline' width='100%'>".NL."<thead>".NL."<tr>".NL."<th class=\"sortfirstdesc\" id='id'>Id</th>".NL.$reduced_header."</tr>".NL."</thead>".NL;
+            $body = '<tbody>'.$reduced_issues.'</tbody>'.NL.'</table>'.NL.'</div>'.NL;
         }
 
 
         if (strtolower($data['controls'])==='on') {
-        $ret = '<div>'.
-               '<script  type="text/javascript"> 
-                       function changeAction(where) { 
-                          if(where==1) { 
-                             document.forms["myForm"].action = "doku.php?id=' . $ID . '&do=issuelist_previous"; 
-                          } 
-                          else if(where==2){ 
-                             document.forms["myForm"].action = "doku.php?id=' . $ID . '&do=issuelist_next"; 
-                          } 
-                          else if(where==3){ 
-                             document.forms["myForm"].action = "doku.php?id=' . $ID . '&do=issuelist_filter"; 
-                          } 
-                          document.forms["myForm"].submit(); 
-                       } 
-                    </script>'.
-               '<table class="itl__t1"><tbody>'.
-               '<tr class="itd__tables_tr">'.
-                  '<td colspan="5" align="left"   valign="middle" height="40">'.
-                      '<label class="it__cir_projectlabel">'.$this->getLang('lbl_issueqty').count($issues).'</label>'.
-                  '</td>'.
-               '</tr>'.
-               '<tr>'.
-                    
- 
-                      '<td align ="left" valign="top" width="20%">
-                         <p class="it__cir_projectlabel">'.$this->getLang('lbl_scroll').' <br />
-                                                         '.$this->getLang('lbl_filtersev').' <br />
-                                                         '.$this->getLang('lbl_filterstat').' </p>
-                      </td>
-                      <td align ="left" valign="top" width="20%">
-                      <form name="myForm" action="" method="post">
-                         <input type="hidden" name="itl_start" id="itl_start" value="'.$start.'"/>
-                         <input type="hidden" name="itl_step" id="itl_step" value="'.$step.'"/>
-                         <input type="hidden" name="itl_next" id="itl_next" value="'.$next_start.'"/>
-                         <input type="hidden" name="itl_project" id="itl_project" value="'.$project.'"/>
-                         <input class="itl__buttons" type="button" name="showprevious" value="'.$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>
-                         <input class="itl__step_input"      name="itl_step" id="itl_step" type="text" value="'.$step.'"/>
-                         <input class="itl__buttons" type="button" name="shownext" value="'.$this->getLang('btn_next').'" title="'.$this->getLang('btn_next_title').'" onClick="changeAction(2)"/><br />
-                         <input class="itl__sev_filter"      name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br />                         
-                         <input class="itl__stat_filter"     name="itl_stat_filter" id="itl_stat_filter" type="text" value="'.$stat_filter.'"/>
-                         <input class="itl__buttons" type="button" name="go" value="'.$this->getLang('btn_go').'" title="'.$this->getLang('btn_go').'" onClick="changeAction(3)"/><br />
-                      </form>                      
-                      </td>'.NL.
-                 '<td width="10%">&nbsp;</td>'.NL.
-                 '<td align ="left" width="30%">'.NL.
-                     '<form  method="post" action="doku.php?id=' . $ID . '&do=showcase"><label class="it__cir_projectlabel"> '.$this->getLang('lbl_showid').'</label>'.NL.
-                         '<input class="itl__showid_input" name="showid" id="showid" type="text" value="0"/>'.NL.
-                         '<input type="hidden" name="project" id="project" value="'.$project.'"/>'.NL.
-                         '<input type="hidden" name="itl_sev_filter" id="itl_sev_filter" value="'.$sev_filter.'"/>'.NL.
-                         '<input type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$stat_filter.'"/>'.NL.
-                         '<input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="'.$this->getLang('btn_showid').'" title="'.$this->getLang('btn_showid_title').'"/>'.NL.
-                     '</form>'.NL.
-                 '</td>'.NL.
-                 '<td width="20%"></td>'.NL.
-               '</tr></tbody></table></div>'.NL;
+          $li_count = $this->_count_render($issues);
+        $ret = '<div>'.NL.
+               '<script  type="text/javascript">'.NL. 
+               '        function changeAction(where) {'.NL. 
+               '           if(where==1) {'.NL. 
+               '              document.forms["myForm"].action = "doku.php?id=' . $ID . '&do=issuelist_previous";'.NL. 
+               '           }'.NL. 
+               '           else if(where==2){'.NL. 
+               '              document.forms["myForm"].action = "doku.php?id=' . $ID . '&do=issuelist_next";'.NL. 
+               '           }'.NL. 
+               '           else if(where==3){'.NL. 
+               '              document.forms["myForm"].action = "doku.php?id=' . $ID . '&do=issuelist_filter";'.NL. 
+               '           }'.NL. 
+               '           document.forms["myForm"].submit();'.NL. 
+               '        }'.NL. 
+               '     </script>'.NL.
+               '<table class="itl__t1"><tbody>'.NL.
+               '<tr class="itd__tables_tr">'.NL.
+                  '<td colspan="4" align="left" valign="middle" height="40">'.NL.
+                      '<label class="it__cir_projectlabel">'.$this->getLang('lbl_issueqty').count($issues).'</label>'.NL.
+                  '</td>'.NL.
+                  '<td class="itl__showdtls" rowspan="2" width="35%">'.$li_count.'</td>'.NL.
+               '</tr>'.NL.
+
+               '<tr class="itd__tables_tr">'.NL.
+               '   <td align ="left" valign="top" width="15%">'.NL.
+               '     <p class="it__cir_projectlabel">'.$this->getLang('lbl_scroll').' <br />'.NL.
+                                                      $this->getLang('lbl_filtersev').' <br />'.NL.
+                                                      $this->getLang('lbl_filterstat').' </p>'.NL.
+               '   </td>'.NL.
+               '   <td align ="left" valign="top" width="20%">'.NL.
+               '    <form name="myForm" action="" method="post">'.NL.
+               '       <input type="hidden" name="itl_start" id="itl_start" value="'.$start.'"/>'.NL.
+               '       <input type="hidden" name="itl_step" id="itl_step" value="'.$step.'"/>'.NL.
+               '       <input type="hidden" name="itl_next" id="itl_next" value="'.$next_start.'"/>'.NL.
+               '       <input type="hidden" name="itl_project" id="itl_project" value="'.$project.'"/>'.NL.
+               '       <input class="itl__buttons" type="button" name="showprevious" value="'.$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>'.NL.
+               '       <input class="itl__step_input"      name="itl_step" id="itl_step" type="text" value="'.$step.'"/>'.NL.
+               '       <input class="itl__buttons" type="button" name="shownext" value="'.$this->getLang('btn_next').'" title="'.$this->getLang('btn_next_title').'" onClick="changeAction(2)"/><br />'.NL.
+               '       <input class="itl__sev_filter"      name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br />'.NL.                         
+               '       <input class="itl__stat_filter"     name="itl_stat_filter" id="itl_stat_filter" type="text" value="'.$stat_filter.'"/>'.NL.
+               '       <input class="itl__buttons" type="button" name="go" value="'.$this->getLang('btn_go').'" title="'.$this->getLang('btn_go').'" onClick="changeAction(3)"/><br />'.NL.
+               '    </form>'.NL.                      
+               '   </td>'.NL.
+               '   <td width="2%">&nbsp;</td>'.NL.
+               '   <td class="itl__showdtls" align ="left" width="30%">'.NL.
+               '    <form  method="post" action="doku.php?id=' . $ID . '&do=showcase">'.NL.
+               '       <label class="it__cir_projectlabel">'.$this->getLang('lbl_showid').'</label><br />'.NL.
+               '       <input class="itl__showid_input" name="showid" id="showid" type="text" value="0"/>'.NL.
+               '       <input type="hidden" name="project" id="project" value="'.$project.'"/>'.NL.
+               '       <input type="hidden" name="itl_sev_filter" id="itl_sev_filter" value="'.$sev_filter.'"/>'.NL.
+               '       <input type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$stat_filter.'"/>'.NL.
+               '       <input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="'.$this->getLang('btn_showid').'" title="'.$this->getLang('btn_showid_title').'"/>'.NL.
+               '    </form>'.NL.
+               '   </td>'.NL.
+               '</tr>'.NL.'</tbody>'.NL.'</table>'.NL.'</div>'.NL;
          }
     
          $ret = $ret.$head.$body;              

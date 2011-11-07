@@ -23,7 +23,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2011-10-20',
+         'date'   => '2011-11-07',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -424,7 +424,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                             
                     $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" onMouseover="this.bgColor=\'#DDDDDD\'" onMouseout="this.bgColor=\'#FFFFFF\'">'.                       
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.
-                             '<td class="itl__td_date">'.$this->_get_one_value($issue,'created').'</td>'.
+                             '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'product').'</td>'.
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'version').'</td>'.
                              '<td'.$severity_img.'</td>'.
@@ -433,7 +433,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                              '<td class="canbreak itl__td_standard">'.$itl_item_title.'</td>'.
                              '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$this->_get_one_value($issue,'assigned').'</a></td>'. 
                              '<td class="canbreak itl__td_standard">'.$this->_get_one_value($issue,'resolution').'</td>'.
-                             '<td class="itl__td_date">'.$this->_get_one_value($issue,'modified').'</td>'.
+                             '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.
                              '</tr>';        
                 }
             } 
@@ -491,6 +491,12 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                             $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
                             $reduced_issues .='<td>'.
                                               '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$isval.'">'.$isval.'</a></td>';
+                        }
+                        elseif ($config == 'created')
+                        {   $reduced_issues .='<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.NL;
+                        }
+                        elseif ($config == 'modified')
+                        {   $reduced_issues .='<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.NL;
                         }
                         else 
                         {
@@ -694,7 +700,7 @@ $issue_edit_head .= '<tr class="itd_tr_standard">
                       <td class="itd__col3"><a href="mailto:'.$__reportedby.'">'.$__reportedby.'</a></td>
                       <td class="itd__col4"></td>                   
                       <td class="itd__col5">'.$this->getLang('th_created').':</td>
-                      <td class="itd__col6">'.$issue[$issue_id]['created'].'</td>
+                      <td class="itd__col6">'.date($this->getConf('d_format'),strtotime($issue[$issue_id]['created'])).'</td>
                     </tr>
                    
                     <tr class="itd_tr_standard">
@@ -703,7 +709,7 @@ $issue_edit_head .= '<tr class="itd_tr_standard">
                       <td class="itd__col3"><a href="mailto:'.$__assigened.'">'.$__assigened.'</a></td>
                       <td class="itd__col4"></td>                   
                       <td class="itd__col5">'.$this->getLang('th_modified').':</td>
-                      <td class="itd__col6">'.$issue[$issue_id]['modified'].'</td>
+                      <td class="itd__col6">'.date($this->getConf('d_format'),strtotime($issue[$issue_id]['modified'])).'</td>
                     </tr>
                     </tbody></table>';
 
@@ -755,7 +761,7 @@ $issue_client_details .= '<tr class="itd__tables_tr">
 
 $issue_initial_description = '<table class="itd__tables"><tbody>
                                 <tr>
-                                  <td class="itd_tables_tdh" colSpan="2" >Initial description</td>
+                                  <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_initdescr').'</td>
                                 </tr>
                                 <tr class="itd__tables_tr">
                                   <td width="1%"></td>
@@ -799,7 +805,7 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
 
                         $issue_comments_log .= '<tr  class="itd__tables_tr">
                                                   <td class="itd_comment_trh"><label>['.$this->_get_one_value($a_comment,'id').'] </label>&nbsp;&nbsp;&nbsp;
-                                                                            <label>'.$this->_get_one_value($a_comment,'timestamp').' </label>&nbsp;&nbsp;&nbsp;
+                                                                            <label>'.date($this->getConf('d_format'),strtotime($this->_get_one_value($a_comment,'timestamp'))).' </label>&nbsp;&nbsp;&nbsp;
                                                                             <label>'.$x_mail.'</label></td>
                                                 </tr>
                                                 <tr  class="itd__tables_tr">
