@@ -246,7 +246,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 else
                     {$count[$status][0] += 1;}                                
         }
-        $rendered_count = '<div>'.'<table>';
+        $rendered_count = '<div class="itl__count_div">'.'<table class="itl__count_tbl">';
         foreach ($count as $value)
         {
             $rendered_count .= '<tr><td>'.$value[1].'&nbsp;</td><td>&nbsp;'.$value[0].'</td></tr>';
@@ -781,7 +781,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
       			    }
             }
          //<input name="do[save]" type="submit" value="Save" class="button" id="edbtn__save" accesskey="s" tabindex="4" title="Save [S]" />
-            $ret .= '<p><input name="submit" type="submit" value="submit" class="button" id="edbtn__save" title="'.$this->getLang('btn_reportsave').'"/>'.
+            $ret .= '<p><input name="submit" type="submit" value="'.$this->getLang('btn_reportsave').'" class="button" id="edbtn__save" title="'.$this->getLang('btn_reportsave').'"/>'.
             '</p></form></div>';
         }
         else { 

@@ -61,9 +61,24 @@ div.it__cir_form {
 }
 
 /* ----- Issue List Elements ------- */
-.it__cir_projectlabel, .itl__showid_input, .itl__showid_button, .itl__step_input, div.itl__table, div.issuetracker_div, itl_sev_filter, .itl__buttons, .itl__sev_filter, .itl__stat_filter  { 
+.it__cir_projectlabel, .itl__showid_input, .itl__showid_button, .itl__step_input, div.itl__table, div.issuetracker_div, itl_sev_filter, .itl__buttons, .itl__sev_filter, .itl__stat_filter, .itd__tables_tr div  { 
 	font-size:              0.85em;
 }
+
+.itd__tables_tr div  { 
+	float:                   right;
+	border-left: 1px solid #CED2DB;	
+	padding:                0.45em;
+}
+
+.itl__showdtls {
+	vertical-align:            top;
+}
+
+itl__count_div {
+  font-size:              0.95em;
+}
+
 .itl__showid_input {
 	width:                     3em;
 	height:                  1.3em;
@@ -71,7 +86,7 @@ div.it__cir_form {
 	font-size:              0.85em;
 	text-align:             center;
 	padding-left:           0.15em;
-	margin-left:            0.75em;
+	margin-left:             2.5em;
 	margin-right:           0.75em;
 	border-radius:             5px;
 }

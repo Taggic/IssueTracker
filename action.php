@@ -377,7 +377,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         // members of defined groups allowed$user_grps changing issue contents 
         if ($cFlag === true)       
         {   
-            $head = "<div class='itl__table'><table id='".$project."' class='sortable editable resizable inline'>".NL.
+            $head = "<div class='itl__table'><table id='".$project."' class='sortable editable resizable inline' width='100%'>".NL.
                     "<thead><tr><th class=\"sortfirstdesc\" id='id'>".$this->getLang('th_id')."</th>".NL.
                     "<th id='created'>".$this->getLang('th_created')."</th>".NL.
                     "<th id='product'>".$this->getLang('th_product')."</th>".NL.
@@ -510,60 +510,63 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $head = "<div class='issuetracker_div'><table id='".$project."' class='sortable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
             $body = '<tbody>'.$reduced_issues.'</tbody></table></div>';
         }
+        
+        $li_count = $this->_count_render($issues);
+        $ret = '<div>'.NL.
+               '<script  type="text/javascript">'.NL. 
+               '        function changeAction(where) {'.NL. 
+               '           if(where==1) {'.NL. 
+               '              document.forms["myForm"].action = "doku.php?id=' . $ID . '&do=issuelist_previous";'.NL. 
+               '           }'.NL. 
+               '           else if(where==2){'.NL. 
+               '              document.forms["myForm"].action = "doku.php?id=' . $ID . '&do=issuelist_next";'.NL. 
+               '           }'.NL. 
+               '           else if(where==3){'.NL. 
+               '              document.forms["myForm"].action = "doku.php?id=' . $ID . '&do=issuelist_filter";'.NL. 
+               '           }'.NL. 
+               '           document.forms["myForm"].submit();'.NL. 
+               '        }'.NL. 
+               '     </script>'.NL.
+               '<table class="itl__t1"><tbody>'.NL.
+               '<tr class="itd__tables_tr">'.NL.
+                  '<td colspan="4" align="left" valign="middle" height="40">'.NL.
+                      '<label class="it__cir_projectlabel">'.$this->getLang('lbl_issueqty').count($issues).'</label>'.NL.
+                  '</td>'.NL.
+                  '<td class="itl__showdtls" rowspan="2" width="35%">'.$li_count.'</td>'.NL.
+               '</tr>'.NL.
 
-        $ret = '<div>'.
-               '<script  type="text/javascript"> 
-                       function changeAction(where) { 
-                          if(where==1) { 
-                             document.forms["myForm"].action = "doku.php?id=' . $ID . '&do=issuelist_previous"; 
-                          } 
-                          else if(where==2){ 
-                             document.forms["myForm"].action = "doku.php?id=' . $ID . '&do=issuelist_next"; 
-                          } 
-                          else if(where==3){ 
-                             document.forms["myForm"].action = "doku.php?id=' . $ID . '&do=issuelist_filter"; 
-                          } 
-                          document.forms["myForm"].submit(); 
-                       } 
-                    </script>'.                    
-               '<table class="itl__t1"><tbody>'.
-               '<tr class="itd__tables_tr">'.
-                  '<td colspan="5" align="left"   valign="middle" height="40">'.
-                      '<label class="it__cir_projectlabel">'.$this->getLang('lbl_issueqty').count($issues).'</label>'.
-                  '</td>'.
-               '</tr>'.
-               '<tr>'.
-                    '<form name="myForm" action="" method="post"> 
-                      <td align ="left" valign="top" width="20%">
-                         <p class="it__cir_projectlabel">'.$this->getLang('lbl_scroll').' <br />
-                                                         '.$this->getLang('lbl_filtersev').' <br />
-                                                         '.$this->getLang('lbl_filterstat').' </p>
-                      <td align ="left" valign="top" width="20%">
-                      <form name="myForm" action="" method="post">
-                         <input type="hidden" name="itl_start" id="itl_start" value="'.$start.'"/>
-                         <input type="hidden" name="itl_step" id="itl_step" value="'.$step.'"/>
-                         <input type="hidden" name="itl_next" id="itl_next" value="'.$next_start.'"/>
-                         <input type="hidden" name="itl_project" id="itl_project" value="'.$project.'"/>
-                         <input class="itl__buttons" type="button" name="showprevious" value="'.$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>
-                         <input class="itl__step_input"      name="itl_step" id="itl_step" type="text" value="'.$step.'"/>
-                         <input class="itl__buttons" type="button" name="shownext" value="'.$this->getLang('btn_next').'" title="'.$this->getLang('btn_next_title').'" onClick="changeAction(2)"/><br />
-                         <input class="itl__sev_filter"      name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br />                         
-                         <input class="itl__stat_filter"     name="itl_stat_filter" id="itl_stat_filter" type="text" value="'.$stat_filter.'"/>
-                         <input class="itl__buttons" type="button" name="go" value="'.$this->getLang('btn_go').'" title="'.$this->getLang('btn_go').'" onClick="changeAction(3)"/><br />
-                      </form>                      
-                      </td>'.NL.
-                 '<td width="10%">&nbsp;</td>'.NL.
-                 '<td align ="left" width="30%">'.NL.
-                     '<form  method="post" action="doku.php?id=' . $ID . '&do=showcase"><label class="it__cir_projectlabel"> '.$this->getLang('lbl_showid').'</label>'.NL.
-                         '<input class="itl__showid_input" name="showid" id="showid" type="text" value="0"/>'.NL.
-                         '<input type="hidden" name="project" id="project" value="'.$project.'"/>'.NL.
-                         '<input type="hidden" name="itl_sev_filter" id="itl_sev_filter" value="'.$sev_filter.'"/>'.NL.
-                         '<input type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$stat_filter.'"/>'.NL.
-                         '<input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="'.$this->getLang('btn_showid').'" title="'.$this->getLang('btn_showid_title').'"/>'.NL.
-                     '</form>'.NL.
-                 '</td>'.NL.
-                 '<td width="20%"></td>'.NL.
-               '</tr></tbody></table></div>'.NL;
+               '<tr class="itd__tables_tr">'.NL.
+               '   <td align ="left" valign="top" width="15%">'.NL.
+               '     <p class="it__cir_projectlabel">'.$this->getLang('lbl_scroll').' <br />'.NL.
+                                                      $this->getLang('lbl_filtersev').' <br />'.NL.
+                                                      $this->getLang('lbl_filterstat').' </p>'.NL.
+               '   </td>'.NL.
+               '   <td align ="left" valign="top" width="20%">'.NL.
+               '    <form name="myForm" action="" method="post">'.NL.
+               '       <input type="hidden" name="itl_start" id="itl_start" value="'.$start.'"/>'.NL.
+               '       <input type="hidden" name="itl_step" id="itl_step" value="'.$step.'"/>'.NL.
+               '       <input type="hidden" name="itl_next" id="itl_next" value="'.$next_start.'"/>'.NL.
+               '       <input type="hidden" name="itl_project" id="itl_project" value="'.$project.'"/>'.NL.
+               '       <input class="itl__buttons" type="button" name="showprevious" value="'.$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>'.NL.
+               '       <input class="itl__step_input"      name="itl_step" id="itl_step" type="text" value="'.$step.'"/>'.NL.
+               '       <input class="itl__buttons" type="button" name="shownext" value="'.$this->getLang('btn_next').'" title="'.$this->getLang('btn_next_title').'" onClick="changeAction(2)"/><br />'.NL.
+               '       <input class="itl__sev_filter"      name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br />'.NL.                         
+               '       <input class="itl__stat_filter"     name="itl_stat_filter" id="itl_stat_filter" type="text" value="'.$stat_filter.'"/>'.NL.
+               '       <input class="itl__buttons" type="button" name="go" value="'.$this->getLang('btn_go').'" title="'.$this->getLang('btn_go').'" onClick="changeAction(3)"/><br />'.NL.
+               '    </form>'.NL.                      
+               '   </td>'.NL.
+               '   <td width="2%">&nbsp;</td>'.NL.
+               '   <td class="itl__showdtls" align ="left" width="30%">'.NL.
+               '    <form  method="post" action="doku.php?id=' . $ID . '&do=showcase">'.NL.
+               '       <label class="it__cir_projectlabel">'.$this->getLang('lbl_showid').'</label><br />'.NL.
+               '       <input class="itl__showid_input" name="showid" id="showid" type="text" value="0"/>'.NL.
+               '       <input type="hidden" name="project" id="project" value="'.$project.'"/>'.NL.
+               '       <input type="hidden" name="itl_sev_filter" id="itl_sev_filter" value="'.$sev_filter.'"/>'.NL.
+               '       <input type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$stat_filter.'"/>'.NL.
+               '       <input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="'.$this->getLang('btn_showid').'" title="'.$this->getLang('btn_showid_title').'"/>'.NL.
+               '    </form>'.NL.
+               '   </td>'.NL.
+               '</tr>'.NL.'</tbody>'.NL.'</table>'.NL.'</div>'.NL;
 
          $ret = $ret.$head.$body;              
         return $ret;
@@ -929,5 +932,29 @@ $issue_add_comment .= formSecurityToken(false).
       return ($this->getConf('use_captcha'));
 		}
     
+/******************************************************************************/
+/* Create count output
+*/
+    function _count_render($issues)
+    {
+        $count = array();
+        foreach ($issues as $issue)
+        {
+            $status = $this->_get_one_value($issue,'status');
+            if ($status != '')
+                if ($this->_get_one_value($count,$status)=='')
+                    {$count[$status] = array(1,$status);}
+                else
+                    {$count[$status][0] += 1;}                                
+        }
+        $rendered_count = '<div class="itl__count_div">'.'<table class="itl__count_tbl">';
+        foreach ($count as $value)
+        {
+            $rendered_count .= '<tr><td>'.$value[1].'&nbsp;</td><td>&nbsp;'.$value[0].'</td></tr>';
+        }
+        $rendered_count .= '</table></div>';
+        return $rendered_count;
+    }
+   
 /******************************************************************************/
 }
