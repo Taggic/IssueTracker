@@ -50,6 +50,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         
         //Default Value
         $data['display']  = 'ISSUES';
+        $data['product']  = 'ALL';
         $data['status']   = 'ALL';
         $data['severity'] = 'ALL';
         $data['view']     = '10';
@@ -61,6 +62,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 {
                 if ($splitparam[0]=='project')
                 	{$data['project'] = $splitparam[1];
+                    /*continue;*/}
+
+                if ($splitparam[0]=='product')   
+                	{$data['product'] = strtoupper($splitparam[1]);
+                	 if ($data['product'] == '') {$data['product'] = 'ALL';}
                     /*continue;*/}
 
                 if ($splitparam[0]=='status')   
@@ -114,7 +120,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     function render($mode, &$renderer, $data) {        
         global $ID;
         $project = $data['project'];           
-        
+              
         if ($mode == 'xhtml'){
             
             $renderer->info['cache'] = false;     
@@ -223,7 +229,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             // Count only ...        
             elseif (stristr($data['display'],'COUNT')!= false) 
             {
-                $Generated_Table = $this->_count_render($issues);                
+                $Generated_Table = $this->_count_render($issues,$data['product']);                
             }            
 
             // Render            
@@ -234,17 +240,20 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 /******************************************************************************/
 /* Create count output
 */
-    function _count_render($issues)
+    function _count_render($issues,$productfilter)
     {
         $count = array();
         foreach ($issues as $issue)
         {
-            $status = $this->_get_one_value($issue,'status');
-            if ($status != '')
-                if ($this->_get_one_value($count,$status)=='')
-                    {$count[$status] = array(1,$status);}
-                else
-                    {$count[$status][0] += 1;}                                
+            if (($productfilter=='ALL') || (stristr($productfilter,$this->_get_one_value($issue,'product'))!= false))
+            {
+                $status = $this->_get_one_value($issue,'status');
+                if ($status != '')
+                    if ($this->_get_one_value($count,$status)=='')
+                        {$count[$status] = array(1,$status);}
+                    else
+                        {$count[$status][0] += 1;}
+            }                                
         }
         $rendered_count = '<div class="itl__count_div">'.'<table class="itl__count_tbl">';
         foreach ($count as $value)
@@ -346,6 +355,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $noStatIMG = $this->getConf('noStatIMG');
         $noSevIMG = $this->getConf('noSevIMG');
         $project = $data['project'];
+        $prod_filter = $data['product'];
         $stat_filter = $data['status'];
         $sev_filter = $data['severity'];
                 
@@ -399,8 +409,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     $issue = $issues[$i];                    
                     $a_status = $this->_get_one_value($issue,'status');
                     $a_severity = $this->_get_one_value($issue,'severity');
-
-                if ((($data['status']=='ALL') || (stristr($data['status'],$a_status)!= false)) && (($data['severity']=='ALL') || (stristr($data['severity'],$a_severity)!= false)))
+                    $a_product = $this->_get_one_value($issue,'product');
+                    
+                if ((($data['status']=='ALL') || (stristr($data['status'],$a_status)!= false)) && (($data['severity']=='ALL') || (stristr($data['severity'],$a_severity)!= false)) && (($data['product']=='ALL') || (stristr($data['product'],$a_product)!= false)))
                 {   
                     if ($y>=$step) break;
                     $y=$y+1;
@@ -461,7 +472,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     $issue = $issues[$i];                    
                     $a_status = $this->_get_one_value($issue,'status');
                     $a_severity = $this->_get_one_value($issue,'severity');
-                if ((($data['status']=='ALL') || (stristr($data['status'],$a_status)!= false)) && (($data['severity']=='ALL') || (stristr($data['severity'],$a_severity)!= false)))
+                if ((($data['status']=='ALL') || (stristr($data['status'],$a_status)!= false)) && (($data['severity']=='ALL') || (stristr($data['severity'],$a_severity)!= false)) && (($data['product']=='ALL') || (stristr($data['product'],$a_product)!= false)))
                 {   
                     if ($y>=$step) break;
                     $y=$y+1;
@@ -514,7 +525,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 
 
         if (strtolower($data['controls'])==='on') {
-          $li_count = $this->_count_render($issues);
+          $li_count = $this->_count_render($issues,$data['product']);
         $ret = '<div>'.NL.
                '<script  type="text/javascript">'.NL. 
                '        function changeAction(where) {'.NL. 
@@ -550,6 +561,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                '       <input type="hidden" name="itl_step" id="itl_step" value="'.$step.'"/>'.NL.
                '       <input type="hidden" name="itl_next" id="itl_next" value="'.$next_start.'"/>'.NL.
                '       <input type="hidden" name="itl_project" id="itl_project" value="'.$project.'"/>'.NL.
+               '       <input type="hidden" class="itl__prod_filter" name="itl__prod_filter" id="itl__prod_filter" value="'.$data['product'].'"/>'.NL.
                '       <input class="itl__buttons" type="button" name="showprevious" value="'.$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>'.NL.
                '       <input class="itl__step_input"      name="itl_step" id="itl_step" type="text" value="'.$step.'"/>'.NL.
                '       <input class="itl__buttons" type="button" name="shownext" value="'.$this->getLang('btn_next').'" title="'.$this->getLang('btn_next_title').'" onClick="changeAction(2)"/><br />'.NL.

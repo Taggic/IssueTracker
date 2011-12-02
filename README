@@ -34,7 +34,7 @@ Syntax
 
   ====== List of Issues ======
   ~~NOCACHE~~
-  {{issuetracker>project=your_project|status=all|severity=all|display=issues}} 
+  {{issuetracker>project=your_project|product=all|status=all|severity=all|display=issues}} 
  </code>
 
 
@@ -127,7 +127,7 @@ Examples/Usage
  modify some entries directly on this output, i.e. admin is able to assign the 
  issue to a member of configured user-groups (see configuration). 
 
- {{issuetracker>project=your_project|status=all|severity=all|display=issues}} 
+ {{issuetracker>project=your_project|product=all|status=all|severity=all|display=issues}} 
 
 3. Issue Details view
 --------------------- 

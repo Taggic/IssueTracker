@@ -56,6 +56,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $this->itl_pjct = $_POST['itl_project'];
             $this->itl_stat = $_POST['itl_stat_filter'];
             $this->itl_sev = $_POST['itl_sev_filter'];
+            $this->itl_prod = $_POST['itl_prod_filter'];
          }
          elseif ($event->data === 'issuelist_previous') {
             $this->itl_start = $_POST['itl_start'];
@@ -64,6 +65,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $this->itl_pjct = $_POST['itl_project'];
             $this->itl_stat = $_POST['itl_stat_filter'];
             $this->itl_sev = $_POST['itl_sev_filter'];
+            $this->itl_prod = $_POST['itl_prod_filter'];
          }
          elseif ($event->data === 'issuelist_filter') {
             $this->itl_start = $_POST['itl_start'];
@@ -72,6 +74,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $this->itl_pjct = $_POST['itl_project'];
             $this->itl_stat = $_POST['itl_stat_filter'];
             $this->itl_sev = $_POST['itl_sev_filter'];
+            $this->itl_prod = $_POST['itl_prod_filter'];
          }
          else return;
          
@@ -243,8 +246,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 if ($stat_filter == '') {$stat_filter='ALL';}
                 $sev_filter = $this->itl_sev;
                 if ($sev_filter == '') {$sev_filter='ALL';}
+                $productfilter = $this->itl_prod;
+                if ($productfilter == '') {$productfilter='ALL';}
                 $Generated_Header = '';                        
-                $Generated_Table = $this->_table_render($a,$step,$start,$next_start,$stat_filter,$sev_filter); 
+                $Generated_Table = $this->_table_render($a,$step,$start,$next_start,$stat_filter,$sev_filter,$productfilter); 
                 $Generated_Scripts = $this->_scripts_render();
         }
         else return;
@@ -328,7 +333,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 /******************************************************************************/
 /* Create list of next/previous Issues
 */
-    function _table_render($project,$step,$start,$next_start,$stat_filter,$sev_filter)
+    function _table_render($project,$step,$start,$next_start,$stat_filter,$sev_filter,$productfilter)
     {
         global $ID;
         $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
@@ -397,7 +402,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     $a_status = strtoupper($this->_get_one_value($issue,'status'));
                     $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
                     
-                if ((($stat_filter=='ALL') || (stristr($stat_filter,$a_status)!= false)) && (($sev_filter=='ALL') || (stristr($sev_filter,$a_severity)!= false)))
+                if ((($stat_filter=='ALL') || (stristr($stat_filter,$a_status)!= false)) && (($sev_filter=='ALL') || (stristr($sev_filter,$a_severity)!= false)) && (($data['product']=='ALL') || (stristr($data['product'],$a_product)!= false)))
                 {   
                     if ($y>=$step) break;
                     $y=$y+1;
@@ -458,7 +463,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     $a_status = strtoupper($this->_get_one_value($issue,'status'));
                     $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
 
-                if ((($stat_filter=='ALL') || (stristr($stat_filter,$a_status)!= false)) && (($sev_filter=='ALL') || (stristr($sev_filter,$a_severity)!= false)))
+                if ((($stat_filter=='ALL') || (stristr($stat_filter,$a_status)!= false)) && (($sev_filter=='ALL') || (stristr($sev_filter,$a_severity)!= false)) && (($data['product']=='ALL') || (stristr($data['product'],$a_product)!= false)))
                 {   
                     if ($y>=$step) break;
                     $y=$y+1;
@@ -547,6 +552,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                '       <input type="hidden" name="itl_step" id="itl_step" value="'.$step.'"/>'.NL.
                '       <input type="hidden" name="itl_next" id="itl_next" value="'.$next_start.'"/>'.NL.
                '       <input type="hidden" name="itl_project" id="itl_project" value="'.$project.'"/>'.NL.
+               '       <input type="hidden" class="itl__prod_filter" name="itl__prod_filter" id="itl__prod_filter" value="'.$productfilter.'"/>'.NL.
                '       <input class="itl__buttons" type="button" name="showprevious" value="'.$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>'.NL.
                '       <input class="itl__step_input"      name="itl_step" id="itl_step" type="text" value="'.$step.'"/>'.NL.
                '       <input class="itl__buttons" type="button" name="shownext" value="'.$this->getLang('btn_next').'" title="'.$this->getLang('btn_next_title').'" onClick="changeAction(2)"/><br />'.NL.
@@ -935,17 +941,20 @@ $issue_add_comment .= formSecurityToken(false).
 /******************************************************************************/
 /* Create count output
 */
-    function _count_render($issues)
+    function _count_render($issues,$productfilter)
     {
         $count = array();
         foreach ($issues as $issue)
         {
-            $status = $this->_get_one_value($issue,'status');
-            if ($status != '')
-                if ($this->_get_one_value($count,$status)=='')
-                    {$count[$status] = array(1,$status);}
-                else
-                    {$count[$status][0] += 1;}                                
+            if (($productfilter=='ALL') || (stristr($productfilter,$this->_get_one_value($issue,'product'))!= false))
+            {
+                $status = $this->_get_one_value($issue,'status');
+                if ($status != '')
+                    if ($this->_get_one_value($count,$status)=='')
+                        {$count[$status] = array(1,$status);}
+                    else
+                        {$count[$status][0] += 1;}
+            }                                
         }
         $rendered_count = '<div class="itl__count_div">'.'<table class="itl__count_tbl">';
         foreach ($count as $value)
