@@ -50,6 +50,7 @@ $lang['lbl_reporteradcontact']  = 'Add contact:';
 $lang['lbl_symptlinks']     = 'Links to symptom files';
 $lang['lbl_cmts_wlog']      = 'Comments (work log)';
 $lang['lbl_cmts_adcmt']     = 'Add a new comment';
+$lang['lbl_cmts_edtres']    = 'Resolution';
 $lang['btn_add']            = 'Add';
 $lang['btn_add_title']      = 'Add';
 $lang['lbl_signin']         = 'Sign in</a> if you want to add a comment.';       // </a> necessary to close the link tag
@@ -92,6 +93,16 @@ $lang['issuemod_cmnt']       = 'Comment:  ';
 $lang['issuemod_see']        = 'see details:  ';
 $lang['issuemod_br']         = 'best regards';
 $lang['issuemod_end']        = ' Issue Tracker';    // project name placed before this
+
+/******************************************************************************/
+/* send an e-mail to user due to issue set to resolved on details
+/* _emailForResolutionMod
+*/                            
+$lang['issue_resolved_subject']    = 'Service Request %s on %s was resolved';
+$lang['issue_resolved_intro']      = 'Your reported issue was resolved.';
+$lang['issue_resolved_status']     = 'solved';
+$lang['issue_resolved_text']       = 'Solution:   ';
+$lang['msg_resolution_true']       = 'Your Resolution was added sucessfully.';
 
 /******************************************************************************/
 /* deviations from before for send an e-mail to admin due to new issue created

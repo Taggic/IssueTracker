@@ -685,7 +685,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $STR_PRODUCTS = "";
             foreach ($products as $_products)
             {
-                $STR_PRODUCTS = $STR_PRODUCTS . '<option value="'.$_products.'" >'.$_products."</option>'     ";
+                //if product is preselected by syntax
+                if(strtoupper ($_products) == strtoupper ($data['product'])) { $option_param = '<option value="'.$_products.'" selected >'; }
+                else { $option_param = '<option value="'.$_products.'" >'; }
+                
+                $STR_PRODUCTS = $STR_PRODUCTS . $option_param .$_products."</option>'     ";
             }
             
             /*--------------------------------------------------------------------*/
