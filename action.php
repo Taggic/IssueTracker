@@ -258,7 +258,6 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                   }            	          
 
                  if ($data->data == 'issuelist_next') {
-                 msg('issuelist_next pressed',0);
                     $start = $itl_next;
                     if ($start<0) { $start='0'; }
                     $next_start = $start + $step;                    
@@ -270,7 +269,6 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 //                    echo 'start = '.$start.';  step = '.$step.';  next_start = '.$next_start.'<br />';
                  }
                  elseif ($data->data == 'issuelist_previous') {
-                 msg('issuelist_previous',0);
                     $start = $itl_start - $step;
                     if ($start<0) { $start='0'; }                    
                     $next_start = $start + $step;
