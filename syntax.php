@@ -663,6 +663,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     {
         global $lang;
         global $ID;
+        $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
         $project = $data['project'];
         // retrive some basic information
         $user_mail = pageinfo();  //to get mail address of reporter
@@ -766,7 +767,143 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
              </tr>'.
             '<tr>
                 <td>'.$this->getLang('th_descr').'</td>
-                <td><textarea class="it__cir_linput" name="description" cols="109" rows="7">'.$_REQUEST['description'].'</textarea></td>
+                <td>';
+
+// mod for editor ---------------------------------------------------------------------
+$ret .= '<div class="it_edittoolbar" style="margin-left:30px; margin-top:6px;">
+         <script type="text/javascript" src="'.DOKU_PLUGIN.'issuetracker/xs_edit.js"></script>
+         <script>
+          function doHLine(tag1,obj)
+          {
+          textarea = document.getElementById(obj);
+          	// Code for IE
+          		if (document.selection) 
+          			{
+          				textarea.focus();
+          				var sel = document.selection.createRange();
+          				//alert(sel.text);
+          				sel.text = tag1 + sel.text;
+          			}
+             else 
+              {  // Code for Mozilla Firefox
+          		var len = textarea.value.length;
+          	  var start = textarea.selectionStart;
+          		var end = textarea.selectionEnd;
+          		
+          		var scrollTop = textarea.scrollTop;
+          		var scrollLeft = textarea.scrollLeft;
+          		
+                  var sel = textarea.value.substring(start, end);
+          	      //alert(sel);
+          		    var rep = tag1 + sel;
+                  textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
+          		
+          		textarea.scrollTop = scrollTop;
+          		textarea.scrollLeft = scrollLeft;
+          	}
+          }
+          
+          function doAddTags(tag1,tag2,obj)
+          {
+          textarea = document.getElementById(obj);
+          	// Code for IE
+          		if (document.selection) 
+          			{
+          				textarea.focus();
+          				var sel = document.selection.createRange();
+          				//alert(sel.text);
+          				sel.text = tag1 + sel.text + tag2;
+          			}
+             else 
+              {  // Code for Mozilla Firefox
+          		var len = textarea.value.length;
+          	    var start = textarea.selectionStart;
+          		var end = textarea.selectionEnd;
+          		
+          		var scrollTop = textarea.scrollTop;
+          		var scrollLeft = textarea.scrollLeft;
+          		
+                  var sel = textarea.value.substring(start, end);
+          	    //alert(sel);
+          		var rep = tag1 + sel + tag2;
+                  textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
+          		
+          		textarea.scrollTop = scrollTop;
+          		textarea.scrollLeft = scrollLeft;
+          	}
+          }
+          
+          function doList(tag1,tag2,obj){
+          textarea = document.getElementById(obj);
+          
+          // Code for IE
+          		if (document.selection) 
+          			{
+          				textarea.focus();
+          				var sel = document.selection.createRange();
+          				var list = sel.text.split("\n");
+          		
+          				for(i=0;i<list.length;i++) 
+          				{
+          				list[i] = "[li]" + list[i] + "[/li]";
+          				}
+          				//alert(list.join("\n"));
+          				sel.text = tag1 + "\n" + list.join("\n") + "\n" + tag2;
+          				
+          			} else
+          			// Code for Firefox
+          			{
+          
+          		var len = textarea.value.length;
+          	    var start = textarea.selectionStart;
+          		var end = textarea.selectionEnd;
+          		var i;
+          		
+          		var scrollTop = textarea.scrollTop;
+          		var scrollLeft = textarea.scrollLeft;
+          
+          		
+                  var sel = textarea.value.substring(start, end);
+          	    //alert(sel);
+          		
+          		var list = sel.split("\n");
+          		
+          		for(i=0;i<list.length;i++) 
+          		{
+          		list[i] = "[li]" + list[i] + "[/li]";
+          		}
+          		//alert(list.join("<br>"));
+                  
+          		
+          		var rep = tag1 + "\n" + list.join("\n") + "\n" +tag2;
+          		textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
+          		
+          		textarea.scrollTop = scrollTop;
+          		textarea.scrollLeft = scrollLeft;
+           }
+          }
+         
+         </script>';                      
+// mod for editor ---------------------------------------------------------------------
+
+	$ret .= "<img class=\"button\" src=\"".$imgBASE."/bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','description')\">".NL;
+  $ret .= "<img class=\"button\" src=\"".$imgBASE."/italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','description')\">".NL;
+	$ret .= "<img class=\"button\" src=\"".$imgBASE."/underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','description')\">".NL;
+	$ret .= "<img class=\"button\" src=\"".$imgBASE."/strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','description')\">".NL;
+	$ret .= "<img class=\"button\" src=\"".$imgBASE."/subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','description')\">".NL;
+	$ret .= "<img class=\"button\" src=\"".$imgBASE."/superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','description')\">".NL;
+	$ret .= "<img class=\"button\" src=\"".$imgBASE."/hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','description')\">".NL;
+	$ret .= "<img class=\"button\" src=\"".$imgBASE."/ordered.png\" name=\"btnList\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','description')\">".NL;
+	$ret .= "<img class=\"button\" src=\"".$imgBASE."/unordered.png\" name=\"btnList\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','description')\">".NL;
+	$ret .= "<img class=\"button\" src=\"".$imgBASE."/quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','description')\">".NL; 
+	$ret .= "<img class=\"button\" src=\"".$imgBASE."/code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','description')\">".NL;
+	$ret .= "<img class=\"button\" src=\"".$imgBASE."/pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','description')\">".NL;
+	$ret .= "<img class=\"button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','description')\">".NL;
+	$ret .= "<img class=\"button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','description')\">".NL;
+	$ret .= "<img class=\"button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','description')\">".NL;
+  $ret .= "<br></div>";
+
+          $ret .= '<textarea class="it__cir_linput" id="description" name="description" cols="109" rows="7">'.$_REQUEST['description'].'</textarea></td>
              </tr>'.
             '<tr><td colspan=2>&nbsp;</td></tr>'. 
             '<tr>                

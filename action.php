@@ -8,6 +8,7 @@
 **  must run within Dokuwiki
 **/
 if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../../').'/');
+if(!defined('xs_ImagePath')) define('xs_ImagePath',realpath(dirname(__FILE__)).'/');
 if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 require_once(DOKU_PLUGIN.'action.php');
 
@@ -23,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2011-12-04',
+         'date'   => '2011-12-06',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -169,7 +170,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                        $comments[$comment_id]['id'] = $comment_id;    
                                        $comments[$comment_id]['author'] = htmlspecialchars(stripslashes($_REQUEST['author']));
                                        $comments[$comment_id]['timestamp'] = htmlspecialchars(stripslashes($_REQUEST['timestamp']));
-                                       $comments[$comment_id]['comment'] = $_REQUEST['comment'];    
+                                       $comments[$comment_id]['comment'] = htmlspecialchars(stripslashes($_REQUEST['comment']));    
                 
                                        //Create comments file
                                        $xvalue = io_saveFile($comments_file,serialize($comments));
@@ -216,7 +217,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                       break;}
                                   }
                               if ($cFlag === true)
-                              {   $issues[$issue_id]['resolution'] = stripslashes($_REQUEST['x_resolution']);
+                              {   $issues[$issue_id]['resolution'] = htmlspecialchars(stripslashes($_REQUEST['x_resolution']));
+                                  
                                   $issues[$issue_id]['status'] = $this->getLang('issue_resolved_status');
                                   $xuser = $issues[$issue_id]['user_mail'];
                                   $xdescription = $issues[$issue_id]['description'];
@@ -819,7 +821,7 @@ $issue_initial_description = '<table class="itd__tables"><tbody>
                                 </tr>
                                 <tr class="itd__tables_tr">
                                   <td width="1%"></td>
-                                  <td>'.$x_comment.'</td>
+                                  <td>'.$this->xs_format($x_comment).'</td>
                                 </tr>
                               </tbody></table>';
                               
@@ -863,7 +865,7 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
                                                                             <label>'.$x_mail.'</label></td>
                                                 </tr>
                                                 <tr  class="itd__tables_tr">
-                                                  <td class="itd_comment_tr">'.$x_comment.'</td>
+                                                  <td class="itd_comment_tr">'.$this->xs_format($x_comment).'</td>
                                                 </tr>';
                   }
               }
@@ -892,21 +894,158 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
             { $_cFlag = true; } }
 
         if($_cFlag === true) {
+
+// mod for editor ---------------------------------------------------------------------
+$ret .= '<script type="text/javascript" src="'.DOKU_PLUGIN.'issuetracker/xs_edit.js"></script>
+         <script>
+          function doHLine(tag1,obj)
+          {
+          textarea = document.getElementById(obj);
+          	// Code for IE
+          		if (document.selection) 
+          			{
+          				textarea.focus();
+          				var sel = document.selection.createRange();
+          				//alert(sel.text);
+          				sel.text = tag1 + sel.text;
+          			}
+             else 
+              {  // Code for Mozilla Firefox
+          		var len = textarea.value.length;
+          	  var start = textarea.selectionStart;
+          		var end = textarea.selectionEnd;
+          		
+          		var scrollTop = textarea.scrollTop;
+          		var scrollLeft = textarea.scrollLeft;
+          		
+                  var sel = textarea.value.substring(start, end);
+          	      //alert(sel);
+          		    var rep = tag1 + sel;
+                  textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
+          		
+          		textarea.scrollTop = scrollTop;
+          		textarea.scrollLeft = scrollLeft;
+          	}
+          }
+          
+          function doAddTags(tag1,tag2,obj)
+          {
+          textarea = document.getElementById(obj);
+          	// Code for IE
+          		if (document.selection) 
+          			{
+          				textarea.focus();
+          				var sel = document.selection.createRange();
+          				//alert(sel.text);
+          				sel.text = tag1 + sel.text + tag2;
+          			}
+             else 
+              {  // Code for Mozilla Firefox
+          		var len = textarea.value.length;
+          	    var start = textarea.selectionStart;
+          		var end = textarea.selectionEnd;
+          		
+          		var scrollTop = textarea.scrollTop;
+          		var scrollLeft = textarea.scrollLeft;
+          		
+                  var sel = textarea.value.substring(start, end);
+          	    //alert(sel);
+          		var rep = tag1 + sel + tag2;
+                  textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
+          		
+          		textarea.scrollTop = scrollTop;
+          		textarea.scrollLeft = scrollLeft;
+          	}
+          }
+          
+          function doList(tag1,tag2,obj){
+          textarea = document.getElementById(obj);
+          
+          // Code for IE
+          		if (document.selection) 
+          			{
+          				textarea.focus();
+          				var sel = document.selection.createRange();
+          				var list = sel.text.split("\n");
+          		
+          				for(i=0;i<list.length;i++) 
+          				{
+          				list[i] = "[li]" + list[i] + "[/li]";
+          				}
+          				//alert(list.join("\n"));
+          				sel.text = tag1 + "\n" + list.join("\n") + "\n" + tag2;
+          				
+          			} else
+          			// Code for Firefox
+          			{
+          
+          		var len = textarea.value.length;
+          	    var start = textarea.selectionStart;
+          		var end = textarea.selectionEnd;
+          		var i;
+          		
+          		var scrollTop = textarea.scrollTop;
+          		var scrollLeft = textarea.scrollLeft;
+          
+          		
+                  var sel = textarea.value.substring(start, end);
+          	    //alert(sel);
+          		
+          		var list = sel.split("\n");
+          		
+          		for(i=0;i<list.length;i++) 
+          		{
+          		list[i] = "[li]" + list[i] + "[/li]";
+          		}
+          		//alert(list.join("<br>"));
+                  
+          		
+          		var rep = tag1 + "\n" + list.join("\n") + "\n" +tag2;
+          		textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
+          		
+          		textarea.scrollTop = scrollTop;
+          		textarea.scrollLeft = scrollLeft;
+           }
+          }
+         
+         </script>';                      
+// mod for editor ---------------------------------------------------------------------
+
 $issue_add_comment ='<table class="itd__tables">'.
                       '<tr>'.
                         '<td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_cmts_adcmt').'</td>
                       </tr><tr><td>';
-                      
+// mod for editor ---------------------------------------------------------------------
+
+$issue_add_comment .= '<div class="it_edittoolbar">'.NL;
+	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','comment')\">".NL;
+  $issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/ordered.png\" name=\"btnList\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/unordered.png\" name=\"btnList\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','comment')\">".NL; 
+	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','comment')\">".NL;
+  $issue_add_comment .= "<br></div>".NL;                      
+// mod for editor ---------------------------------------------------------------------
+
 $issue_add_comment .= '<script type="text/javascript" src="include/selectupdate.js"></script>'.NL.
                       '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
-
+                      
 $issue_add_comment .= formSecurityToken(false). 
                      '<input type="hidden" name="project" type="text" value="'.$project.'"/>'.NL.
                      '<input type="hidden" name="comment_file" type="text" value="'.$cfile.'"/>'.NL.
                      '<input type="hidden" name="comment_issue_ID" type="text" value="'.$issue[$issue_id]['id'].'"/>'.NL.
                      '<input type="hidden" name="author" type="text" value="'.$u_mail_check.'"/>'.NL.        
                      '<input type="hidden" name="timestamp" type="text" value="'.$cur_date.'"/>'.NL.        
-                     '<textarea name="comment" type="text" cols="106" rows="7" value=""></textarea>'.NL;        
+                     '<textarea id="comment" name="comment" type="text" cols="106" rows="7" value=""></textarea>'.NL;        
              
                       if ($this->getConf('use_captcha')==1) 
                       {   $helper = null;
@@ -928,13 +1067,34 @@ $issue_edit_resolution ='<table class="itd__tables">
                          <tr>
                             <td class="itd_tables_tdh" colSpan="2" >Resolution</td>
                         </tr><tr><td>';
+
+// mod for editor ---------------------------------------------------------------------
+$issue_edit_resolution .= '<div class="it_edittoolbar">'.NL;
+	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','x_resolution')\">".NL;
+  $issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/ordered.png\" name=\"btnList\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/unordered.png\" name=\"btnList\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','x_resolution')\">".NL; 
+	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','x_resolution')\">".NL;
+  $issue_edit_resolution .= "<br></div>".NL;                      
+// mod for editor ---------------------------------------------------------------------
+
 $issue_edit_resolution .= '<form name="edit_resolution" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'">'.NL;                                            
 $issue_edit_resolution .= formSecurityToken(false).
                           '<input type="hidden" name="project" type="text" value="'.$project.'"/>'.NL.
                           '<input type="hidden" name="comment_issue_ID" type="text" value="'.$issue[$issue_id]['id'].'"/>'.NL.
                           '<input type="hidden" name="add_resolution" type="text" value="1"/>'.NL;        
     
-$issue_edit_resolution .= "<textarea name='x_resolution' type='text' cols='106' rows='7' value=''>$x_resolution</textarea>";
+$issue_edit_resolution .= "<textarea id='x_resolution' name='x_resolution' type='text' cols='106' rows='7' value=''>$x_resolution</textarea>";
                               
                       if ($this->getConf('use_captcha')==1) 
                       {   $helper = null;
@@ -1081,6 +1241,51 @@ $issue_edit_resolution = '<table class="itd__tables"><tbody>
         $rendered_count .= '</table></div>';
         return $rendered_count;
     }
-   
+/******************************************************************************/
+/* replace simple formats used by editor buttons
+*/
+    function xs_format($x_comment)
+    { // bold , italic, underline, etc.
+        $x_comment = preg_replace('/\[([bius])\]/i', '<\\1>', $x_comment);
+        $x_comment = preg_replace('/\[\/([bius])\]/i', '</\\1>', $x_comment);
+
+        $x_comment = preg_replace('/\[ol\]/i', '<ol>', $x_comment);
+        $x_comment = preg_replace('/\[\/ol\]/i', '</ol>', $x_comment);    
+
+        $x_comment = preg_replace('/\[ul\]/i', '<ul>', $x_comment);
+        $x_comment = preg_replace('/\[\/ul\]/i', '</ul>', $x_comment);    
+
+        $x_comment = preg_replace('/\[li\]/i', '<li>', $x_comment);
+        $x_comment = preg_replace('/\[\/li\]/i', '</li>', $x_comment);    
+
+        $x_comment = preg_replace('/\[sup\]/i', '<sup>', $x_comment);
+        $x_comment = preg_replace('/\[\/sup\]/i', '</sup>', $x_comment);    
+
+        $x_comment = preg_replace('/\[sub\]/i', '<sub>', $x_comment);
+        $x_comment = preg_replace('/\[\/sub\]/i', '</sub>', $x_comment);    
+
+        $x_comment = preg_replace('/\[hr\]/i', '<hr>', $x_comment);
+
+        $x_comment = preg_replace('/\[blockquote\]/i', '<blockquote>', $x_comment);
+        $x_comment = preg_replace('/\[\/blockquote\]/i', '</blockquote>', $x_comment);    
+
+        $x_comment = preg_replace('/\[code\]/i', '<code>', $x_comment);
+        $x_comment = preg_replace('/\[\/code\]/i', '</code>', $x_comment);    
+
+        $x_comment = preg_replace('/\[red\]/i', '<span style="color:red;">', $x_comment);
+        $x_comment = preg_replace('/\[\/red\]/i', '</span>', $x_comment);    
+
+        $x_comment = preg_replace('/\[grn\]/i', '<span style="color:green;">', $x_comment);
+        $x_comment = preg_replace('/\[\/grn\]/i', '</span>', $x_comment);    
+
+        $x_comment = preg_replace('/\[bgy\]/i', '<span style="background:yellow;">', $x_comment);
+        $x_comment = preg_replace('/\[\/bgy\]/i', '</span>', $x_comment);    
+
+        $x_comment = preg_replace('/\[blu\]/i', '<span style="color:blue;">', $x_comment);
+        $x_comment = preg_replace('/\[\/blu\]/i', '</span>', $x_comment);    
+
+
+      return $x_comment;
+    }
 /******************************************************************************/
 }

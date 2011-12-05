@@ -212,6 +212,19 @@ table.itd_tr_standard {
 	border-bottom:       solid 2px;
 	border-color:          #b0b0b0;
 	background-color:      #f0f0f0;
-	padding:               0.75em;
-	border-radius:         0.25em;
+	padding:                0.75em;
+	border-radius:          0.25em;
+}
+
+.itd_comment_tr li {
+  margin:           0 !important;
+  padding:          0 !important;
+  font-size:      1em !important;
+  line-height:  1.2em !important;
+  font-weight: normal !important;
+}
+
+.it_edittoolbar {
+  width:                   330px;
+  border:     1px dotted #69859E;
 }
