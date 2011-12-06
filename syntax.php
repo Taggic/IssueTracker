@@ -445,7 +445,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                              '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$this->_get_one_value($issue,'user_name').'</a></td>'.NL. 
                              '<td class="canbreak itl__td_standard">'.$itl_item_title.'</td>'.NL.
                              '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$this->_get_one_value($issue,'assigned').'</a></td>'.NL. 
-                             '<td class="canbreak itl__td_standard">'.$this->_get_one_value($issue,'resolution').'</td>'.NL.
+                             '<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.NL.
                              '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.NL.
                              '</tr>'.NL;        
                 }
@@ -509,6 +509,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                         }
                         elseif ($config == 'modified')
                         {   $reduced_issues .='<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.NL;
+                        }
+                        elseif ($config == 'resolution')
+                        {   $reduced_issues .='<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.NL;
                         }
                         else 
                         {
@@ -615,7 +618,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $this->getLang('issuemod_severity').$issue['severity'].chr(10).
             $this->getLang('issuemod_creator').$issue['user_name'].chr(10).
             $this->getLang('issuemod_title').$issue['title'].chr(10).
-            $this->getLang('issuenew_descr').$issue['description'].chr(10).
+            $this->getLang('issuenew_descr').$this->xs_format($issue['description']).chr(10).
             $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
             $this->getLang('issuemod_br').chr(10).$this->getLang('issuemod_end');
 
@@ -626,6 +629,30 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     }
 
 /******************************************************************************/
+/* send an e-mail to user due to issue resolution
+*/                            
+    function _emailForResolution($project,$issue)
+    {  if ($this->getConf('userinfo_email')==1)
+        {
+            $subject = sprintf($this->getLang('issue_resolved_subject'),$issue['id'], $project);            
+            $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
+            global $ID;
+            
+            $body = $this->getLang('issuemod_head').chr(10).chr(10).$this->getLang('issue_resolved_intro').chr(10).chr(13).
+                    $this->getLang('issuemod_issueid').$issue['id'].chr(10).
+                    $this->getLang('issuemod_status').$issue['status'].chr(10).
+                    $this->getLang('issuemod_product').$issue['product'].chr(10).
+                    $this->getLang('issuemod_version').$issue['version'].chr(10).
+                    $this->getLang('issue_resolved_text').$this->xs_format($issue['resolution']).chr(10).
+                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+                    $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
+
+            $from=$this->getConf('email_address') ;
+            $to=$issue['user_mail'];
+            $cc=$issue['add_user_mail'];
+            mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
+        }
+    }/******************************************************************************/
 /* send an e-mail to user due to issue modificaion
 */
     function _emailForIssueMod($project,$issue,$comment)
@@ -646,7 +673,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $this->getLang('issuemod_title').$issue['title'].chr(10).
             $this->getLang('issuemod_cmntauthor').$comment['author'].chr(10).
             $this->getLang('issuemod_date').$comment['timestamp'].chr(10).
-            $this->getLang('issuemod_cmnt').$comment['comment'].chr(10).
+            $this->getLang('issuemod_cmnt').$this->xs_format($comment['comment']).chr(10).
             $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
             $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
 
@@ -771,7 +798,6 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 
 // mod for editor ---------------------------------------------------------------------
 $ret .= '<div class="it_edittoolbar" style="margin-left:30px; margin-top:6px;">
-         <script type="text/javascript" src="'.DOKU_PLUGIN.'issuetracker/xs_edit.js"></script>
          <script>
           function doHLine(tag1,obj)
           {
@@ -1055,5 +1081,52 @@ address format and the domain exists.
        }
        return $isValid;
     }
+/******************************************************************************/
+/* replace simple formats used by editor buttons
+*/
+    function xs_format($x_comment)
+    { // bold , italic, underline, etc.
+        $x_comment = preg_replace('/\[([bius])\]/i', '<\\1>', $x_comment);
+        $x_comment = preg_replace('/\[\/([bius])\]/i', '</\\1>', $x_comment);
+
+        $x_comment = preg_replace('/\[ol\]/i', '<ol>', $x_comment);
+        $x_comment = preg_replace('/\[\/ol\]/i', '</ol>', $x_comment);    
+
+        $x_comment = preg_replace('/\[ul\]/i', '<ul>', $x_comment);
+        $x_comment = preg_replace('/\[\/ul\]/i', '</ul>', $x_comment);    
+
+        $x_comment = preg_replace('/\[li\]/i', '<li>', $x_comment);
+        $x_comment = preg_replace('/\[\/li\]/i', '</li>', $x_comment);    
+
+        $x_comment = preg_replace('/\[sup\]/i', '<sup>', $x_comment);
+        $x_comment = preg_replace('/\[\/sup\]/i', '</sup>', $x_comment);    
+
+        $x_comment = preg_replace('/\[sub\]/i', '<sub>', $x_comment);
+        $x_comment = preg_replace('/\[\/sub\]/i', '</sub>', $x_comment);    
+
+        $x_comment = preg_replace('/\[hr\]/i', '<hr>', $x_comment);
+
+        $x_comment = preg_replace('/\[blockquote\]/i', '<blockquote>', $x_comment);
+        $x_comment = preg_replace('/\[\/blockquote\]/i', '</blockquote>', $x_comment);    
+
+        $x_comment = preg_replace('/\[code\]/i', '<code>', $x_comment);
+        $x_comment = preg_replace('/\[\/code\]/i', '</code>', $x_comment);    
+
+        $x_comment = preg_replace('/\[red\]/i', '<span style="color:red;">', $x_comment);
+        $x_comment = preg_replace('/\[\/red\]/i', '</span>', $x_comment);    
+
+        $x_comment = preg_replace('/\[grn\]/i', '<span style="color:green;">', $x_comment);
+        $x_comment = preg_replace('/\[\/grn\]/i', '</span>', $x_comment);    
+
+        $x_comment = preg_replace('/\[bgy\]/i', '<span style="background:yellow;">', $x_comment);
+        $x_comment = preg_replace('/\[\/bgy\]/i', '</span>', $x_comment);    
+
+        $x_comment = preg_replace('/\[blu\]/i', '<span style="color:blue;">', $x_comment);
+        $x_comment = preg_replace('/\[\/blu\]/i', '</span>', $x_comment);    
+
+
+      return $x_comment;
+    }
+/******************************************************************************/
 }
 ?>

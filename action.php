@@ -8,9 +8,9 @@
 **  must run within Dokuwiki
 **/
 if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../../').'/');
-if(!defined('xs_ImagePath')) define('xs_ImagePath',realpath(dirname(__FILE__)).'/');
 if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 require_once(DOKU_PLUGIN.'action.php');
+
 
 /******************************************************************************/
 class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
@@ -177,16 +177,13 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     
                                        // inform user (or assignee) about update
                                        $this->_emailForIssueMod($_REQUEST['project'],$issues[$_REQUEST['comment_issue_ID']], $comments[$comment_id]);                                 
-                
-                                   
+
                                        // update modified date
                                        $issues[$_REQUEST['comment_issue_ID']]['modified'] = date($this->getConf('d_format')); 
                                        $xvalue = io_saveFile($pfile,serialize($issues));
                                        $anker_id = 'resolved_'. uniqid((double)microtime()*1000000,1);                                   
                                        $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_commenttrue').$comment_id.'.</div><br />';
-                                       
                                     } 
-                                    
                                  }
                             }
                        }
@@ -209,13 +206,16 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     if ($captcha_ok)
                       {   if (checkSecurityToken())
                           {   //Add resolution text to the issue file and set the issue to solved
-                              $issue_id = $_REQUEST['comment_issue_ID'];
-                              $cFlag = false;      
+                              $issue_id = trim($_REQUEST['comment_issue_ID']);
+                              $cFlag = false;
+     
                               foreach ($issues as $value)
-                                  { if ($value['id'] = $issue_id) 
+                                  { $ist = $value['id'];
+                                    if ($value['id'] == $issue_id) 
                                     { $cFlag = true;
                                       break;}
                                   }
+
                               if ($cFlag === true)
                               {   $issues[$issue_id]['resolution'] = htmlspecialchars(stripslashes($_REQUEST['x_resolution']));
                                   
@@ -230,6 +230,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                   msg($this->getLang('msg_resolution_true').$issue_id,1);
                                   $this->_emailForResolution($_REQUEST['project'], $issues[$_REQUEST['comment_issue_ID']]);
                               }
+                              else { msg("Issue with ID: $issue_id not found.",-1); }
                                 
                           }
                       }        
@@ -395,7 +396,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         if (@file_exists($pfile))
         	{$issues  = unserialize(@file_get_contents($pfile));}
         else
-        	{$issues = array();}            	          
+        	{ msg("No [$pfile] found.",-1); return; }            	          
 
         if ($start>count($issues)) $start=count($issues)-$step;                
         if(array_key_exists('userinfo', $user_grp))
@@ -483,7 +484,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                              '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$this->_get_one_value($issue,'user_name').'</a></td>'. 
                              '<td class="canbreak itl__td_standard">'.$itl_item_title.'</td>'.
                              '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$this->_get_one_value($issue,'assigned').'</a></td>'. 
-                             '<td class="canbreak itl__td_standard">'.$this->_get_one_value($issue,'resolution').'</td>'.
+                             '<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.
                              '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.
                              '</tr>';        
                 }
@@ -500,7 +501,6 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             {
                 $reduced_header = $reduced_header."<th id='".$config."'>".strtoupper($config)."</th>";
             }
-
             //Build rows according settings
             $reduced_issues='';
             for ($i=$next_start-1;$i>=0;$i=$i-1)
@@ -509,11 +509,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     $a_status = strtoupper($this->_get_one_value($issue,'status'));
                     $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
 
-                if ((($stat_filter=='ALL') || (stristr($stat_filter,$a_status)!= false)) && (($sev_filter=='ALL') || (stristr($sev_filter,$a_severity)!= false)) && (($data['product']=='ALL') || (stristr($data['product'],$a_product)!= false)))
+                if ((($stat_filter=='ALL') || (stristr($stat_filter,$a_status)!= false)) && (($sev_filter=='ALL') || (stristr($sev_filter,$a_severity)!= false)) && (($productfilter=='ALL') || (stristr($productfilter,$a_product)!= false)))
                 {   
                     if ($y>=$step) break;
                     $y=$y+1;
-                    
                     $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" onMouseover="this.bgColor=\'#DDDDDD\'" onMouseout="this.bgColor=\'#FFFFFF\'">'.
                                                       '<td'.$style.$this->_get_one_value($issue,'id').'</td>';
                     foreach ($configs as $config)
@@ -549,9 +548,11 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         elseif ($config == 'modified')
                         {   $reduced_issues .='<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.NL;
                         }
+                        elseif ($config == 'resolution')
+                        {   $reduced_issues .='<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.NL;
+                        }
                         else 
-                        {
-                            $reduced_issues .= '<td'.$style.$isval.'</td>';
+                        {   $reduced_issues .= '<td'.$style.$isval.'</td>';
                         }
                     }
                         $reduced_issues .= '</tr>';
@@ -896,7 +897,7 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
         if($_cFlag === true) {
 
 // mod for editor ---------------------------------------------------------------------
-$ret .= '<script type="text/javascript" src="'.DOKU_PLUGIN.'issuetracker/xs_edit.js"></script>
+$issue_add_comment .= '<span>
          <script>
           function doHLine(tag1,obj)
           {
@@ -914,20 +915,20 @@ $ret .= '<script type="text/javascript" src="'.DOKU_PLUGIN.'issuetracker/xs_edit
           		var len = textarea.value.length;
           	  var start = textarea.selectionStart;
           		var end = textarea.selectionEnd;
-          		
+
           		var scrollTop = textarea.scrollTop;
           		var scrollLeft = textarea.scrollLeft;
-          		
+
                   var sel = textarea.value.substring(start, end);
           	      //alert(sel);
           		    var rep = tag1 + sel;
                   textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
-          		
+
           		textarea.scrollTop = scrollTop;
           		textarea.scrollLeft = scrollLeft;
           	}
           }
-          
+
           function doAddTags(tag1,tag2,obj)
           {
           textarea = document.getElementById(obj);
@@ -944,10 +945,10 @@ $ret .= '<script type="text/javascript" src="'.DOKU_PLUGIN.'issuetracker/xs_edit
           		var len = textarea.value.length;
           	    var start = textarea.selectionStart;
           		var end = textarea.selectionEnd;
-          		
+
           		var scrollTop = textarea.scrollTop;
           		var scrollLeft = textarea.scrollLeft;
-          		
+
                   var sel = textarea.value.substring(start, end);
           	    //alert(sel);
           		var rep = tag1 + sel + tag2;
@@ -957,61 +958,59 @@ $ret .= '<script type="text/javascript" src="'.DOKU_PLUGIN.'issuetracker/xs_edit
           		textarea.scrollLeft = scrollLeft;
           	}
           }
-          
+
           function doList(tag1,tag2,obj){
           textarea = document.getElementById(obj);
-          
+
           // Code for IE
           		if (document.selection) 
           			{
           				textarea.focus();
           				var sel = document.selection.createRange();
           				var list = sel.text.split("\n");
-          		
+
           				for(i=0;i<list.length;i++) 
           				{
           				list[i] = "[li]" + list[i] + "[/li]";
           				}
           				//alert(list.join("\n"));
           				sel.text = tag1 + "\n" + list.join("\n") + "\n" + tag2;
-          				
+
           			} else
           			// Code for Firefox
           			{
-          
+
           		var len = textarea.value.length;
-          	    var start = textarea.selectionStart;
+          	  var start = textarea.selectionStart;
           		var end = textarea.selectionEnd;
           		var i;
-          		
+
           		var scrollTop = textarea.scrollTop;
-          		var scrollLeft = textarea.scrollLeft;
-          
-          		
-                  var sel = textarea.value.substring(start, end);
-          	    //alert(sel);
-          		
+          		var scrollLeft = textarea.scrollLeft;          
+
+              var sel = textarea.value.substring(start, end);
+      	      //alert(sel);
+
           		var list = sel.split("\n");
-          		
+
           		for(i=0;i<list.length;i++) 
           		{
           		list[i] = "[li]" + list[i] + "[/li]";
           		}
           		//alert(list.join("<br>"));
-                  
-          		
+
           		var rep = tag1 + "\n" + list.join("\n") + "\n" +tag2;
           		textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
-          		
+
           		textarea.scrollTop = scrollTop;
           		textarea.scrollLeft = scrollLeft;
            }
           }
          
-         </script>';                      
+         </script></span>';                       
 // mod for editor ---------------------------------------------------------------------
 
-$issue_add_comment ='<table class="itd__tables">'.
+$issue_add_comment .='<table class="itd__tables">'.
                       '<tr>'.
                         '<td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_cmts_adcmt').'</td>
                       </tr><tr><td>';
@@ -1042,7 +1041,7 @@ $issue_add_comment .= '<script type="text/javascript" src="include/selectupdate.
 $issue_add_comment .= formSecurityToken(false). 
                      '<input type="hidden" name="project" type="text" value="'.$project.'"/>'.NL.
                      '<input type="hidden" name="comment_file" type="text" value="'.$cfile.'"/>'.NL.
-                     '<input type="hidden" name="comment_issue_ID" type="text" value="'.$issue[$issue_id]['id'].'"/>'.NL.
+                     '<input type="hidden" id="comment_issue_ID" name="comment_issue_ID" type="text" value="'.$issue[$issue_id]['id'].'"/>'.NL.
                      '<input type="hidden" name="author" type="text" value="'.$u_mail_check.'"/>'.NL.        
                      '<input type="hidden" name="timestamp" type="text" value="'.$cur_date.'"/>'.NL.        
                      '<textarea id="comment" name="comment" type="text" cols="106" rows="7" value=""></textarea>'.NL;        
@@ -1092,7 +1091,7 @@ $issue_edit_resolution .= '<form name="edit_resolution" method="post" action="'.
 $issue_edit_resolution .= formSecurityToken(false).
                           '<input type="hidden" name="project" type="text" value="'.$project.'"/>'.NL.
                           '<input type="hidden" name="comment_issue_ID" type="text" value="'.$issue[$issue_id]['id'].'"/>'.NL.
-                          '<input type="hidden" name="add_resolution" type="text" value="1"/>'.NL;        
+                          '<input type="hidden" id="add_resolution" name="add_resolution" type="text" value="1"/>'.NL;        
     
 $issue_edit_resolution .= "<textarea id='x_resolution' name='x_resolution' type='text' cols='106' rows='7' value=''>$x_resolution</textarea>";
                               
@@ -1139,12 +1138,11 @@ $issue_edit_resolution = '<table class="itd__tables"><tbody>
     }
 
 /******************************************************************************/
-/* send an e-mail to user due to issue modificaion
+/* send an e-mail to user due to issue resolution
 */                            
     function _emailForResolution($project,$issue)
     {  if ($this->getConf('userinfo_email')==1)
-        {
-            $subject = sprintf($this->getLang('issue_resolved_subject'),$issue['id'], $project);            
+        {   $subject = sprintf($this->getLang('issue_resolved_subject'),$issue['id'], $project);            
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
             global $ID;
             
@@ -1153,7 +1151,7 @@ $issue_edit_resolution = '<table class="itd__tables"><tbody>
                     $this->getLang('issuemod_status').$issue['status'].chr(10).
                     $this->getLang('issuemod_product').$issue['product'].chr(10).
                     $this->getLang('issuemod_version').$issue['version'].chr(10).
-                    $this->getLang('issue_resolved_text').$issue['resolution'].chr(10).
+                    $this->getLang('issue_resolved_text').$this->xs_format($issue['resolution']).chr(10).
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
 
@@ -1184,7 +1182,7 @@ $issue_edit_resolution = '<table class="itd__tables"><tbody>
             $this->getLang('issuemod_title').$issue['title'].chr(10).
             $this->getLang('issuemod_cmntauthor').$comment['author'].chr(10).
             $this->getLang('issuemod_date').$comment['timestamp'].chr(10).
-            $this->getLang('issuemod_cmnt').$comment['comment'].chr(10).
+            $this->getLang('issuemod_cmnt').$this->xs_format($comment['comment']).chr(10).
             $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
             $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
 

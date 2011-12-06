@@ -227,4 +227,6 @@ table.itd_tr_standard {
 .it_edittoolbar {
   width:                   330px;
   border:     1px dotted #69859E;
+  padding:     4px 12px 0px 12px;
+	border-radius:             4px;
 }
