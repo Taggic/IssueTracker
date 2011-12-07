@@ -800,71 +800,94 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 $ret .= '<div class="it_edittoolbar" style="margin-left:30px; margin-top:6px;">
          <script>
           function doHLine(tag1,obj)
-          {
-          textarea = document.getElementById(obj);
-          	// Code for IE
-          		if (document.selection) 
-          			{
+          { textarea = document.getElementById(obj);
+          	if (document.selection) 
+          	{     // Code for IE
           				textarea.focus();
           				var sel = document.selection.createRange();
-          				//alert(sel.text);
           				sel.text = tag1 + sel.text;
-          			}
-             else 
-              {  // Code for Mozilla Firefox
-          		var len = textarea.value.length;
-          	  var start = textarea.selectionStart;
-          		var end = textarea.selectionEnd;
-          		
-          		var scrollTop = textarea.scrollTop;
-          		var scrollLeft = textarea.scrollLeft;
-          		
-                  var sel = textarea.value.substring(start, end);
-          	      //alert(sel);
-          		    var rep = tag1 + sel;
-                  textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
-          		
-          		textarea.scrollTop = scrollTop;
-          		textarea.scrollLeft = scrollLeft;
           	}
-          }
-          
-          function doAddTags(tag1,tag2,obj)
-          {
-          textarea = document.getElementById(obj);
+            else 
+            {   // Code for Mozilla Firefox
+             		var len = textarea.value.length;
+             	  var start = textarea.selectionStart;
+             		var end = textarea.selectionEnd;
+              		
+             		var scrollTop = textarea.scrollTop;
+             		var scrollLeft = textarea.scrollLeft;
+              		
+                var sel = textarea.value.substring(start, end);
+         		    var rep = tag1 + sel;
+                textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
+              		
+             		textarea.scrollTop = scrollTop;
+             		textarea.scrollLeft = scrollLeft;
+          	}
+          }'.
+
+         "function doLink(tag1,tag2,obj)
+          {   var sel;
+              textarea = document.getElementById(obj);
+              var url = prompt('Enter the URL:','http://');
+              var scrollTop = textarea.scrollTop;
+              var scrollLeft = textarea.scrollLeft;
+              
+              if (url != '' && url != null) 
+              {   if (document.selection) 
+                  {   textarea.focus();
+                      var sel = document.selection.createRange();
+                      
+                      if(sel.text=='') { sel.text = '<a href=\"' + url + '\">' + url + '</a>'; }
+                      else { sel.text = '<a href=\"' + url + '\">' + sel.text + '</a>'; }				
+                  }
+                  else 
+                  {   var len = textarea.value.length;
+                      var start = textarea.selectionStart;
+                      var end = textarea.selectionEnd;
+                      var sel = textarea.value.substring(start, end);
+                      
+                      if(sel==''){ sel=url; } 
+                      else { var sel = textarea.value.substring(start, end); }
+                      
+                      var rep = '<a href=\"' + url + '\">' + sel + '</a>';
+                      textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
+                      textarea.scrollTop = scrollTop;
+                      textarea.scrollLeft = scrollLeft;
+                	}
+              }
+          }".
+         'function doAddTags(tag1,tag2,obj)
+          { textarea = document.getElementById(obj);
           	// Code for IE
-          		if (document.selection) 
-          			{
-          				textarea.focus();
+          	if (document.selection) 
+          			{ textarea.focus();
           				var sel = document.selection.createRange();
-          				//alert(sel.text);
           				sel.text = tag1 + sel.text + tag2;
           			}
              else 
               {  // Code for Mozilla Firefox
-          		var len = textarea.value.length;
+          		  var len = textarea.value.length;
           	    var start = textarea.selectionStart;
-          		var end = textarea.selectionEnd;
+          		  var end = textarea.selectionEnd;
           		
-          		var scrollTop = textarea.scrollTop;
-          		var scrollLeft = textarea.scrollLeft;
+          		  var scrollTop = textarea.scrollTop;
+          		  var scrollLeft = textarea.scrollLeft;
           		
-                  var sel = textarea.value.substring(start, end);
-          	    //alert(sel);
-          		var rep = tag1 + sel + tag2;
-                  textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
+                var sel = textarea.value.substring(start, end);
+          		  var rep = tag1 + sel + tag2;
+                textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
           		
-          		textarea.scrollTop = scrollTop;
-          		textarea.scrollLeft = scrollLeft;
+          		  textarea.scrollTop = scrollTop;
+          		  textarea.scrollLeft = scrollLeft;
           	}
           }
           
-          function doList(tag1,tag2,obj){
-          textarea = document.getElementById(obj);
-          
-          // Code for IE
+          function doList(tag1,tag2,obj)
+          {
+              textarea = document.getElementById(obj);
+
           		if (document.selection) 
-          			{
+          			{ // Code for IE
           				textarea.focus();
           				var sel = document.selection.createRange();
           				var list = sel.text.split("\n");
@@ -873,42 +896,31 @@ $ret .= '<div class="it_edittoolbar" style="margin-left:30px; margin-top:6px;">
           				{
           				list[i] = "[li]" + list[i] + "[/li]";
           				}
-          				//alert(list.join("\n"));
           				sel.text = tag1 + "\n" + list.join("\n") + "\n" + tag2;
-          				
-          			} else
-          			// Code for Firefox
-          			{
-          
-          		var len = textarea.value.length;
-          	    var start = textarea.selectionStart;
-          		var end = textarea.selectionEnd;
-          		var i;
-          		
-          		var scrollTop = textarea.scrollTop;
-          		var scrollLeft = textarea.scrollLeft;
-          
-          		
+          			} 
+              else
+          			{ // Code for Firefox
+          		    var len = textarea.value.length;
+          	      var start = textarea.selectionStart;
+          		    var end = textarea.selectionEnd;
+          		    var i;
+
+          		    var scrollTop = textarea.scrollTop;
+          		    var scrollLeft = textarea.scrollLeft;
+
                   var sel = textarea.value.substring(start, end);
-          	    //alert(sel);
+          		    var list = sel.split("\n");
           		
-          		var list = sel.split("\n");
-          		
-          		for(i=0;i<list.length;i++) 
-          		{
-          		list[i] = "[li]" + list[i] + "[/li]";
-          		}
-          		//alert(list.join("<br>"));
-                  
-          		
-          		var rep = tag1 + "\n" + list.join("\n") + "\n" +tag2;
-          		textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
-          		
-          		textarea.scrollTop = scrollTop;
-          		textarea.scrollLeft = scrollLeft;
-           }
+              		for(i=0;i<list.length;i++) 
+              		{ list[i] = "[li]" + list[i] + "[/li]"; }
+
+              		var rep = tag1 + "\n" + list.join("\n") + "\n" +tag2;
+              		textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
+
+              		textarea.scrollTop = scrollTop;
+              		textarea.scrollLeft = scrollLeft;
+              }
           }
-         
          </script>';                      
 // mod for editor ---------------------------------------------------------------------
 
@@ -927,6 +939,7 @@ $ret .= '<div class="it_edittoolbar" style="margin-left:30px; margin-top:6px;">
 	$ret .= "<img class=\"button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','description')\">".NL;
 	$ret .= "<img class=\"button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','description')\">".NL;
 	$ret .= "<img class=\"button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','description')\">".NL;
+	$ret .= "<img class=\"button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','description')\">".NL;
   $ret .= "<br></div>";
 
           $ret .= '<textarea class="it__cir_linput" id="description" name="description" cols="109" rows="7">'.$_REQUEST['description'].'</textarea></td>
@@ -1124,6 +1137,9 @@ address format and the domain exists.
         $x_comment = preg_replace('/\[blu\]/i', '<span style="color:blue;">', $x_comment);
         $x_comment = preg_replace('/\[\/blu\]/i', '</span>', $x_comment);    
 
+//        $x_comment = preg_replace("|\[link\].*?\[/link\]|si","", $x_comment);
+//        echo 'comment: '.$x_comment.'<br />'; 
+//        $x_comment = '<a href="'.$x_comment.'">'.$x_comment.'</a>');
 
       return $x_comment;
     }

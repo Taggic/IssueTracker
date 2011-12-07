@@ -144,7 +144,7 @@ table.itd__title TR TD P {
 	border-style:           outset;
 	background-color:      #CED2DB;
 	padding:                   5px;
-	border-radius:           0.5em;
+	border-radius:             4px;
 }
 table.itd_tr_standard {
 	background-color: #f0f0f0;
@@ -156,7 +156,7 @@ table.itd_tr_standard {
 }
 .itd__col2 {
 	width:                     13%;
-	font-weight:              bold;
+	font-size:              0.75em;
 }
 .itd__col3, .itd__col4 {
 	width:                     25%;
@@ -178,14 +178,16 @@ table.itd_tr_standard {
 	border-spacing:            0px;
 }
 .itd_tables_tdh {
-	background-color:      #bbbbbb;
+  background-color:      #CED2DB;
 	width:                     90%;
-	border:                    0px;
-	color:                 #ffffff;
+	border:     1px dotted #9999FF;
+	color:                 #555555;
 	font-weight:              bold;
 	white-space:            nowrap;
-	text-align:             center;
+	text-align:               left;
 	vertical-align:         center;
+  padding-left:             12px;
+	border-radius:             3px;
 }
 .itd__tables_tr {
 	border:                      0;
@@ -194,7 +196,7 @@ table.itd_tr_standard {
 .itd_tables_tdc2 {
 	border:                      0;
 	width:                     13%;
-	font-weight:              bold;
+	font-size:              0.75em;  
 }
 .itd_tables_tdc3 {
 	border:                      0;
@@ -229,4 +231,16 @@ table.itd_tr_standard {
   border:     1px dotted #69859E;
   padding:     4px 12px 0px 12px;
 	border-radius:             4px;
+}
+
+.img_tab_open_comment {
+  background-image:url(images/enfold.png);
+  background-repeat:no-repeat;
+  height:19px;
+  background-position: 0 0;
+ }
+
+.lnk_tab_open_comment {
+  width:                   222px;
+	text-align:             center;
 }

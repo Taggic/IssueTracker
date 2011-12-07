@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2011-12-06',
+         'date'   => '2011-12-07',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -708,196 +708,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $__reportedby = $issue[$issue_id]['user_name'];
         }
                    
-
-//--------------------------------------
-// Tables for the Issue details view:
-//--------------------------------------
-$issue_edit_head = '<table class="itd__title">'.
-                   '<tr>
-                      <td colSpan="6" >
-                      <p>
-                        <font size="1"><i>&nbsp['.$issue[$issue_id]['id'].']&nbsp;&nbsp;</i></font>
-                        <font size="3" color=#00008f>'.
-                          '<b><i><h class="itd_formtitle">'.$issue[$issue_id]['title'].'</h></i></b>
-                        </FONT>
-                      </p>
-                      </td>
-                    </tr>'.                  
-                   '<tbody class="itd__details">'.                    
-                   '<tr class="itd_tr_standard">
-                      <td class="it__left_indent"></td>
-                      <td class="itd__col2">'.$this->getLang('lbl_issueid').'</td>
-                      <td class="itd__col3">'.$issue[$issue_id]['id'].'</td>
-                      <td class="itd__col4"></td>                   
-                      <td class="itd__col5">'.$this->getLang('lbl_project').'</td>
-                      <td class="itd__col6">'.$project.'</td>
-                    </tr>';
-                   
-$issue_edit_head .= '<tr class="itd_tr_standard">
-                      <td class="it__left_indent"></td>
-                      <td class="itd__col2">'.$this->getLang('th_severity').':</td>
-                      <td class="itd__col3">'.$severity_img.$issue[$issue_id]['severity'].'</td>
-                      <td class="itd__col4"></td>                   
-                      <td class="itd__col5">'.$this->getLang('th_product').':</td>
-                      <td class="itd__col6">'.$issue[$issue_id]['product'].'</td>
-                    </tr>';
-                   
-$issue_edit_head .= '<tr class="itd_tr_standard">
-                      <td class="it__left_indent"></td>
-                      <td class="itd__col2">'.$this->getLang('th_status').':</td>
-                      <td class="itd__col3">'.$status_img.$issue[$issue_id]['status'].'</td>
-                      <td class="itd__col4"></td>                   
-                      <td class="itd__col5">'.$this->getLang('th_version').':</td>
-                      <td class="itd__col6">'.$issue[$issue_id]['version'].'</td>
-                    </tr>';
-
-$issue_edit_head .= '<tr class="itd_tr_standard">                      
-                      <td class="it__left_indent"></td>
-                      <td class="itd__col2">'.$this->getLang('lbl_reporter').'</td>
-                      <td class="itd__col3"><a href="mailto:'.$__reportedby.'">'.$__reportedby.'</a></td>
-                      <td class="itd__col4"></td>                   
-                      <td class="itd__col5">'.$this->getLang('th_created').':</td>
-                      <td class="itd__col6">'.date($this->getConf('d_format'),strtotime($issue[$issue_id]['created'])).'</td>
-                    </tr>
-                   
-                    <tr class="itd_tr_standard">
-                      <td class="it__left_indent"></td>
-                      <td class="itd__col2">'.$this->getLang('th_assigned').':</td>
-                      <td class="itd__col3"><a href="mailto:'.$__assigened.'">'.$__assigened.'</a></td>
-                      <td class="itd__col4"></td>                   
-                      <td class="itd__col5">'.$this->getLang('th_modified').':</td>
-                      <td class="itd__col6">'.date($this->getConf('d_format'),strtotime($issue[$issue_id]['modified'])).'</td>
-                    </tr>
-                    </tbody></table>';
-
-
-$issue_client_details = '<table class="itd__tables"><tbody>
-                        <tr>
-                           <td class="itd_tables_tdh" colSpan="3">'.$this->getLang('lbl_reporterdtls').'</td>
-                        </tr>
-                        <tr class="itd__tables_tr">
-                           <td class="it__left_indent"></td>
-                           <td class="itd_tables_tdc2">'.$this->getLang('lbl_reportername').'</td>
-                           <td class="itd_tables_tdc3">'.$issue[$issue_id]['user_name'].'</td>
-                        </tr>';
-
-                        //--------------------------------------------------------------------------------------------------------------
-                        // do not show personal details if issue details diplayed by neigther admin/assignee nor the original user itself
-                        //--------------------------------------------------------------------------------------------------------------
-/*                        echo "current user = ".$user_mail['userinfo']['mail']."<br />".
-                               "Reporting user = ".$issue[$issue_id]['user_mail']."<br />";
-                          if($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) {echo "current user = Reporting user <br /><br />";}
-                             else {echo "current user != Reporting user <br /><br />";}
-                          if(strpos($target2,$user_mail['userinfo']['mail']) != false) {echo "current user is a member of assignees <br /><br />";}
-                             else {echo "current user is not a member of assignees <br /><br />";}
-*/                               
-                        if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
-                        {
-$issue_client_details .= '<tr class="itd__tables_tr">
-                            <td class="it__left_indent"></td>
-                            <td class="itd_tables_tdc2">'.$this->getLang('lbl_reportermail').'</td>
-                            <td class="itd_tables_tdc3"><a href="mailto:'.$issue[$issue_id]['user_mail'].'">'.$issue[$issue_id]['user_mail'].'</a></td>
-                          </tr>
-                          <tr class="itd__tables_tr">
-                            <td class="it__left_indent"></td>
-                            <td class="itd_tables_tdc2">'.$this->getLang('lbl_reporterphone').'</td>
-                            <td class="itd_tables_tdc3">'.$issue[$issue_id]['user_phone'].'</td>
-                          </tr>
-                          <tr class="itd__tables_tr">
-                            <td class="it__left_indent"></td>
-                            <td class="itd_tables_tdc2">'.$this->getLang('lbl_reporteradcontact').'</td>
-                            <td class="itd_tables_tdc3"><a href="mailto:'.$issue[$issue_id]['add_user_mail'].'">'.$issue[$issue_id]['add_user_mail'].'</a></td>
-                          </tr>
-                          </tbody></table>'; 
-                        }
-                        else {
-                          $issue_client_details .= '</tbody></table>';
-                        }
-
-                        $x_comment = $this->convertlabel($issue[$issue_id]['description']);
-                        
-$issue_initial_description = '<table class="itd__tables"><tbody>
-                                <tr>
-                                  <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_initdescr').'</td>
-                                </tr>
-                                <tr class="itd__tables_tr">
-                                  <td width="1%"></td>
-                                  <td>'.$this->xs_format($x_comment).'</td>
-                                </tr>
-                              </tbody></table>';
-                              
-$issue_attachments = '<table class="itd__tables"><tbody>
-                      <tr>
-                        <td class="itd_tables_tdh">'.$this->getLang('lbl_symptlinks').'</td>
-                      </tr>
-                      <tr  class="itd__tables_tr">
-                        <td style="padding-left:0.45em;">1. <a href="'.$issue[$issue_id]['attachment1'].'"><img border="0" alt="symptoms 1" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment1'].'" href="'.$issue[$issue_id]['attachment1'].'">'.$issue[$issue_id]['attachment1'].'</a></td>
-                      </tr>'.
-                     '<tr  class="itd__tables_tr">
-                        <td style="padding-left:0.45em;">2. <a href="'.$issue[$issue_id]['attachment2'].'"><img border="0" alt="symptoms 2" style="margin-right:0.5em" vspace=1em align=absMiddle src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment2'].'" href="'.$issue[$issue_id]['attachment2'].'">'.$issue[$issue_id]['attachment2'].'</a></td>
-                      </tr>'.
-                     '<tr  class="itd__tables_tr">
-                        <td style="padding-left:0.45em;">3. <a href="'.$issue[$issue_id]['attachment3'].'"><img border="0" alt="symptoms 3" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment3'].'" href="'.$issue[$issue_id]['attachment3'].'">'.$issue[$issue_id]['attachment3'].'</a></td>
-                      </tr>'.
-                     '</tbody></table>';              
-
-$issue_comments_log ='<table class="itd__tables"><tbody>
-                      <tr>
-                        <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_cmts_wlog').'</td>
-                      </tr>';
-              // loop through the comments
-              if ($comments!=false) {              
-                  foreach ($comments as $a_comment)
-                  {
-                        $x_id = $this->_get_one_value($a_comment,'id');
-                        $x_comment = $this->_get_one_value($a_comment,'comment');
-                        $x_comment = $this->convertlabel($x_comment);
-                        
-                        //----------------------------------------------------------------------------------------------------------------
-                        // do not show personal details if issue details diplayed by neigther admin/assignee nor the original user itself
-                        //----------------------------------------------------------------------------------------------------------------
-                        if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
-                        {   $x_mail = '<a href="mailto:'.$this->_get_one_value($a_comment,'author').'">'.$this->_get_one_value($a_comment,'author').'</a>'; }
-                        else {   $x_mail = '<i> (user details hidden) </i>';  }
-
-                        $issue_comments_log .= '<tr  class="itd__tables_tr">
-                                                  <td class="itd_comment_trh"><label>['.$this->_get_one_value($a_comment,'id').'] </label>&nbsp;&nbsp;&nbsp;
-                                                                            <label>'.date($this->getConf('d_format'),strtotime($this->_get_one_value($a_comment,'timestamp'))).' </label>&nbsp;&nbsp;&nbsp;
-                                                                            <label>'.$x_mail.'</label></td>
-                                                </tr>
-                                                <tr  class="itd__tables_tr">
-                                                  <td class="itd_comment_tr">'.$this->xs_format($x_comment).'</td>
-                                                </tr>';
-                  }
-              }
-              $issue_comments_log .='</tbody></table>'; 
-
-                     
-        //--------------------------------------------------------------------------------------------------------------
-        // only admin/assignees and reporter are allowed to add comments if only user edit option is set
-        //--------------------------------------------------------------------------------------------------------------
-        // retrive some basic information
-        $cur_date = date ($this->getConf('d_format'));
-        if($user_mail['userinfo']['mail']=='') {$u_mail_check ='unknown';}
-        else {$u_mail_check = $user_mail['userinfo']['mail'];}
-        $user_check = $this->getConf('registered_users');
-        
-        //2011-12-02: bwenz code proposal (Issue 11)
-        $x_resolution = $this->convertlabel($issue[$issue_id]['resolution']);
-        if($x_resolution=="") { $x_resolution = "&nbsp;"; }
-                        
-        $_cFlag = false;             
-        if($user_check == false)
-            { $_cFlag = true; } 
-            
-        elseif ($user_check == true) {
-            if ($user_mail['perm'] > 1) 
-            { $_cFlag = true; } }
-
-        if($_cFlag === true) {
-
-// mod for editor ---------------------------------------------------------------------
-$issue_add_comment .= '<span>
+// scripts for xsEditor -------------------------------------------------------
+$issue_edit_head .= '<span>
          <script>
           function doHLine(tag1,obj)
           {
@@ -973,7 +785,6 @@ $issue_add_comment .= '<span>
           				{
           				list[i] = "[li]" + list[i] + "[/li]";
           				}
-          				//alert(list.join("\n"));
           				sel.text = tag1 + "\n" + list.join("\n") + "\n" + tag2;
 
           			} else
@@ -997,7 +808,6 @@ $issue_add_comment .= '<span>
           		{
           		list[i] = "[li]" + list[i] + "[/li]";
           		}
-          		//alert(list.join("<br>"));
 
           		var rep = tag1 + "\n" + list.join("\n") + "\n" +tag2;
           		textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
@@ -1006,14 +816,226 @@ $issue_add_comment .= '<span>
           		textarea.scrollLeft = scrollLeft;
            }
           }
-         
-         </script></span>';                       
-// mod for editor ---------------------------------------------------------------------
+          </script></span>'.NL;
+          
+$issue_edit_head .= '<span>
+         <script>
+             function tab_open(blink_id, cell_ID) 
+              {   if (document.getElementById(blink_id).style.display == "block")
+                  {   document.getElementById(blink_id).style.display = "none";
+                      document.getElementById(cell_ID).style.backgroundPosition = "0px 0px";
+                  }
+                  else
+                  {   document.getElementById(blink_id).style.display = "block";
+                      document.getElementById(cell_ID).style.backgroundPosition = "0px -19px";
+                  }
+              } 
+        </script></span>'.NL;
+//--------------------------------------
+// Tables for the Issue details view:
+//--------------------------------------
+$issue_edit_head .= '<table class="itd__title">'.
+                   '<tr>
+                      <td colSpan="6" >
+                      <p>
+                        <font size="1"><i>&nbsp['.$issue[$issue_id]['id'].']&nbsp;&nbsp;</i></font>
+                        <font size="3" color=#00008f>'.
+                          '<b><i><h class="itd_formtitle">'.$issue[$issue_id]['title'].'</h></i></b>
+                        </FONT>
+                      </p>
+                      </td>
+                    </tr>'.                  
+                   '<tbody class="itd__details">'.                    
+                   '<tr class="itd_tr_standard">
+                      <td class="it__left_indent"></td>
+                      <td class="itd__col2">'.$this->getLang('lbl_issueid').'</td>
+                      <td class="itd__col3">'.$issue[$issue_id]['id'].'</td>
+                      <td class="itd__col4"></td>                   
+                      <td class="itd__col5">'.$this->getLang('lbl_project').'</td>
+                      <td class="itd__col6">'.$project.'</td>
+                    </tr>';
+                   
+$issue_edit_head .= '<tr class="itd_tr_standard">
+                      <td class="it__left_indent"></td>
+                      <td class="itd__col2">'.$this->getLang('th_severity').':</td>
+                      <td class="itd__col3">'.$severity_img.$issue[$issue_id]['severity'].'</td>
+                      <td class="itd__col4"></td>                   
+                      <td class="itd__col5">'.$this->getLang('th_product').':</td>
+                      <td class="itd__col6">'.$issue[$issue_id]['product'].'</td>
+                    </tr>';
+                   
+$issue_edit_head .= '<tr class="itd_tr_standard">
+                      <td class="it__left_indent"></td>
+                      <td class="itd__col2">'.$this->getLang('th_status').':</td>
+                      <td class="itd__col3">'.$status_img.$issue[$issue_id]['status'].'</td>
+                      <td class="itd__col4"></td>                   
+                      <td class="itd__col5">'.$this->getLang('th_version').':</td>
+                      <td class="itd__col6">'.$issue[$issue_id]['version'].'</td>
+                    </tr>';
 
+$issue_edit_head .= '<tr class="itd_tr_standard">                      
+                      <td class="it__left_indent"></td>
+                      <td class="itd__col2">'.$this->getLang('lbl_reporter').'</td>
+                      <td class="itd__col3"><a href="mailto:'.$__reportedby.'">'.$__reportedby.'</a></td>
+                      <td class="itd__col4"></td>                   
+                      <td class="itd__col5">'.$this->getLang('th_created').':</td>
+                      <td class="itd__col6">'.date($this->getConf('d_format'),strtotime($issue[$issue_id]['created'])).'</td>
+                    </tr>
+                   
+                    <tr class="itd_tr_standard">
+                      <td class="it__left_indent"></td>
+                      <td class="itd__col2">'.$this->getLang('th_assigned').':</td>
+                      <td class="itd__col3"><a href="mailto:'.$__assigened.'">'.$__assigened.'</a></td>
+                      <td class="itd__col4"></td>                   
+                      <td class="itd__col5">'.$this->getLang('th_modified').':</td>
+                      <td class="itd__col6">'.date($this->getConf('d_format'),strtotime($issue[$issue_id]['modified'])).'</td>
+                    </tr>
+                    </tbody></table>';
+
+
+                  $alink_id++;
+                  $blink_id = 'statanker_'.$alink_id;
+                  $anker_id = 'anker_'.$alink_id;
+                  $cell_ID = 'img_tab_open_reporterdtls'.$blink_id;                              
+$issue_client_details = '<table class="itd__tables" id="tbl_'.$anker_id.'"><tbody>
+                        <tr>
+                           <td class="itd_tables_tdh" colSpan="3">'.$this->getLang('lbl_reporterdtls').'</td>
+                        </tr>
+                        <tbody style="display : none;" id="'.$blink_id.'"><tr class="itd__tables_tr">
+                           <td class="it__left_indent"></td>
+                           <td class="itd_tables_tdc2">'.$this->getLang('lbl_reportername').'</td>
+                           <td class="itd_tables_tdc3">'.$issue[$issue_id]['user_name'].'</td>
+                        </tr>';
+
+                        //--------------------------------------------------------------------------------------------------------------
+                        // do not show personal details if issue details diplayed by neigther admin/assignee nor the original user itself
+                        //--------------------------------------------------------------------------------------------------------------
+/*                        echo "current user = ".$user_mail['userinfo']['mail']."<br />".
+                               "Reporting user = ".$issue[$issue_id]['user_mail']."<br />";
+                          if($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) {echo "current user = Reporting user <br /><br />";}
+                             else {echo "current user != Reporting user <br /><br />";}
+                          if(strpos($target2,$user_mail['userinfo']['mail']) != false) {echo "current user is a member of assignees <br /><br />";}
+                             else {echo "current user is not a member of assignees <br /><br />";}
+*/                               
+                        if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
+                        {
+$issue_client_details .= '<tr class="itd__tables_tr">
+                            <td class="it__left_indent"></td>
+                            <td class="itd_tables_tdc2">'.$this->getLang('lbl_reportermail').'</td>
+                            <td class="itd_tables_tdc3"><a href="mailto:'.$issue[$issue_id]['user_mail'].'">'.$issue[$issue_id]['user_mail'].'</a></td>
+                          </tr>
+                          <tr class="itd__tables_tr">
+                            <td class="it__left_indent"></td>
+                            <td class="itd_tables_tdc2">'.$this->getLang('lbl_reporterphone').'</td>
+                            <td class="itd_tables_tdc3">'.$issue[$issue_id]['user_phone'].'</td>
+                          </tr>
+                          <tr class="itd__tables_tr">
+                            <td class="it__left_indent"></td>
+                            <td class="itd_tables_tdc2">'.$this->getLang('lbl_reporteradcontact').'</td>
+                            <td class="itd_tables_tdc3"><a href="mailto:'.$issue[$issue_id]['add_user_mail'].'">'.$issue[$issue_id]['add_user_mail'].'</a></td>
+                          </tr>'; 
+                        }
+
+$issue_client_details .= '</tbody><tr>'.NL.'
+                            <td colspan="3" class="img_tab_open_comment" id="'.$cell_ID.'">'.NL.'
+                                <div class="lnk_tab_open_comment" id="'.$cell_ID.'">
+                                  <a href="#tbl_'.$anker_id.'" id="'.$anker_id.'" onClick="tab_open(\''.$blink_id.'\',\''.$cell_ID.'\')">'.$this->getLang('gen_tab_open').'</a>
+                                </div>'.NL.'
+                            </td>
+                            </tr>'.NL.'</tbody></table>';
+
+
+                        $x_comment = $this->convertlabel($issue[$issue_id]['description']);
+                        
+$issue_initial_description = '<table class="itd__tables"><tbody>
+                                <tr>
+                                  <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_initdescr').'</td>
+                                </tr>
+                                <tr class="itd__tables_tr">
+                                  <td width="1%"></td>
+                                  <td>'.$this->xs_format($x_comment).'</td>
+                                </tr>
+                              </tbody></table>';
+
+$issue_attachments = '<table class="itd__tables"><tbody>
+                      <tr>
+                        <td class="itd_tables_tdh">'.$this->getLang('lbl_symptlinks').'</td>
+                      </tr>
+                      <tr  class="itd__tables_tr">
+                        <td style="padding-left:0.45em;">1. <a href="'.$issue[$issue_id]['attachment1'].'"><img border="0" alt="symptoms 1" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment1'].'" href="'.$issue[$issue_id]['attachment1'].'">'.$issue[$issue_id]['attachment1'].'</a></td>
+                      </tr>'.
+                     '<tr  class="itd__tables_tr">
+                        <td style="padding-left:0.45em;">2. <a href="'.$issue[$issue_id]['attachment2'].'"><img border="0" alt="symptoms 2" style="margin-right:0.5em" vspace=1em align=absMiddle src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment2'].'" href="'.$issue[$issue_id]['attachment2'].'">'.$issue[$issue_id]['attachment2'].'</a></td>
+                      </tr>'.
+                     '<tr  class="itd__tables_tr">
+                        <td style="padding-left:0.45em;">3. <a href="'.$issue[$issue_id]['attachment3'].'"><img border="0" alt="symptoms 3" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment3'].'" href="'.$issue[$issue_id]['attachment3'].'">'.$issue[$issue_id]['attachment3'].'</a></td>
+                      </tr>'.
+                     '</tbody></table>';              
+
+$issue_comments_log ='<table class="itd__tables"><tbody>
+                      <tr>
+                        <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_cmts_wlog').'</td>
+                      </tr>';
+              // loop through the comments
+              if ($comments!=false) {              
+                  foreach ($comments as $a_comment)
+                  {
+                        $x_id = $this->_get_one_value($a_comment,'id');
+                        $x_comment = $this->_get_one_value($a_comment,'comment');
+                        $x_comment = $this->convertlabel($x_comment);
+                        
+                        //----------------------------------------------------------------------------------------------------------------
+                        // do not show personal details if issue details diplayed by neigther admin/assignee nor the original user itself
+                        //----------------------------------------------------------------------------------------------------------------
+                        if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
+                        {   $x_mail = '<a href="mailto:'.$this->_get_one_value($a_comment,'author').'">'.$this->_get_one_value($a_comment,'author').'</a>'; }
+                        else {   $x_mail = '<i> (user details hidden) </i>';  }
+
+                        $issue_comments_log .= '<tr  class="itd__tables_tr">
+                                                  <td class="itd_comment_trh"><label>['.$this->_get_one_value($a_comment,'id').'] </label>&nbsp;&nbsp;&nbsp;
+                                                                            <label>'.date($this->getConf('d_format'),strtotime($this->_get_one_value($a_comment,'timestamp'))).' </label>&nbsp;&nbsp;&nbsp;
+                                                                            <label>'.$x_mail.'</label></td>
+                                                </tr>
+                                                <tr  class="itd__tables_tr">
+                                                  <td class="itd_comment_tr">'.$this->xs_format($x_comment).'</td>
+                                                </tr>';
+                  }
+              }
+              $issue_comments_log .='</tbody></table>'; 
+
+                     
+        //--------------------------------------------------------------------------------------------------------------
+        // only admin/assignees and reporter are allowed to add comments if only user edit option is set
+        //--------------------------------------------------------------------------------------------------------------
+        // retrive some basic information
+        $cur_date = date ($this->getConf('d_format'));
+        if($user_mail['userinfo']['mail']=='') {$u_mail_check ='unknown';}
+        else {$u_mail_check = $user_mail['userinfo']['mail'];}
+        $user_check = $this->getConf('registered_users');
+        
+        //2011-12-02: bwenz code proposal (Issue 11)
+        $x_resolution = $this->convertlabel($issue[$issue_id]['resolution']);
+        if($x_resolution=="") { $x_resolution = "&nbsp;"; }
+                        
+        $_cFlag = false;             
+        if($user_check == false)
+            { $_cFlag = true; } 
+            
+        elseif ($user_check == true) {
+            if ($user_mail['perm'] > 1) 
+            { $_cFlag = true; } }
+
+        if($_cFlag === true) {
+
+                      
+// mod for editor ---------------------------------------------------------------------
+                  $alink_id++;
+                  $blink_id = 'statanker_'.$alink_id;
+                  $anker_id = 'anker_'.$alink_id;
 $issue_add_comment .='<table class="itd__tables">'.
                       '<tr>'.
                         '<td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_cmts_adcmt').'</td>
-                      </tr><tr><td>';
+                      </tr><tr><td colSpan="2" style="display : none;" id="'.$blink_id.'">';
 // mod for editor ---------------------------------------------------------------------
 
 $issue_add_comment .= '<div class="it_edittoolbar">'.NL;
@@ -1032,6 +1054,7 @@ $issue_add_comment .= '<div class="it_edittoolbar">'.NL;
 	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','comment')\">".NL;
 	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','comment')\">".NL;
 	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','comment')\">".NL;
   $issue_add_comment .= "<br></div>".NL;                      
 // mod for editor ---------------------------------------------------------------------
 
@@ -1054,18 +1077,33 @@ $issue_add_comment .= formSecurityToken(false).
               		        if(!is_null($helper) && $helper->isEnabled())
               			      {  $issue_add_comment .= '<p>'.$helper->getHTML().'</p>'; }
                       }
-                      
+                      $cell_ID = 'img_tab_open_comment'.$blink_id;
                       // check if only registered users are allowed to add comments
                       // ¦ perm — the user's permissions related to the current page ($ID)
-                      $issue_add_comment .= '<input  type="hidden" class="showid__option" name="showid" id="showid" type="text" size="10" value="'.$this->parameter.'"/>'.
-                                            '<input class="button" id="showcase" type="submit" name="showcase" value="'.$this->getLang('btn_add').'" title="'.$this->getLang('btn_add_title').'");/>'.
-                                            '</form></td></tr></table>'.NL;
+                      $issue_add_comment .= '<input  type="hidden" class="showid__option" name="showid" id="showid" type="text" size="10" value="'.$this->parameter.'"/>'.NL.
+                                            '<input class="button" id="showcase" type="submit" name="showcase" value="'.$this->getLang('btn_add').'" title="'.$this->getLang('btn_add_title').'");/>'.NL.
+                                            '</form>'.NL.'</td>'.NL.'</tr>'.NL.
+                                            '<tr>'.NL.'
+                                                <td colspan="2" class="img_tab_open_comment" id="'.$cell_ID.'">'.NL.'
+                                                    <div class="lnk_tab_open_comment" id="'.$cell_ID.'">
+                                                      <a href="#'.$anker_id.'" id="'.$anker_id.'" onClick="tab_open(\''.$blink_id.'\',\''.$cell_ID.'\')">'.$this->getLang('cmt_tab_open').'</a>
+                                                    </div>'.NL.'
+                                                </td>'.NL.'
+                                             </tr></table>'.NL;
 
+                  $alink_id++;
+                  $blink_id = 'statanker_'.$alink_id;
+                  $anker_id = 'anker_'.$alink_id;
 
 $issue_edit_resolution ='<table class="itd__tables">
                          <tr>
                             <td class="itd_tables_tdh" colSpan="2" >Resolution</td>
-                        </tr><tr><td>';
+                        </tr>';
+$issue_edit_resolution .= '<tr class="itd__tables_tr">
+                            <td width="1%"></td>
+                            <td>'.$this->xs_format($x_resolution).'</td>
+                          </tr>
+                          <tr><td colSpan="2" style="display : none;" id="'.$blink_id.'">';
 
 // mod for editor ---------------------------------------------------------------------
 $issue_edit_resolution .= '<div class="it_edittoolbar">'.NL;
@@ -1084,6 +1122,7 @@ $issue_edit_resolution .= '<div class="it_edittoolbar">'.NL;
 	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','x_resolution')\">".NL;
 	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','x_resolution')\">".NL;
 	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','x_resolution')\">".NL;
   $issue_edit_resolution .= "<br></div>".NL;                      
 // mod for editor ---------------------------------------------------------------------
 
@@ -1104,28 +1143,32 @@ $issue_edit_resolution .= "<textarea id='x_resolution' name='x_resolution' type=
               			      {  $issue_edit_resolution .= '<p>'.$helper->getHTML().'</p>'; }
                       }
                       
+                      $cell_ID = 'img_tab_open_comment'.$blink_id;
                       // check if only registered users are allowed to add comments
                       // ¦ perm — the user's permissions related to the current page ($ID)
 $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="showid" id="showid" type="text" size="10" value="'.$this->parameter.'"/>'.
                       '<input class="button" id="store_resolution" type="submit" name="store_resolution" value="'.$this->getLang('btn_add').'" title="'.$this->getLang('btn_add_title').'");/>'.
-                      '</form></td></tr></table>'.NL;
-
-
+                      '</form>'.NL.'</td>'.NL.'</tr>'.NL.
+                      '<tr>'.NL.'
+                          <td colspan="2" class="img_tab_open_comment" id="'.$cell_ID.'">'.NL.'
+                              <div class="lnk_tab_open_comment" id="'.$cell_ID.'">
+                                <a href="#'.$anker_id.'" id="'.$anker_id.'" onClick="tab_open(\''.$blink_id.'\',\''.$cell_ID.'\')">'.$this->getLang('rsl_tab_open').'</a>
+                              </div>'.NL.'
+                          </td>'.NL.'
+                       </tr></table>'.NL;
         }
         else {
-           $wmsg = 'Please <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">'.$this->getLang('lbl_signin'); 
-           $issue_add_comment .= '<div class="it__standard_feedback">'.$wmsg.'</div>';                      
+            $issue_edit_resolution ='<table class="itd__tables">
+                                     <tr>
+                                        <td class="itd_tables_tdh" colSpan="2" >Resolution</td>
+                                    </tr>';
+            $issue_edit_resolution .= '<tr class="itd__tables_tr">
+                                        <td width="1%"></td>
+                                        <td>'.$this->xs_format($x_resolution).'</td>
+                                      </tr></table>'.NL;
 
-                      //2011-12-02: bwenz code proposal (Issue 11)
-$issue_edit_resolution = '<table class="itd__tables"><tbody>
-                                <tr>
-                                  <td class="itd_tables_tdh" colSpan="2" >Resolution</td>
-                                </tr>
-                                <tr class="itd__tables_tr">
-                                  <td width="1%"></td>
-                                  <td>'.$x_resolution.'</td>
-                                </tr>
-                              </tbody></table>';
+            $wmsg = 'Please <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">'.$this->getLang('lbl_signin'); 
+            $issue_edit_resolution .= '<div class="it__standard_feedback">'.$wmsg.'</div>';                      
         }
 
 
@@ -1282,6 +1325,13 @@ $issue_edit_resolution = '<table class="itd__tables"><tbody>
         $x_comment = preg_replace('/\[blu\]/i', '<span style="color:blue;">', $x_comment);
         $x_comment = preg_replace('/\[\/blu\]/i', '</span>', $x_comment);    
 
+        $urlsuch[]="/([^]_a-z0-9-=\"'\/])((https?|ftp):\/\/|www\.)([^ \r\n\(\)\^\$!`\"'\|\[\]\{\}<>]*)/si";
+        $urlsuch[]="/^((https?|ftp):\/\/|www\.)([^ \r\n\(\)\^\$!`\"'\|\[\]\{\}<>]*)/si";
+        $urlreplace[]="\\1[link]\\2\\4[/link]";
+        $urlreplace[]="[link]\\1\\3[/link]";
+        $x_comment = preg_replace($urlsuch, $urlreplace, $x_comment);   
+        $x_comment = preg_replace("/\[link\]www.(.*?)\[\/link\]/si", "<a target=\"_blank\" href=\"http://www.\\1\">www.\\1</a>", $x_comment); 
+        $x_comment = preg_replace("/\[link\](.*?)\[\/link\]/si", "<a target=\"_blank\" href=\"\\1\">\\1</a>", $x_comment);
 
       return $x_comment;
     }

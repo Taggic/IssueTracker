@@ -53,7 +53,7 @@ $lang['lbl_cmts_adcmt']     = 'Add a new comment';
 $lang['lbl_cmts_edtres']    = 'Resolution';
 $lang['btn_add']            = 'Add';
 $lang['btn_add_title']      = 'Add';
-$lang['lbl_signin']         = 'Sign in</a> if you want to add a comment.';       // </a> necessary to close the link tag
+$lang['lbl_signin']         = 'Sign in</a> if you want to add a comment or resolution note.';       // </a> necessary to close the link tag
 
 $lang['th_project']         = 'Project';
 $lang['th_id']              = 'Id';
@@ -72,7 +72,9 @@ $lang['th_sympt']           = 'Symptom link ';
 $lang['th_assigned']        = 'Assigned to'; 
 $lang['th_resolution']      = 'Resolution';
 $lang['th_modified']        = 'Modified';        
-
+$lang['gen_tab_open']       = 'Details';
+$lang['cmt_tab_open']       = 'add Comment';
+$lang['rsl_tab_open']       = 'add / modify Resolution';
 /******************************************************************************/
 /* send an e-mail to user due to issue modificaion
 /* _emailForIssueMod
