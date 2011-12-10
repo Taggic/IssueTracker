@@ -21,5 +21,4 @@ $lang['products']       = 'Define Products coverd by the project <br> (comma sep
 $lang['assign']         = 'select wiki user groups pre-selected for assigning issues <br> (pipe "|" separated)';
 $lang['noStatIMG']      = 'status text instead of icons at Issue list';
 $lang['noSevIMG']       = 'severity text instead of icons at Issue list';
-//Setup VIM: ex: et ts=2 :
-                                                                                                       
+$lang['ltdReport']      = 'Reduce Report form by following selection';

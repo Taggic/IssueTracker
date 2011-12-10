@@ -17,5 +17,4 @@ $conf['products']          = 'ProdA, ProdB';                                    
 $conf['assign']            = 'admin';                                                            // Configure groups usable for issue asignments
 $conf['noStatIMG']         = false;                                                              // define if status text instead of pictures will be displayed at Issue list
 $conf['noSevIMG']          = false;                                                              // define if severity text instead of pictures will be displayed at Issue list
-
-
+$conf['ltdReport']         = '';                                                                 // empty by default

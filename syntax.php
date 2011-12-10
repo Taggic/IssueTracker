@@ -721,17 +721,6 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             }
             
             /*--------------------------------------------------------------------*/
-            // load set of version values defined by admin
-            /*--------------------------------------------------------------------*/
-    /*        $versions = explode('|', $this->getConf('versions'));
-            $xversions = explode(',', $versions[0]);
-            $STR_VERSIONS = "";
-            foreach ($xversions as $_versions)
-            {
-                $STR_VERSIONS = $STR_VERSIONS . '<option value="'.$_versions.'" >'.$_versions."</option>'     ";
-            }
-    */        
-            /*--------------------------------------------------------------------*/
             // load set of severity values defined by admin
             /*--------------------------------------------------------------------*/
             $STR_SEVERITY = "";
@@ -762,10 +751,17 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 <td>'.$this->getLang('th_product').'</td>
                 <td><select class="element select small it__cir_select" name="product">'.$STR_PRODUCTS.'</select></td>
               </tr>'.
-             '<tr>
-                <td>'.$this->getLang('th_version').'</td>
-                <td><input class="it__cir_input" name="version" value="'.$STR_VERSIONS.'"/></td>
-              </tr>'.
+             '<tr>';
+                   //Check config if hidden
+                  if(strpos($this->getConf('ltdReport'),'Version')!==false){
+                      $STR_VERSIONS = ' ';
+                      $ret .= ' <input type="hidden" class="it__cir_input" name="version" value="'.$STR_VERSIONS.'"/>';
+                  } 
+                  else {
+                      $ret .= ' <td>'.$this->getLang('th_version').'</td>
+                                <td><input class="it__cir_input" name="version" value="'.$STR_VERSIONS.'"/></td>';
+                  }             
+        $ret .= '</tr>'.
              '<tr><td colspan=2>&nbsp;</td></tr>'.
              '<tr>
                 <td>'.$this->getLang('th_username').'</td>
@@ -779,10 +775,16 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 <td>'.$this->getLang('th_userphone').'</td>
                 <td><input class="it__cir_input" name="user_phone" value="'.$user_phone['userinfo']['phone'].'"/></td>
               </tr>'.
-             '<tr>
-                <td>'.$this->getLang('th_reporteradcontact').'</td>
-                <td><input class="it__cir_input" name="add_user_mail" value="'.$_REQUEST['add_user_mail'].'"/></td>        
-              </tr>'.
+             '<tr>';
+                   //Check config if hidden
+                  if(strpos($this->getConf('ltdReport'),'Add contact')!==false){
+                      $ret .= ' <input type="hidden" class="it__cir_input" name="add_user_mail" value="'.$_REQUEST['add_user_mail'].'"/>';
+                  } 
+                  else {
+                      $ret .= ' <td>'.$this->getLang('th_reporteradcontact').'</td>
+                                <td><input class="it__cir_input" name="add_user_mail" value="'.$_REQUEST['add_user_mail'].'"/></td>';
+                  }             
+        $ret .= '</tr>'.
             '<tr><td colspan=2>&nbsp;</td></tr>'.
             '<tr>
                 <td>'.$this->getLang('th_severity').'</td>
@@ -944,22 +946,31 @@ $ret .= '<div class="it_edittoolbar" style="margin-left:30px; margin-top:6px;">
 
           $ret .= '<textarea class="it__cir_linput" id="description" name="description" cols="109" rows="7">'.$_REQUEST['description'].'</textarea></td>
              </tr>'.
-            '<tr><td colspan=2>&nbsp;</td></tr>'. 
-            '<tr>                
-                <td>'.$this->getLang('th_sympt').'1</td>
-                <td><input class="it__cir_linput" name="attachment1" value="'.$_REQUEST['attachment1'].'"/></td>
-             </tr>'.
-            '<tr>
-                <td>'.$this->getLang('th_sympt').'2</td>
-                <td><input class="it__cir_linput" name="attachment2" type="text" size="126" value="'.$_REQUEST['attachment2'].'"/></td>
-             </tr>'.
-            '<tr>
-                <td>'.$this->getLang('th_sympt').'3</td>
-                <td><input class="it__cir_linput" name="attachment3" type="text" size="126" value="'.$_REQUEST['attachment3'].'"</td>
-            </tr></table>'.  
-                  
-            '<p><input type="hidden" name="modified" type="text" value="'.$cur_date.'"/>'.
-            '<input type="hidden" name="assigned" type="text" value="" />';
+            '<tr><td colspan=2>&nbsp;</td></tr>';
+                   //Check config if hidden
+                  if(strpos($this->getConf('ltdReport'),'Symptom link 1')!==false){
+                      $ret .= ' <input type="hidden" class="it__cir_input" name="attachment1" value="'.$_REQUEST['attachment1'].'"/>';
+                  } 
+                  else {
+                      $ret .= '<tr><td>'.$this->getLang('th_sympt').'1</td>
+                                   <td><input class="it__cir_input" name="attachment1" value="'.$_REQUEST['attachment1'].'"/></td></tr>';
+                  }             
+                  if(strpos($this->getConf('ltdReport'),'Symptom link 2')!==false){
+                      $ret .= ' <input type="hidden" class="it__cir_input" name="attachment2" value="'.$_REQUEST['attachment2'].'"/>';
+                  } 
+                  else {
+                      $ret .= '<tr><td>'.$this->getLang('th_sympt').'2</td>
+                                   <td><input class="it__cir_input" name="attachment2" value="'.$_REQUEST['attachment2'].'"/></td></tr>';
+                  }             
+                  if(strpos($this->getConf('ltdReport'),'Symptom link 3')!==false){
+                      $ret .= ' <input type="hidden" class="it__cir_input" name="attachment3" value="'.$_REQUEST['attachment3'].'"/>';
+                  } 
+                  else {
+                      $ret .= '<tr><td>'.$this->getLang('th_sympt').'3</td>
+                                   <td><input class="it__cir_input" name="attachment3" value="'.$_REQUEST['attachment3'].'"/></td></tr>';
+                  }             
+        $ret .= '</table><p><input type="hidden" name="modified" type="text" value="'.$cur_date.'"/>'.
+                '<input type="hidden" name="assigned" type="text" value="" />';
     
             if ($this->getConf('use_captcha')==1) 
             {        
