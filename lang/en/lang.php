@@ -102,7 +102,7 @@ $lang['issuemod_end']        = ' Issue Tracker';    // project name placed befor
 */                            
 $lang['issue_resolved_subject']    = 'Service Request %s on %s was resolved';
 $lang['issue_resolved_intro']      = 'Your reported issue was resolved.';
-$lang['issue_resolved_status']     = 'solved';
+$lang['issue_resolved_status']     = 'Solved';
 $lang['issue_resolved_text']       = 'Solution:   ';
 $lang['msg_resolution_true']       = 'Your Resolution was added sucessfully.';
 
