@@ -77,6 +77,15 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $this->itl_sev = $_POST['itl_sev_filter'];
             $this->itl_prod = $_POST['itl_prod_filter'];
          }
+         elseif ($event->data === 'issuelist_filterlink') {
+            $this->itl_start = $_GET['itl_start'];
+            $this->itl_step = $_GET['itl_step'];
+            $this->itl_next = $_GET['itl_next'];
+            $this->itl_pjct = $_GET['itl_project'];
+            $this->itl_stat = $_GET['itl_stat_filter'];
+            $this->itl_sev = $_GET['itl_sev_filter'];
+            $this->itl_prod = $_GET['itl_prod_filter'];
+         }
          else return;
          
          $event->preventDefault(); // https://www.dokuwiki.org/devel:events#event_object  
@@ -242,7 +251,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 
         }
         // scrolling next/previous issues 
-        elseif (($data->data == 'issuelist_next') || ($data->data == 'issuelist_previous') || ($data->data == 'issuelist_filter'))  {
+        elseif (($data->data == 'issuelist_next') || ($data->data == 'issuelist_previous') || ($data->data == 'issuelist_filter') || ($data->data == 'issuelist_filterlink'))  {
                  $data->preventDefault();
                  $renderer->info['cache'] = false;         
                  $itl_start = $this->itl_start;
@@ -250,15 +259,17 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                  if ($step == '') {$step=10;}
                  $itl_next = $this->itl_next;
                  $a = $this->itl_pjct;
+//                 echo 'Project: '.$a.'<br />';
+                 
                                                    
                  $pfile = metaFN($a, '.issues');        
                 if (@file_exists($pfile))
                 	{$issues  = unserialize(@file_get_contents($pfile));}
-                else
+/*                else
                 	{   // prompt error message that issue with ID does not exist
                       echo '<div class="it__negative_feedback">'.printf($this->getLang('msg_pfilemissing'), $project).'</div><br />';
                       return;
-                  }            	          
+                  } */           	          
 
                  if ($data->data == 'issuelist_next') {
                     $start = $itl_next;
@@ -282,7 +293,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                       }
 //                    echo 'start = '.$start.';  step = '.$step.';  next_start = '.$next_start.'<br />';
                  }
-                 elseif ($data->data == 'issuelist_filter') {
+                 elseif (($data->data == 'issuelist_filter')||($data->data == 'issuelist_filterlink')) {
                     $start = $itl_start;
                     $next_start = $start + $step;                    
                     if ($next_start>count($issues)) { $next_start=count($issues); }                 
@@ -564,7 +575,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         }
         
         if ($productfilter==="") {$productfilter='ALL';}
-        $li_count = $this->_count_render($issues,$productfilter);
+        //$a,,$productfilter
+        $li_count = $this->_count_render($issues,$start,$step,$next_start,$stat_filter,$sev_filter,$productfilter,$project);
         $ret = '<div>'.NL.
                '<script  type="text/javascript">'.NL. 
                '        function changeAction(where) {'.NL. 
@@ -1259,8 +1271,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 /******************************************************************************/
 /* Create count output
 */
-    function _count_render($issues,$productfilter)
-    {
+    function _count_render($issues,$start,$step,$next_start,$stat_filter,$sev_filter,$productfilter,$project)
+    {   global $ID;
         $count = array();
         foreach ($issues as $issue)
         {
@@ -1277,11 +1289,13 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
         $rendered_count = '<div class="itl__count_div">'.'<table class="itl__count_tbl">';
         foreach ($count as $value)
         {
-            $rendered_count .= '<tr><td>'.$value[1].'&nbsp;</td><td>&nbsp;'.$value[0].'</td></tr>';
+            //http://www.fristercons.de/fcon/doku.php?id=issuetracker:issuelist&do=showcaselink&showid=19&project=fcon_project
+            // $ID.'&do=issuelist_filter&itl_sev_filter='.$value[1]
+            $rendered_count .= '<tr><td><a href="'.DOKU_URL.'doku.php?id='.$ID.'&do=issuelist_filterlink'.'&itl_start='.$start.'&itl_step='.$step.'&itl_next='.$next_start.'&itl_stat_filter='.$value[1].'&itl_sev_filter='.$sev_filter.'&itl_prod_filter='.$productfilter.'&itl_project='.$project.'" >'.$value[1].'</a>&nbsp;</td><td>&nbsp;'.$value[0].'</td></tr>';
         }
         $rendered_count .= '</table></div>';
         return $rendered_count;
-    }
+    }   
 /******************************************************************************/
 /* replace simple formats used by editor buttons
 */

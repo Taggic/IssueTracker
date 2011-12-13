@@ -229,7 +229,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             // Count only ...        
             elseif (stristr($data['display'],'COUNT')!= false) 
             {
-                $Generated_Table = $this->_count_render($issues,$data['product']);                
+                $Generated_Table = $this->_count_render($issues,$start,$step,$next_start,$data);                
             }            
 
             // Render            
@@ -240,9 +240,10 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 /******************************************************************************/
 /* Create count output
 */
-    function _count_render($issues,$productfilter)
-    {
+    function _count_render($issues,$start,$step,$next_start,$data)
+    {   global $ID;
         $count = array();
+        $productfilter=$data['product'];
         foreach ($issues as $issue)
         {
             if (($productfilter=='ALL') || (stristr($productfilter,$this->_get_one_value($issue,'product'))!= false))
@@ -258,7 +259,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $rendered_count = '<div class="itl__count_div">'.'<table class="itl__count_tbl">';
         foreach ($count as $value)
         {
-            $rendered_count .= '<tr><td>'.$value[1].'&nbsp;</td><td>&nbsp;'.$value[0].'</td></tr>';
+            //http://www.fristercons.de/fcon/doku.php?id=issuetracker:issuelist&do=showcaselink&showid=19&project=fcon_project
+            // $ID.'&do=issuelist_filter&itl_sev_filter='.$value[1]
+            $rendered_count .= '<tr><td><a href="'.DOKU_URL.'doku.php?id='.$ID.'&do=issuelist_filterlink'.'&itl_start='.$start.'&itl_step='.$step.'&itl_next='.$next_start.'&itl_stat_filter='.$value[1].'&itl_sev_filter='.$data['severity'].'&itl_prod_filter='.$data['product'].'&itl_project='.$data['project'].'" >'.$value[1].'</a>&nbsp;</td><td>&nbsp;'.$value[0].'</td></tr>';
         }
         $rendered_count .= '</table></div>';
         return $rendered_count;
@@ -528,7 +531,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 
 
         if (strtolower($data['controls'])==='on') {
-          $li_count = $this->_count_render($issues,$data['product']);
+          $li_count = $this->_count_render($issues,$start,$step,$next_start,$data);
         $ret = '<div>'.NL.
                '<script  type="text/javascript">'.NL. 
                '        function changeAction(where) {'.NL. 
@@ -949,25 +952,25 @@ $ret .= '<div class="it_edittoolbar" style="margin-left:30px; margin-top:6px;">
             '<tr><td colspan=2>&nbsp;</td></tr>';
                    //Check config if hidden
                   if(strpos($this->getConf('ltdReport'),'Symptom link 1')!==false){
-                      $ret .= ' <input type="hidden" class="it__cir_input" name="attachment1" value="'.$_REQUEST['attachment1'].'"/>';
+                      $ret .= ' <input type="hidden" class="it__cir_linput" name="attachment1" value="'.$_REQUEST['attachment1'].'"/>';
                   } 
                   else {
                       $ret .= '<tr><td>'.$this->getLang('th_sympt').'1</td>
-                                   <td><input class="it__cir_input" name="attachment1" value="'.$_REQUEST['attachment1'].'"/></td></tr>';
+                                   <td><input class="it__cir_linput" name="attachment1" value="'.$_REQUEST['attachment1'].'"/></td></tr>';
                   }             
                   if(strpos($this->getConf('ltdReport'),'Symptom link 2')!==false){
-                      $ret .= ' <input type="hidden" class="it__cir_input" name="attachment2" value="'.$_REQUEST['attachment2'].'"/>';
+                      $ret .= ' <input type="hidden" class="it__cir_linput" name="attachment2" value="'.$_REQUEST['attachment2'].'"/>';
                   } 
                   else {
                       $ret .= '<tr><td>'.$this->getLang('th_sympt').'2</td>
-                                   <td><input class="it__cir_input" name="attachment2" value="'.$_REQUEST['attachment2'].'"/></td></tr>';
+                                   <td><input class="it__cir_linput" name="attachment2" value="'.$_REQUEST['attachment2'].'"/></td></tr>';
                   }             
                   if(strpos($this->getConf('ltdReport'),'Symptom link 3')!==false){
-                      $ret .= ' <input type="hidden" class="it__cir_input" name="attachment3" value="'.$_REQUEST['attachment3'].'"/>';
+                      $ret .= ' <input type="hidden" class="it__cir_linput" name="attachment3" value="'.$_REQUEST['attachment3'].'"/>';
                   } 
                   else {
                       $ret .= '<tr><td>'.$this->getLang('th_sympt').'3</td>
-                                   <td><input class="it__cir_input" name="attachment3" value="'.$_REQUEST['attachment3'].'"/></td></tr>';
+                                   <td><input class="it__cir_linput" name="attachment3" value="'.$_REQUEST['attachment3'].'"/></td></tr>';
                   }             
         $ret .= '</table><p><input type="hidden" name="modified" type="text" value="'.$cur_date.'"/>'.
                 '<input type="hidden" name="assigned" type="text" value="" />';

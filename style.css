@@ -42,10 +42,10 @@ div.it__cir_form {
 	float:                    left;
 	padding-left:           0.45em;
 	margin-left:               2em;
-	type: "text";
+	type:                   "text";
 	width:                    15em;
 	border:      1px solid #CED2DB;
-	border-radius:             5px;
+	border-radius:             3px;
 }
 .it__cir_linput {
 	width:                     53em;
@@ -57,7 +57,7 @@ div.it__cir_form {
 	margin-left:               2em;
 	width:                  15.7em;
 	border:      1px solid #CED2DB;
-	border-radius:             5px;
+	border-radius:             3px;
 }
 
 /* ----- Issue List Elements ------- */
