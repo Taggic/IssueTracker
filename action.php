@@ -951,7 +951,7 @@ $issue_client_details .= '<tr class="itd__tables_tr">
 $issue_client_details .= '</tbody><tr>'.NL.'
                             <td colspan="3" class="img_tab_open_comment" id="'.$cell_ID.'">'.NL.'
                                 <div class="lnk_tab_open_comment" id="'.$cell_ID.'">
-                                  <a href="#tbl_'.$anker_id.'" id="'.$anker_id.'" onClick="tab_open(\''.$blink_id.'\',\''.$cell_ID.'\')">'.$this->getLang('gen_tab_open').'</a>
+                                  <a id="'.$anker_id.'" onClick="tab_open(\''.$blink_id.'\',\''.$cell_ID.'\')">'.$this->getLang('gen_tab_open').'</a>
                                 </div>'.NL.'
                             </td>
                             </tr>'.NL.'</tbody></table>';
@@ -1051,22 +1051,22 @@ $issue_add_comment .='<table class="itd__tables">'.
 // mod for editor ---------------------------------------------------------------------
 
 $issue_add_comment .= '<div class="it_edittoolbar">'.NL;
-	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','comment')\">".NL;
-  $issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/ordered.png\" name=\"btnList\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/unordered.png\" name=\"btnList\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','comment')\">".NL; 
-	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','comment')\">".NL;
+  $issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/ordered.png\" name=\"btnList\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/unordered.png\" name=\"btnList\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','comment')\">".NL; 
+	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','comment')\">".NL;
+	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','comment')\">".NL;
   $issue_add_comment .= "<br></div>".NL;                      
 // mod for editor ---------------------------------------------------------------------
 
@@ -1098,7 +1098,7 @@ $issue_add_comment .= formSecurityToken(false).
                                             '<tr>'.NL.'
                                                 <td colspan="2" class="img_tab_open_comment" id="'.$cell_ID.'">'.NL.'
                                                     <div class="lnk_tab_open_comment" id="'.$cell_ID.'">
-                                                      <a href="#'.$anker_id.'" id="'.$anker_id.'" onClick="tab_open(\''.$blink_id.'\',\''.$cell_ID.'\')">'.$this->getLang('cmt_tab_open').'</a>
+                                                      <a id="'.$anker_id.'" onClick="tab_open(\''.$blink_id.'\',\''.$cell_ID.'\')">'.$this->getLang('cmt_tab_open').'</a>
                                                     </div>'.NL.'
                                                 </td>'.NL.'
                                              </tr></table>'.NL;
@@ -1119,22 +1119,22 @@ $issue_edit_resolution .= '<tr class="itd__tables_tr">
 
 // mod for editor ---------------------------------------------------------------------
 $issue_edit_resolution .= '<div class="it_edittoolbar">'.NL;
-	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','x_resolution')\">".NL;
-  $issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/ordered.png\" name=\"btnList\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/unordered.png\" name=\"btnList\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','x_resolution')\">".NL; 
-	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','x_resolution')\">".NL;
+  $issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/ordered.png\" name=\"btnList\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/unordered.png\" name=\"btnList\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','x_resolution')\">".NL; 
+	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','x_resolution')\">".NL;
+	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','x_resolution')\">".NL;
   $issue_edit_resolution .= "<br></div>".NL;                      
 // mod for editor ---------------------------------------------------------------------
 
@@ -1164,7 +1164,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                       '<tr>'.NL.'
                           <td colspan="2" class="img_tab_open_comment" id="'.$cell_ID.'">'.NL.'
                               <div class="lnk_tab_open_comment" id="'.$cell_ID.'">
-                                <a href="#'.$anker_id.'" id="'.$anker_id.'" onClick="tab_open(\''.$blink_id.'\',\''.$cell_ID.'\')">'.$this->getLang('rsl_tab_open').'</a>
+                                <a id="'.$anker_id.'" onClick="tab_open(\''.$blink_id.'\',\''.$cell_ID.'\')">'.$this->getLang('rsl_tab_open').'</a>
                               </div>'.NL.'
                           </td>'.NL.'
                        </tr></table>'.NL;

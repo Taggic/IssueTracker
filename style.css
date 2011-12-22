@@ -216,6 +216,7 @@ table.itd_tr_standard {
 	background-color:      #f0f0f0;
 	padding:                0.75em;
 	border-radius:          0.25em;
+  position:relative;
 }
 
 .itd_comment_tr li {
@@ -224,6 +225,7 @@ table.itd_tr_standard {
   font-size:      1em !important;
   line-height:  1.2em !important;
   font-weight: normal !important;
+  position:relative;
 }
 
 .it_edittoolbar {
@@ -243,4 +245,13 @@ table.itd_tr_standard {
 .lnk_tab_open_comment {
   width:                   222px;
 	text-align:             center;
+  cursor:pointer;
+}
+
+.xseditor_button {
+  cursor:pointer;
+  border-radius:             2px;
+}
+.xseditor_button:hover {
+  background-color: #E0E0E0;
 }

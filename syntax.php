@@ -167,7 +167,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                     $issues[$issue_id]['created'] = htmlspecialchars(stripslashes($_REQUEST['created']));
                                     $issues[$issue_id]['status'] = "New";
                                     $issues[$issue_id]['user_name'] = htmlspecialchars(stripslashes($_REQUEST['user_name']));
-                                    $issues[$issue_id]['user_mail'] = htmlspecialchars(stripslashes($_REQUEST['user_mail']));
+                                    $issues[$issue_id]['user_mail'] = trim(htmlspecialchars(stripslashes($_REQUEST['user_mail'])));
                                     $issues[$issue_id]['user_phone'] = htmlspecialchars(stripslashes($_REQUEST['user_phone']));
                                     $issues[$issue_id]['add_user_mail'] = htmlspecialchars(stripslashes($_REQUEST['add_user_mail']));
                                     $issues[$issue_id]['title'] = htmlspecialchars(stripslashes($_REQUEST['title']));
@@ -929,22 +929,22 @@ $ret .= '<div class="it_edittoolbar" style="margin-left:30px; margin-top:6px;">
          </script>';                      
 // mod for editor ---------------------------------------------------------------------
 
-	$ret .= "<img class=\"button\" src=\"".$imgBASE."/bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','description')\">".NL;
-  $ret .= "<img class=\"button\" src=\"".$imgBASE."/italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','description')\">".NL;
-	$ret .= "<img class=\"button\" src=\"".$imgBASE."/underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','description')\">".NL;
-	$ret .= "<img class=\"button\" src=\"".$imgBASE."/strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','description')\">".NL;
-	$ret .= "<img class=\"button\" src=\"".$imgBASE."/subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','description')\">".NL;
-	$ret .= "<img class=\"button\" src=\"".$imgBASE."/superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','description')\">".NL;
-	$ret .= "<img class=\"button\" src=\"".$imgBASE."/hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','description')\">".NL;
-	$ret .= "<img class=\"button\" src=\"".$imgBASE."/ordered.png\" name=\"btnList\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','description')\">".NL;
-	$ret .= "<img class=\"button\" src=\"".$imgBASE."/unordered.png\" name=\"btnList\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','description')\">".NL;
-	$ret .= "<img class=\"button\" src=\"".$imgBASE."/quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','description')\">".NL; 
-	$ret .= "<img class=\"button\" src=\"".$imgBASE."/code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','description')\">".NL;
-	$ret .= "<img class=\"button\" src=\"".$imgBASE."/pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','description')\">".NL;
-	$ret .= "<img class=\"button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','description')\">".NL;
-	$ret .= "<img class=\"button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','description')\">".NL;
-	$ret .= "<img class=\"button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','description')\">".NL;
-	$ret .= "<img class=\"button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','description')\">".NL;
+	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','description')\">".NL;
+  $ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','description')\">".NL;
+	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','description')\">".NL;
+	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','description')\">".NL;
+	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','description')\">".NL;
+	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','description')\">".NL;
+	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','description')\">".NL;
+	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/ordered.png\" name=\"btnList\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','description')\">".NL;
+	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/unordered.png\" name=\"btnList\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','description')\">".NL;
+	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','description')\">".NL; 
+	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','description')\">".NL;
+	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','description')\">".NL;
+	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','description')\">".NL;
+	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','description')\">".NL;
+	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','description')\">".NL;
+	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','description')\">".NL;
   $ret .= "<br></div>";
 
           $ret .= '<textarea class="it__cir_linput" id="description" name="description" cols="109" rows="7">'.$_REQUEST['description'].'</textarea></td>
