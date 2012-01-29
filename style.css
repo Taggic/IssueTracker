@@ -1,4 +1,6 @@
-/** * Design Elements - additional  CSS for the IssueTracker plugin * * @author Taggic <taggic@t-online.de> */
+/** 
+ * Design Elements - additional  CSS for the IssueTracker plugin * 
+ * @author Taggic <taggic@t-online.de> */
 /* ----- General Elements ---------- */
 .it__negative_feedback {
 	border:            1px red solid;
@@ -202,6 +204,11 @@ table.itd_tr_standard {
 	border:                      0;
 	width:                     75%;
 }
+
+.itd__tables code {
+  font-size:              1em !important;    
+}
+
 .itd_comment_trh {
 	background-color:      #ffffff;
 	padding-top:            0.75em;
@@ -253,5 +260,30 @@ table.itd_tr_standard {
   border-radius:             2px;
 }
 .xseditor_button:hover {
-  background-color: #E0E0E0;
+  background-color:      #E0E0E0;
+}
+
+.cmt_mod_exclamation {
+  color:                 #FF0000;
+  font-weight:              bold;
+	font-style:             italic;
+}
+
+.cmt_mod_label {
+  font-weight:              bold;
+  float:                   right;
+}
+
+.cmt_del_img {
+  background-image:url(images/delete.gif);
+  margin-top: -10px ;
+  margin-right: -10px ;
+  float:right;
+}
+
+.cmt_del_img:hover {
+  background-image:url(images/delete_hov.gif) !important;
+  margin-top: -10px ;
+  margin-right: -10px ;
+  float:right;
 }

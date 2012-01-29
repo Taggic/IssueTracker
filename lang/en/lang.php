@@ -34,9 +34,12 @@ $lang['btn_showid_title']   = 'Show';
 
 $lang['msg_commentfalse']   = 'This comment does already exist and was not added again.';
 $lang['msg_commenttrue']    = 'Your comment has been successfully stored with ID #';
+$lang['msg_commentmodtrue'] = 'Your comment successfully modified as ID #';
+$lang['msg_commentmodfalse'] = 'No diff of comment ID #';
 $lang['msg_pfilemissing']   = 'Project file does not exist: %s .issues. ';
 $lang['msg_issuemissing']   = 'There does no Issue exist with ID ';
 $lang['msg_captchawrong']   = 'Wrong answer to the antispam question.';
+$lang['msg_descrmodtrue']   = 'Description successfully modified.';
 
 $lang['lbl_project']        = 'Project:';
 $lang['lbl_issueid']        = 'ID:';
@@ -53,6 +56,9 @@ $lang['lbl_cmts_adcmt']     = 'Add a new comment';
 $lang['lbl_cmts_edtres']    = 'Resolution';
 $lang['btn_add']            = 'Add';
 $lang['btn_add_title']      = 'Add';
+$lang['btn_mod']            = 'Update'; // to submit comment modification
+$lang['btn_mod_title']      = 'Update';
+$lang['del_title']          = 'Delete this comment';
 $lang['lbl_signin']         = 'Sign in</a> if you want to add a comment or resolution note.';       // </a> necessary to close the link tag
 
 $lang['th_project']         = 'Project';
@@ -73,7 +79,9 @@ $lang['th_assigned']        = 'Assigned to';
 $lang['th_resolution']      = 'Resolution';
 $lang['th_modified']        = 'Modified';        
 $lang['gen_tab_open']       = 'Details';
+$lang['descr_tab_mod']      = 'modiy Description';
 $lang['cmt_tab_open']       = 'add Comment';
+$lang['cmt_tab_mod']        = 'modify Comment';
 $lang['rsl_tab_open']       = 'add / modify Resolution';
 /******************************************************************************/
 /* send an e-mail to user due to issue modificaion

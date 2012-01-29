@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2011-12-07',
+         'date'   => '2012-01-29',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -142,10 +142,29 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                  
                  $Generated_Header = '';
                  $Generated_Message = '';
-
-                 //If comment to be added
-                 if (isset($_REQUEST['comment'])) 
-                 {  if (($_REQUEST['comment']) && (isset($_REQUEST['comment_issue_ID'])))
+                 //If comment to be deleted
+                 if ($_REQUEST['del_cmnt']==='TRUE') {
+                     // check if captcha is to be used by issue tracker in general
+                     if ($this->getConf('use_captcha') === 0) { $captcha_ok = 1;}
+                     else { $captcha_ok = ($this->_captcha_ok());}
+                     if ($captcha_ok)
+                     {    if (checkSecurityToken())
+                          {  // get comment file contents
+                             $comments_file = metaFN($project."_".$_REQUEST['comment_issue_ID'], '.cmnts');
+                             if (@file_exists($comments_file))  {  $comments  = unserialize(@file_get_contents($comments_file));  }
+                             else  {  $txt='Comments file does not exist.';  }
+                             // delete fieldset from $comments array
+                             $comment_id = htmlspecialchars(stripslashes($_REQUEST['comment_id']));
+                             //$comments[$comment_id]
+                             unset($comments[$comment_id]);
+                             // store comments to file
+                             $xvalue = io_saveFile($comments_file,serialize($comments));;
+                          }
+                      }
+                 }
+                 //If comment to be added  or modified
+                 elseif ((isset($_REQUEST['comment'])) || (isset($_REQUEST['comment_id']))) 
+                 {  if ((($_REQUEST['comment']) || (isset($_REQUEST['comment_id']))) && (isset($_REQUEST['comment_issue_ID'])))
                        {        
                        // check if captcha is to be used by issue tracker in general
                        if ($this->getConf('use_captcha') === 0) { $captcha_ok = 1;}
@@ -155,47 +174,110 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                        if ($captcha_ok)
                              {                           
                                 if (checkSecurityToken())
-                                {
-                                   // get comment file contents
+                                {  // get comment file contents
                                    $comments_file = metaFN($project."_".$_REQUEST['comment_issue_ID'], '.cmnts');
             
                                    if (@file_exists($comments_file))  {  $comments  = unserialize(@file_get_contents($comments_file));  }
                                    else  {  $comments = array();  }
-                                      	
-                                   //Add it to the comment file
+                                   $checkFlag=false;
+                                   
+                                   //Add new comment to the comment file
                                    $comment_id=count($comments);
-                                   $checkFlag=false;      
+                                   // check if comment content already exist
                                    foreach ($comments as $value)
                                        {  if ($value['id'] >= $comment_id) { $comment_id=$value['id'] + 1; } 
                                           if ($_REQUEST['comment'] === $value['comment']) 
-                                          {
-                                              $Generated_Header = '<div class="it__negative_feedback">'.$this->getLang('msg_commentfalse').'</div><br />';
+                                          {   $Generated_Header = '<div class="it__negative_feedback">'.$this->getLang('msg_commentfalse').'</div><br />';
                                               $checkFlag=true; 
-                                              break;
+//                                              break;
                                           }
                                        }
-                                   if ($checkFlag === false)
-                                   {
-                                       $comments[$comment_id]['id'] = $comment_id;    
+                                   //If comment to be modified
+                                   if (($checkFlag === false) && (isset($_REQUEST['comment_id'])))
+                                   { $comment_id = htmlspecialchars(stripslashes($_REQUEST['comment_id']));
+                                     if ($_REQUEST['comment_mod'] === $comments[$comment_id]['comment']) 
+                                        {   $Generated_Header = '<div class="it__negative_feedback">'.$this->getLang('msg_commentmodfalse').$comment_id.'</div><br />';
+                                            $checkFlag=true; 
+                                        }
+                                     else
+                                     {  $cur_date = date ($this->getConf('d_format'));
+                                        $comments[$comment_id]['mod_timestamp'] = $cur_date;
+                                        $comments[$comment_id]['comment'] = htmlspecialchars(stripslashes($_REQUEST['comment_mod']));
+                                        $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_commentmodtrue').$comment_id.'.</div><br />';
+                                        //Create comments file
+                                        $xvalue = io_saveFile($comments_file,serialize($comments));
+                                      }
+                                   }
+                                   //If comment to be added
+                                   elseif ($checkFlag === false)
+                                   {   $comment_id=$value['id']+1;
+                                       $comments[$comment_id]['id'] = $comment_id;
+                                       
+/*                                       echo 'request Project: '.htmlspecialchars(stripslashes($_REQUEST['project'])).'<br />';
+                                       echo 'request CMNT File: '.htmlspecialchars(stripslashes($_REQUEST['comment_file'])).'<br />';
+                                       echo 'request Issue ID: '.htmlspecialchars(stripslashes($_REQUEST['comment_issue_ID'])).'<br />';
+                                       echo 'request Author: '.htmlspecialchars(stripslashes($_REQUEST['author'])).'<br />';
+                                       echo 'request Timestamp: '.htmlspecialchars(stripslashes($_REQUEST['timestamp'])).'<br />';
+                                       echo 'request Comment: '.htmlspecialchars(stripslashes($_REQUEST['comment'])).'<br />';    
+*/                                       
                                        $comments[$comment_id]['author'] = htmlspecialchars(stripslashes($_REQUEST['author']));
-                                       $comments[$comment_id]['timestamp'] = htmlspecialchars(stripslashes($_REQUEST['timestamp']));
-                                       $comments[$comment_id]['comment'] = htmlspecialchars(stripslashes($_REQUEST['comment']));    
-                
+                                       $cur_date = date ($this->getConf('d_format'));
+                                       $comments[$comment_id]['timestamp'] = $cur_date;
+                                       $comments[$comment_id]['comment'] = htmlspecialchars(stripslashes($_REQUEST['comment']));
                                        //Create comments file
-                                       $xvalue = io_saveFile($comments_file,serialize($comments));
-    
-                                       // inform user (or assignee) about update
-                                       $this->_emailForIssueMod($_REQUEST['project'],$issues[$_REQUEST['comment_issue_ID']], $comments[$comment_id]);                                 
-
-                                       // update modified date
-                                       $issues[$_REQUEST['comment_issue_ID']]['modified'] = date($this->getConf('d_format')); 
-                                       $xvalue = io_saveFile($pfile,serialize($issues));
-                                       $anker_id = 'resolved_'. uniqid((double)microtime()*1000000,1);                                   
+                                       $xvalue = io_saveFile($comments_file,serialize($comments)); 
                                        $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_commenttrue').$comment_id.'.</div><br />';
-                                    } 
+                                    }
+                                     
+                                    // update issues modification date
+                                    if ($checkFlag === false)
+                                    {   // inform user (or assignee) about update
+                                        $this->_emailForIssueMod($_REQUEST['project'],$issues[$_REQUEST['comment_issue_ID']], $comments[$comment_id]);                                 
+
+                                        // update modified date
+                                        $issues[$_REQUEST['comment_issue_ID']]['modified'] = date($this->getConf('d_format')); 
+                                        $xvalue = io_saveFile($pfile,serialize($issues));
+                                        $anker_id = 'resolved_'. uniqid((double)microtime()*1000000,1);                                   
+                                    }
                                  }
                             }
                        }
+                 }
+                 elseif (isset($_REQUEST['mod_description']))
+                 {  if (@file_exists($pfile))
+                    	{ $issues  = unserialize(@file_get_contents($pfile)); }
+                    else
+                    	{ msg('Issue file not found !'.NL.$pfile,-1);
+                        return false; }
+                                        // check if captcha is to be used by issue tracker in general
+                    if ($this->getConf('use_captcha') === 0) { $captcha_ok = 1;}
+                    else { $captcha_ok = ($this->_captcha_ok());}
+                    
+                    if ($captcha_ok)
+                    {   if (checkSecurityToken())
+                        {   // find issue and description
+                              $issue_id = trim($_REQUEST['comment_issue_ID']);
+                              echo 'request Issue ID: '.htmlspecialchars(stripslashes($_REQUEST['comment_issue_ID'])).'<br />';
+                              echo 'request Description: '.htmlspecialchars(stripslashes($_REQUEST['description_mod'])).'<br />';
+                              $cFlag = false;
+     
+                              foreach ($issues as $value)
+                              { $ist = $value['id'];
+                                if ($value['id'] == $issue_id) 
+                                { $cFlag = true;
+                                  break;}
+                              }
+
+                              if ($cFlag === true)
+                              {   $issues[$issue_id]['description'] = htmlspecialchars(stripslashes($_REQUEST['description_mod']));
+                                  //save issue-file
+                                  $xvalue = io_saveFile($pfile,serialize($issues));
+                                  $Generated_Message = '<div class="it__positive_feedback">'.$this->getLang('msg_descrmodtrue').$issue_id.'</div>';
+                              }
+                              else { msg("Issue with ID: $issue_id not found.",-1); }
+                              
+                        }
+                    }
                  }
                  elseif (isset($_REQUEST['add_resolution'])) 
                  {  $renderer->info['cache'] = false;     
@@ -958,7 +1040,30 @@ $issue_client_details .= '</tbody><tr>'.NL.'
 
 
                         $x_comment = $this->convertlabel($issue[$issue_id]['description']);
-                        
+
+/*------------------------------------------------------------------------------
+ * Issue: 39, reported by lukas
+ * hook-in to provide possibility of modifing the initial description
+ * record new description and the possibility to see former ones
+------------------------------------------------------------------------------*/
+/*    - if user = report creator then provide edit text area option pre-filled  
+        with initial/current description  + update method
+      - provide edit textarea and preview method
+ *    - upon diff of old description and textarea content 
+ *       + store it as description
+ *       + keep old description (optional) 
+ *       + hidden output as drop-in box (optional)
+ *       + feature to make hidden content/modifications visible (optional) 
+=> In the event of later modification of initial description add a comment 
+   including timestamp as "Alert" to the comments file or update last "Alert" to
+   prevent lots of such lines. 
+------------------------------------------------------------------------------*/
+        // retrive some basic information
+        $cur_date = date ($this->getConf('d_format'));
+        if($user_mail['userinfo']['mail']=='') {$u_mail_check ='unknown';}
+        else {$u_mail_check = $user_mail['userinfo']['mail'];}
+        $user_check = $this->getConf('registered_users');
+
 $issue_initial_description = '<table class="itd__tables"><tbody>
                                 <tr>
                                   <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_initdescr').'</td>
@@ -966,8 +1071,55 @@ $issue_initial_description = '<table class="itd__tables"><tbody>
                                 <tr class="itd__tables_tr">
                                   <td width="1%"></td>
                                   <td>'.$this->xs_format($x_comment).'</td>
-                                </tr>
-                              </tbody></table>';
+                                </tr>';
+                             
+/* mod for edit description by ticket owner ----------------------------------*/
+// check if current user is author of the comment and offer an edit button
+            if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
+            {     // add hidden edit toolbar and textarea
+                  $alink_id++;
+                  $blink_id = 'statanker_'.$alink_id;
+                  $anker_id = 'anker_'.$alink_id;
+        
+            $issue_initial_description .= '   <tr>
+                                                 <td colSpan="2" style="display : none;" id="'.$blink_id.'">';
+                    
+            $issue_initial_description .= $this->it_edit_toolbar('description_mod');
+                    
+            $issue_initial_description .= '<script type="text/javascript" src="include/selectupdate.js"></script>'.NL.
+                                           '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
+                                          
+            $issue_initial_description .= formSecurityToken(false). 
+                                         '<input type="hidden" name="project" value="'.$project.'" />'.NL.
+                                         '<input type="hidden" name="comment_issue_ID" value="'.$issue[$issue_id]['id'].'" />'.NL.
+                                         '<input type="hidden" name="author"value="'.$u_mail_check.'" />'.NL.        
+                                         '<input type="hidden" name="timestamp" value="'.$cur_date.'" />'.NL.
+                                         '<input type="hidden" name="mod_description" value="1"/>'.NL.
+                                         '<textarea id="description_mod" name="description_mod" type="text" cols="106" rows="7" value="">'.$x_comment.'</textarea>'.NL;        
+                                         
+                                if ($this->getConf('use_captcha')==1) 
+                                {   $helper = null;
+                        		        if(@is_dir(DOKU_PLUGIN.'captcha'))
+                        			         $helper = plugin_load('helper','captcha');
+                        			         
+                        		        if(!is_null($helper) && $helper->isEnabled())
+                        			      {  $issue_comments_log .= '<p>'.$helper->getHTML().'</p>'; }
+                                }
+                                $cell_ID = 'img_tab_open_comment'.$blink_id;
+
+$issue_initial_description .=  '<input  type="hidden" class="showid__option" name="showid" id="showid" size="10" value="'.$this->parameter.'"/>'.
+                               '<input  type="submit" class="button" id="btnmod_description" name="btnmod_description"  value="'.$this->getLang('btn_mod').'" title="'.$this->getLang('btn_mod_title').'");/>'.
+                               '</form>'.NL.'</td>'.NL.'</tr>'.NL.
+                               '<tr>'.NL.'
+                                   <td colspan="2" class="img_tab_open_comment" id="'.$cell_ID.'">'.NL.'
+                                       <div class="lnk_tab_open_comment" id="'.$cell_ID.'">
+                                         <a id="'.$anker_id.'" onClick="tab_open(\''.$blink_id.'\',\''.$cell_ID.'\')">'.$this->getLang('descr_tab_mod').'</a>
+                                       </div>'.NL.'
+                                   </td>'.NL.'
+                                </tr>'.NL;
+                }
+$issue_initial_description .= '</tbody></table>';
+/* END mod for edit description by ticket owner ----------------------------------*/
 
 $issue_attachments = '<table class="itd__tables"><tbody>
                       <tr>
@@ -999,23 +1151,43 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
                         //----------------------------------------------------------------------------------------------------------------
                         // do not show personal details if issue details diplayed by neigther admin/assignee nor the original user itself
                         //----------------------------------------------------------------------------------------------------------------
-                        if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
+                        if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) 
+                            or (strpos($target2,$user_mail['userinfo']['mail']) != false) 
+                            or ($user_mail['userinfo']['mail'] === $this->_get_one_value($a_comment,'author')))
                         {   $x_mail = '<a href="mailto:'.$this->_get_one_value($a_comment,'author').'">'.$this->_get_one_value($a_comment,'author').'</a>'; }
                         else {   $x_mail = '<i> (user details hidden) </i>';  }
 
+                        if($this->_get_one_value($a_comment,'mod_timestamp')) { $insert_lbl = '<label class="cmt_mod_exclamation">!</label>';}
+                        else $insert_lbl ='';
+
                         $issue_comments_log .= '<tr  class="itd__tables_tr">
                                                   <td class="itd_comment_trh"><label>['.$this->_get_one_value($a_comment,'id').'] </label>&nbsp;&nbsp;&nbsp;
-                                                                            <label>'.date($this->getConf('d_format'),strtotime($this->_get_one_value($a_comment,'timestamp'))).' </label>&nbsp;&nbsp;&nbsp;
-                                                                            <label>'.$x_mail.'</label></td>
-                                                </tr>
+                                                                            <label>'.date($this->getConf('d_format'),strtotime($this->_get_one_value($a_comment,'timestamp'))).' </label>&nbsp;&nbsp;&nbsp;'.NL.'
+                                                                            <label>'.$x_mail.'</label>'.NL;
+                        if($this->_get_one_value($a_comment,'mod_timestamp')) {
+                        $issue_comments_log .= '                            <label class="cmt_mod_label" >&nbsp;&nbsp;[modified: '.date($this->getConf('d_format'),strtotime($this->_get_one_value($a_comment,'mod_timestamp'))).']&nbsp;'.$insert_lbl.'&nbsp;</label>&nbsp;&nbsp;&nbsp;'.NL;
+                        }
+                        
+                        $issue_comments_log .= '  </td>'.NL;
+                        $issue_comments_log .= '</tr>
                                                 <tr  class="itd__tables_tr">
-                                                  <td class="itd_comment_tr">'.$this->xs_format($x_comment).'</td>
-                                                </tr>';
-                  }
-              }
-              $issue_comments_log .='</tbody></table>'; 
-
-                     
+                                                  <td class="itd_comment_tr">';
+                        
+                        // delete button for comments
+                        if(($user_mail['userinfo']['mail'] === $this->_get_one_value($a_comment,'author')) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
+                        {   $issue_comments_log .= '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
+                            $issue_comments_log .= formSecurityToken(false). 
+                                                 '<input type="hidden" name="project" value="'.$project.'"/>'.NL.
+                                                 '<input type="hidden" name="comment_file" value="'.$cfile.'"/>'.NL.
+                                                 '<input type="hidden" name="comment_issue_ID" value="'.$issue[$issue_id]['id'].'"/>'.NL.
+                                                 '<input type="hidden" name="author" value="'.$u_mail_check.'"/>'.NL.        
+                                                 '<input type="hidden" name="del_cmnt" value="TRUE"/>'.NL.
+                                                 '<input type="hidden" name="comment_id" value="'.$this->_get_one_value($a_comment,'id').'"/>'.NL.        
+                                                 '<input class="cmt_del_img" type="image" src="'.DOKU_BASE.'lib/plugins/issuetracker/images/dot.gif" alt="Del" title="'.$this->getLang('del_title').'" />'.        
+                                                 '</form>'.NL; 
+                       }
+                       // output comment content
+                       $issue_comments_log .= $this->xs_format($x_comment).NL.'</td></tr>'.NL;
         //--------------------------------------------------------------------------------------------------------------
         // only admin/assignees and reporter are allowed to add comments if only user edit option is set
         //--------------------------------------------------------------------------------------------------------------
@@ -1025,9 +1197,72 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
         else {$u_mail_check = $user_mail['userinfo']['mail'];}
         $user_check = $this->getConf('registered_users');
         
+/*------------------------------------------------------------------------------
+ *   Modify comment                                                           */
+                // check if current user is author of the comment and offer an edit button
+                if(($user_mail['userinfo']['mail'] === $this->_get_one_value($a_comment,'author')) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
+                {     // add hidden edit toolbar and textarea
+                      $alink_id++;
+                      $blink_id = 'statanker_'.$alink_id;
+                      $anker_id = 'anker_'.$alink_id;
+        
+                    $issue_comments_log .= '   <tr>
+                                                 <td colSpan="2" style="display : none;" id="'.$blink_id.'">';
+                    
+                    $issue_comments_log .= $this->it_edit_toolbar('comment_mod');
+                    
+                    $issue_comments_log .= '<script type="text/javascript" src="include/selectupdate.js"></script>'.NL.
+                                           '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
+                                          
+                    $issue_comments_log .= formSecurityToken(false). 
+                                         '<input type="hidden" name="project" value="'.$project.'" />'.NL.
+                                         '<input type="hidden" name="comment_file" value="'.$cfile.'" />'.NL.
+                                         '<input type="hidden" name="comment_issue_ID" value="'.$issue[$issue_id]['id'].'" />'.NL.
+                                         '<input type="hidden" name="author"value="'.$u_mail_check.'" />'.NL.        
+                                         '<input type="hidden" name="timestamp" value="'.$cur_date.'" />'.NL.
+                                         '<input type="hidden" name="comment_id" value="'.$this->_get_one_value($a_comment,'id').'" />'.NL.        
+                                         '<textarea id="comment_mod" name="comment_mod" type="text" cols="106" rows="7" value="">'.strip_tags($x_comment).'</textarea>'.NL;        
+                    if ($this->getConf('use_captcha')==1) 
+                    {   $helper = null;
+            		        if(@is_dir(DOKU_PLUGIN.'captcha'))
+            			         $helper = plugin_load('helper','captcha');
+            			         
+            		        if(!is_null($helper) && $helper->isEnabled())
+            			      {  $issue_comments_log .= '<p>'.$helper->getHTML().'</p>'; }
+                    }
+                    $cell_ID = 'img_tab_open_comment'.$blink_id;
+                    // check if only registered users are allowed to modify comments
+                    // ¦ perm — the user's permissions related to the current page ($ID)
+$issue_comments_log .= '<input  type="hidden" class="showid__option" name="showid" id="showid" type="text" size="10" value="'.$this->parameter.'"/>'.
+                       '<input  type="submit" class="button" id="btnmod_description" name="btnmod_description"  value="'.$this->getLang('btn_mod').'" title="'.$this->getLang('btn_mod_title').'");/>'.
+                       '</form>'.NL.'</td>'.NL.'</tr>'.NL.
+                       '<tr>'.NL.'
+                           <td colspan="2" class="img_tab_open_comment" id="'.$cell_ID.'">'.NL.'
+                               <div class="lnk_tab_open_comment" id="'.$cell_ID.'">
+                                 <a id="'.$anker_id.'" onClick="tab_open(\''.$blink_id.'\',\''.$cell_ID.'\')">'.$this->getLang('cmt_tab_mod').'</a>
+                               </div>'.NL.'
+                           </td>'.NL.'
+                        </tr>'.NL;
+                }
+            }
+        }
+        $issue_comments_log .='</tbody></table>'; 
+
+/*   end Modify comment
+------------------------------------------------------------------------------*/
+
+        //--------------------------------------------------------------------------------------------------------------
+        // only admin/assignees and reporter are allowed to add comments if only user edit option is set
+        //--------------------------------------------------------------------------------------------------------------
+        // retrive some basic information
+        $cur_date = date ($this->getConf('d_format'));
+        if($user_mail['userinfo']['mail']=='') {$u_mail_check ='unknown';}
+        else {$u_mail_check = $user_mail['userinfo']['mail'];}
+        $user_check = $this->getConf('registered_users');
+
         //2011-12-02: bwenz code proposal (Issue 11)
         $x_resolution = $this->convertlabel($issue[$issue_id]['resolution']);
-        if($x_resolution=="") { $x_resolution = "&nbsp;"; }
+        if(!$x_resolution) { $x_resolution = "&nbsp;"; }
                         
         $_cFlag = false;             
         if($user_check == false)
@@ -1048,39 +1283,20 @@ $issue_add_comment .='<table class="itd__tables">'.
                       '<tr>'.
                         '<td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_cmts_adcmt').'</td>
                       </tr><tr><td colSpan="2" style="display : none;" id="'.$blink_id.'">';
-// mod for editor ---------------------------------------------------------------------
-
-$issue_add_comment .= '<div class="it_edittoolbar">'.NL;
-	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','comment')\">".NL;
-  $issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/ordered.png\" name=\"btnList\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/unordered.png\" name=\"btnList\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','comment')\">".NL; 
-	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','comment')\">".NL;
-	$issue_add_comment .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','comment')\">".NL;
-  $issue_add_comment .= "<br></div>".NL;                      
+$issue_add_comment .= $this->it_edit_toolbar('comment');                     
 // mod for editor ---------------------------------------------------------------------
 
 $issue_add_comment .= '<script type="text/javascript" src="include/selectupdate.js"></script>'.NL.
                       '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
                       
 $issue_add_comment .= formSecurityToken(false). 
-                     '<input type="hidden" name="project" type="text" value="'.$project.'"/>'.NL.
-                     '<input type="hidden" name="comment_file" type="text" value="'.$cfile.'"/>'.NL.
-                     '<input type="hidden" id="comment_issue_ID" name="comment_issue_ID" type="text" value="'.$issue[$issue_id]['id'].'"/>'.NL.
-                     '<input type="hidden" name="author" type="text" value="'.$u_mail_check.'"/>'.NL.        
-                     '<input type="hidden" name="timestamp" type="text" value="'.$cur_date.'"/>'.NL.        
+                     '<input type="hidden" name="project" value="'.$project.'" />'.NL.
+                     '<input type="hidden" name="comment_file" value="'.$cfile.'" />'.NL.
+                     '<input type="hidden" name="comment_issue_ID" value="'.$issue[$issue_id]['id'].'" />'.NL.
+                     '<input type="hidden" name="author" value="'.$u_mail_check.'" />'.NL.        
+                     '<input type="hidden" name="timestamp" value="'.$cur_date.'" />'.NL.        
                      '<textarea id="comment" name="comment" type="text" cols="106" rows="7" value=""></textarea>'.NL;        
-             
+
                       if ($this->getConf('use_captcha')==1) 
                       {   $helper = null;
               		        if(@is_dir(DOKU_PLUGIN.'captcha'))
@@ -1117,34 +1333,27 @@ $issue_edit_resolution .= '<tr class="itd__tables_tr">
                           </tr>
                           <tr><td colSpan="2" style="display : none;" id="'.$blink_id.'">';
 
+/*------------------------------------------------------------------------------
+ * extension based on Issue: 39, reported by lukas
+ * hook-in to provide possibility of modifing the last comment
+------------------------------------------------------------------------------*/
+/*    - if user = commentor of last comment then provide edit text area 
+        pre-loaded with button and last comment content for mofification
+ *    - upon diff of former comment and textarea store it as comment
+ *    - highlight current comment as modified (optional)
+------------------------------------------------------------------------------*/
+
 // mod for editor ---------------------------------------------------------------------
-$issue_edit_resolution .= '<div class="it_edittoolbar">'.NL;
-	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','x_resolution')\">".NL;
-  $issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/ordered.png\" name=\"btnList\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/unordered.png\" name=\"btnList\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','x_resolution')\">".NL; 
-	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','x_resolution')\">".NL;
-	$issue_edit_resolution .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','x_resolution')\">".NL;
-  $issue_edit_resolution .= "<br></div>".NL;                      
+$issue_edit_resolution .= $this->it_edit_toolbar('x_resolution');                      
 // mod for editor ---------------------------------------------------------------------
 
 $issue_edit_resolution .= '<form name="edit_resolution" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'">'.NL;                                            
 $issue_edit_resolution .= formSecurityToken(false).
-                          '<input type="hidden" name="project" type="text" value="'.$project.'"/>'.NL.
-                          '<input type="hidden" name="comment_issue_ID" type="text" value="'.$issue[$issue_id]['id'].'"/>'.NL.
-                          '<input type="hidden" id="add_resolution" name="add_resolution" type="text" value="1"/>'.NL;        
+                          '<input type="hidden" name="project"value="'.$project.'"/>'.NL.
+                          '<input type="hidden" name="comment_issue_ID" value="'.$issue[$issue_id]['id'].'"/>'.NL.
+                          '<input type="hidden" name="add_resolution" value="1"/>'.NL;        
     
-$issue_edit_resolution .= "<textarea id='x_resolution' name='x_resolution' type='text' cols='106' rows='7' value=''>$x_resolution</textarea>";
+$issue_edit_resolution .= "<textarea id='x_resolution' name='x_resolution' type='text' cols='106' rows='7' value=''>".strip_tags($x_resolution)."</textarea>";
                               
                       if ($this->getConf('use_captcha')==1) 
                       {   $helper = null;
@@ -1347,7 +1556,38 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
         $x_comment = preg_replace("/\[link\]www.(.*?)\[\/link\]/si", "<a target=\"_blank\" href=\"http://www.\\1\">www.\\1</a>", $x_comment); 
         $x_comment = preg_replace("/\[link\](.*?)\[\/link\]/si", "<a target=\"_blank\" href=\"\\1\">\\1</a>", $x_comment);
 
+/*---------------------------------------------------------------------------------
+*  think about parsing content by dokuwiki renderer for dokuwiki syntax recognition
+*        $x_comment = p_render('xhtml',p_get_instructions($x_comment),$info);
+*        take care to strip IssueTracker syntax to prevent endless loop
+---------------------------------------------------------------------------------*/
+
       return $x_comment;
+    }
+/******************************************************************************/
+/* return html-code for edit toolbar
+*/
+    function it_edit_toolbar($type) {
+        $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
+        $it_edit_tb  = '<div class="it_edittoolbar">'.NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','$type')\">".NL;
+        $it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/ordered.png\" name=\"btnList\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/unordered.png\" name=\"btnList\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','$type')\">".NL; 
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','$type')\">".NL;
+        $it_edit_tb .= "<br></div>".NL; 
+        return $it_edit_tb;                     
     }
 /******************************************************************************/
 }
