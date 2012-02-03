@@ -158,7 +158,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                              //$comments[$comment_id]
                              unset($comments[$comment_id]);
                              // store comments to file
-                             $xvalue = io_saveFile($comments_file,serialize($comments));;
+                             $xvalue = io_saveFile($comments_file,serialize($comments));
+                             $this->_emailForRes($_REQUEST['project'], $issues[$_REQUEST['comment_issue_ID']]);
                           }
                       }
                  }
@@ -169,7 +170,11 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                        // check if captcha is to be used by issue tracker in general
                        if ($this->getConf('use_captcha') === 0) { $captcha_ok = 1;}
                        else { $captcha_ok = ($this->_captcha_ok());}
-                       
+                       if (@file_exists($pfile))
+                    	 {  $issues  = unserialize(@file_get_contents($pfile)); }
+                        else
+                    	 {  msg('Issue file not found !'.NL.$pfile,-1);
+                          return false; }
                        
                        if ($captcha_ok)
                              {                           
@@ -189,7 +194,6 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                           if ($_REQUEST['comment'] === $value['comment']) 
                                           {   $Generated_Header = '<div class="it__negative_feedback">'.$this->getLang('msg_commentfalse').'</div><br />';
                                               $checkFlag=true; 
-//                                              break;
                                           }
                                        }
                                    //If comment to be modified
@@ -213,13 +217,6 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                    {   $comment_id=$value['id']+1;
                                        $comments[$comment_id]['id'] = $comment_id;
                                        
-/*                                       echo 'request Project: '.htmlspecialchars(stripslashes($_REQUEST['project'])).'<br />';
-                                       echo 'request CMNT File: '.htmlspecialchars(stripslashes($_REQUEST['comment_file'])).'<br />';
-                                       echo 'request Issue ID: '.htmlspecialchars(stripslashes($_REQUEST['comment_issue_ID'])).'<br />';
-                                       echo 'request Author: '.htmlspecialchars(stripslashes($_REQUEST['author'])).'<br />';
-                                       echo 'request Timestamp: '.htmlspecialchars(stripslashes($_REQUEST['timestamp'])).'<br />';
-                                       echo 'request Comment: '.htmlspecialchars(stripslashes($_REQUEST['comment'])).'<br />';    
-*/                                       
                                        $comments[$comment_id]['author'] = htmlspecialchars(stripslashes($_REQUEST['author']));
                                        $cur_date = date ($this->getConf('d_format'));
                                        $comments[$comment_id]['timestamp'] = $cur_date;
@@ -232,11 +229,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                     // update issues modification date
                                     if ($checkFlag === false)
                                     {   // inform user (or assignee) about update
-                                        $this->_emailForIssueMod($_REQUEST['project'],$issues[$_REQUEST['comment_issue_ID']], $comments[$comment_id]);                                 
-
                                         // update modified date
                                         $issues[$_REQUEST['comment_issue_ID']]['modified'] = date($this->getConf('d_format')); 
                                         $xvalue = io_saveFile($pfile,serialize($issues));
+                                        $this->_emailForMod($_REQUEST['project'],$issues[$_REQUEST['comment_issue_ID']], $comments[$comment_id]);
                                         $anker_id = 'resolved_'. uniqid((double)microtime()*1000000,1);                                   
                                     }
                                  }
@@ -244,11 +240,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                        }
                  }
                  elseif (isset($_REQUEST['mod_description']))
-                 {  if (@file_exists($pfile))
-                    	{ $issues  = unserialize(@file_get_contents($pfile)); }
-                    else
-                    	{ msg('Issue file not found !'.NL.$pfile,-1);
-                        return false; }
+                 {  
                                         // check if captcha is to be used by issue tracker in general
                     if ($this->getConf('use_captcha') === 0) { $captcha_ok = 1;}
                     else { $captcha_ok = ($this->_captcha_ok());}
@@ -257,8 +249,6 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     {   if (checkSecurityToken())
                         {   // find issue and description
                               $issue_id = trim($_REQUEST['comment_issue_ID']);
-                              echo 'request Issue ID: '.htmlspecialchars(stripslashes($_REQUEST['comment_issue_ID'])).'<br />';
-                              echo 'request Description: '.htmlspecialchars(stripslashes($_REQUEST['description_mod'])).'<br />';
                               $cFlag = false;
      
                               foreach ($issues as $value)
@@ -272,6 +262,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                               {   $issues[$issue_id]['description'] = htmlspecialchars(stripslashes($_REQUEST['description_mod']));
                                   //save issue-file
                                   $xvalue = io_saveFile($pfile,serialize($issues));
+                                  $this->_emailForDscr($_REQUEST['project'], $issues[$issue_id]);
                                   $Generated_Message = '<div class="it__positive_feedback">'.$this->getLang('msg_descrmodtrue').$issue_id.'</div>';
                               }
                               else { msg("Issue with ID: $issue_id not found.",-1); }
@@ -318,8 +309,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                   $xvalue = io_saveFile($pfile,serialize($issues));
                                   $anker_id = 'resolved_'. uniqid((double)microtime()*1000000,1);                                   
                                   $Generated_Message = '<div class="it__positive_feedback"><a href="#'.$anker_id.'"></a>'.$this->getLang('msg_resolution_true').$issue_id.'</div>';
-                                  msg($this->getLang('msg_resolution_true').$issue_id,1);
-                                  $this->_emailForResolution($_REQUEST['project'], $issues[$_REQUEST['comment_issue_ID']]);
+                                  msg($this->getLang('msg_resolution_true').$issue_id.'.',1);
+                                  $this->_emailForRes($_REQUEST['project'], $issues[$_REQUEST['comment_issue_ID']]);
                               }
                               else { msg("Issue with ID: $issue_id not found.",-1); }
                                 
@@ -739,32 +730,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 //        $user_grp = pageinfo();
         
         // get issues file contents
-        $pfile = metaFN($project, '.issues');   
-        if (@file_exists($pfile))
-        	{  $issue  = unserialize(@file_get_contents($pfile));
-  
-             // check if ID exist
-             $cFlag = false;
-             foreach ($issue as $issue_item)  {
-                if ($issue_item['id'] == $issue_id) {
-                    $cFlag = true;
-                    break;
-                }
-             }
-             if ($cFlag === false) {
-             // promt error message that issue with this ID does not exist
-              $Generated_Header = '<div class="it__negative_feedback">'.$this->getLang('msg_issuemissing').$issue_id.'.</div><br />';
-              echo $Generated_Header;
-              return;
-             }
-          }
-        else
-        	{
-              // promt error message that issue with ID does not exist
-              $Generated_Header = '<div class="it__negative_feedback">'.sprintf($this->getLang('msg_pfilemissing'),$pfile).'</div><br />';
-              echo $Generated_Header;
-              return;
-          }	          
+        $issue = $this->get_issues_file_contents($project, $issue_id);
+        if(!$issue) return false;	          
         
         // get detail information from issue comment file
         $cfile = metaFN($project."_".$issue_id, '.cmnts');
@@ -1095,7 +1062,7 @@ $issue_initial_description = '<table class="itd__tables"><tbody>
                                          '<input type="hidden" name="author"value="'.$u_mail_check.'" />'.NL.        
                                          '<input type="hidden" name="timestamp" value="'.$cur_date.'" />'.NL.
                                          '<input type="hidden" name="mod_description" value="1"/>'.NL.
-                                         '<textarea id="description_mod" name="description_mod" type="text" cols="106" rows="7" value="">'.$x_comment.'</textarea>'.NL;        
+                                         '<textarea id="description_mod" name="description_mod" type="text" cols="106" rows="7" value="">'.strip_tags($x_comment).'</textarea>'.NL;        
                                          
                                 if ($this->getConf('use_captcha')==1) 
                                 {   $helper = null;
@@ -1404,12 +1371,10 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 /******************************************************************************/
 /* send an e-mail to user due to issue resolution
 */                            
-    function _emailForResolution($project,$issue)
-    {  if ($this->getConf('userinfo_email')==1)
-        {   $subject = sprintf($this->getLang('issue_resolved_subject'),$issue['id'], $project);            
+    function _emailForRes($project,$issue)
+    {       $subject = sprintf($this->getLang('issue_resolved_subject'),$issue['id'], $project);            
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
             global $ID;
-            
             $body = $this->getLang('issuemod_head').chr(10).chr(10).$this->getLang('issue_resolved_intro').chr(10).chr(13).
                     $this->getLang('issuemod_issueid').$issue['id'].chr(10).
                     $this->getLang('issuemod_status').$issue['status'].chr(10).
@@ -1420,41 +1385,76 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
 
             $from=$this->getConf('email_address') ;
-            $to=$issue['user_mail'];
+
+            $user_mail = pageinfo();
+            if($user_mail['userinfo']['mail']===$issue['user_mail']) $to=$issue['assigned']. "\r\n";
+            elseif($user_mail['userinfo']['mail']===$issue['assigned']) $to=$issue['user_mail']. "\r\n";
+            else $to=$issue['user_mail'].', '.$issue['assigned']. "\r\n";
+            
             $cc=$issue['add_user_mail'];
             mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
-        }
     }
 /******************************************************************************/
 /* send an e-mail to user due to issue modificaion
 */                            
-    function _emailForIssueMod($project,$issue,$comment)
-    {
-        if ($this->getConf('userinfo_email')==1)
-        {
-            $subject = sprintf($this->getLang('issuemod_subject'),$issue['id'], $project);            
+    function _emailForMod($project,$issue,$comment)
+    {       $subject = sprintf($this->getLang('issuemod_subject'),$issue['id'], $project). "\r\n";            
+            $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
+            
+            $body = $this->getLang('issuemod_head').chr(10).chr(10).$this->getLang('issuemod_intro').chr(10).chr(13).
+                    $this->getLang('issuemod_issueid').$issue['id'].chr(10).
+                    $this->getLang('issuemod_status').$issue['status'].chr(10).
+                    $this->getLang('issuemod_product').$issue['product'].chr(10).
+                    $this->getLang('issuemod_version').$issue['version'].chr(10).
+                    $this->getLang('issuemod_severity').$issue['severity'].chr(10).
+                    $this->getLang('issuemod_creator').$issue['user_name'].chr(10).
+                    $this->getLang('issuemod_title').$issue['title'].chr(10).
+                    $this->getLang('issuemod_cmntauthor').$comment['author'].chr(10).
+                    $this->getLang('issuemod_date').$comment['timestamp'].chr(10).
+                    $this->getLang('issuemod_cmnt').$this->xs_format($comment['comment']).chr(10).
+                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+                    $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end'). "\r\n";
+
+            $from=$this->getConf('email_address'). "\r\n";
+            
+            $user_mail = pageinfo();
+            if($user_mail['userinfo']['mail']===$issue['user_mail']) $to=$issue['assigned']. "\r\n";
+            elseif($user_mail['userinfo']['mail']===$issue['assigned']) $to=$issue['user_mail']. "\r\n";
+            else $to=$issue['user_mail'].', '.$issue['assigned']. "\r\n";
+            
+            $cc=$issue['add_user_mail']. "\r\n";
+            mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
+    }
+/******************************************************************************/
+/* send an e-mail to user due to issue modificaion
+*/                            
+    function _emailForDscr($project,$issue)
+    {       $subject = sprintf($this->getLang('issuedescrmod_subject'),$issue['id'], $project). "\r\n";            
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
             global $ID;
             
             $body = $this->getLang('issuemod_head').chr(10).chr(10).$this->getLang('issuemod_intro').chr(10).chr(13).
-            $this->getLang('issuemod_issueid').$issue['id'].chr(10).
-            $this->getLang('issuemod_status').$issue['status'].chr(10).
-            $this->getLang('issuemod_product').$issue['product'].chr(10).
-            $this->getLang('issuemod_version').$issue['version'].chr(10).
-            $this->getLang('issuemod_severity').$issue['severity'].chr(10).
-            $this->getLang('issuemod_creator').$issue['user_name'].chr(10).
-            $this->getLang('issuemod_title').$issue['title'].chr(10).
-            $this->getLang('issuemod_cmntauthor').$comment['author'].chr(10).
-            $this->getLang('issuemod_date').$comment['timestamp'].chr(10).
-            $this->getLang('issuemod_cmnt').$this->xs_format($comment['comment']).chr(10).
-            $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
-            $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
+                    $this->getLang('issuemod_issueid').$issue['id'].chr(10).
+                    $this->getLang('issuemod_status').$issue['status'].chr(10).
+                    $this->getLang('issuemod_product').$issue['product'].chr(10).
+                    $this->getLang('issuemod_version').$issue['version'].chr(10).
+                    $this->getLang('issuemod_severity').$issue['severity'].chr(10).
+                    $this->getLang('issuemod_creator').$issue['user_name'].chr(10).
+                    $this->getLang('issuemod_title').$issue['title'].chr(10).
+                    $this->getLang('issuemod_date').$comment['timestamp'].chr(10).
+                    $this->getLang('th_descr').chr(10).$issue['description'].chr(10).
+                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+                    $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end'). "\r\n";
 
-            $from=$this->getConf('email_address') ;
-            $to=$issue['user_mail'];
-            $cc=$issue['add_user_mail'];
+            $from=$this->getConf('email_address'). "\r\n";
+            
+            $user_mail = pageinfo();
+            if($user_mail['userinfo']['mail']===$issue['user_mail']) $to=$issue['assigned']. "\r\n";
+            elseif($user_mail['userinfo']['mail']===$issue['assigned']) $to=$issue['user_mail']. "\r\n";
+            else $to=$issue['user_mail'].', '.$issue['assigned']. "\r\n";
+            
+            $cc=$issue['add_user_mail']. "\r\n";
             mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
-        }
     }
 /******************************************************************************/
 /* pic-up a single value
@@ -1590,4 +1590,32 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
         return $it_edit_tb;                     
     }
 /******************************************************************************/
+    function get_issues_file_contents($project, $issue_id) {
+        $pfile = metaFN($project, '.issues');   
+        if (@file_exists($pfile))
+        	{  $issue  = unserialize(@file_get_contents($pfile));
+             // check if ID exist
+             $cFlag = false;
+             foreach ($issue as $issue_item)  {
+                if ($issue_item['id'] == $issue_id) {
+                    $cFlag = true;
+                    return $issue;
+                    break;
+                }
+             }
+             if ($cFlag === false) {
+             // promt error message that issue with this ID does not exist
+              $Generated_Header = '<div class="it__negative_feedback">'.$this->getLang('msg_issuemissing').$issue_id.'.</div><br />';
+              echo $Generated_Header;
+              return;
+             }
+          }
+        else
+        	{
+              // promt error message that issue with ID does not exist
+              $Generated_Header = '<div class="it__negative_feedback">'.sprintf($this->getLang('msg_pfilemissing'),$pfile).'</div><br />';
+              echo $Generated_Header;
+              return;
+          }
+    }
 }

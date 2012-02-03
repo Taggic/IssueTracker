@@ -79,7 +79,7 @@ $lang['th_assigned']        = 'Assigned to';
 $lang['th_resolution']      = 'Resolution';
 $lang['th_modified']        = 'Modified';        
 $lang['gen_tab_open']       = 'Details';
-$lang['descr_tab_mod']      = 'modiy Description';
+$lang['descr_tab_mod']      = 'modify Description';
 $lang['cmt_tab_open']       = 'add Comment';
 $lang['cmt_tab_mod']        = 'modify Comment';
 $lang['rsl_tab_open']       = 'add / modify Resolution';
@@ -103,6 +103,7 @@ $lang['issuemod_cmnt']       = 'Comment:  ';
 $lang['issuemod_see']        = 'see details:  ';
 $lang['issuemod_br']         = 'best regards';
 $lang['issuemod_end']        = ' Issue Tracker';    // project name placed before this
+$lang['issuedescrmod_subject'] = 'Initial Description of issue %s on %s was modified';
 
 /******************************************************************************/
 /* send an e-mail to user due to issue set to resolved on details
@@ -112,7 +113,7 @@ $lang['issue_resolved_subject']    = 'Service Request %s on %s was resolved';
 $lang['issue_resolved_intro']      = 'Your reported issue was resolved.';
 $lang['issue_resolved_status']     = 'Solved';
 $lang['issue_resolved_text']       = 'Solution:   ';
-$lang['msg_resolution_true']       = 'Your Resolution was added sucessfully.';
+$lang['msg_resolution_true']       = 'Your Resolution was added sucessfully to ID';
 
 /******************************************************************************/
 /* deviations from before for send an e-mail to admin due to new issue created
