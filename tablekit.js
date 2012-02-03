@@ -679,7 +679,7 @@ TableKit.Resizable = {
 			TableKit.Resizable._handle = $(document.createElement('div')).addClassName('resize-handle').setStyle({
 				'top' : cell.cumulativeOffset()[1] + 'px',
 				'left' : Event.pointerX(e) + 'px',
-				'height' : table.getDimensions().height + 'px', 
+				'height' : table.getDimensions().height + 'px' 
 			});
 			document.body.style.cursor = 'w-resize';
       document.body.appendChild(TableKit.Resizable._handle);

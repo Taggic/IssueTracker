@@ -1372,7 +1372,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 /* send an e-mail to user due to issue resolution
 */                            
     function _emailForRes($project,$issue)
-    {       $subject = sprintf($this->getLang('issue_resolved_subject'),$issue['id'], $project);            
+    {       if($this->getConf('userinfo_email') ===0) return;
+            $subject = sprintf($this->getLang('issue_resolved_subject'),$issue['id'], $project);            
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
             global $ID;
             $body = $this->getLang('issuemod_head').chr(10).chr(10).$this->getLang('issue_resolved_intro').chr(10).chr(13).
@@ -1398,7 +1399,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 /* send an e-mail to user due to issue modificaion
 */                            
     function _emailForMod($project,$issue,$comment)
-    {       $subject = sprintf($this->getLang('issuemod_subject'),$issue['id'], $project). "\r\n";            
+    {       if($this->getConf('userinfo_email') ===0) return;
+            $subject = sprintf($this->getLang('issuemod_subject'),$issue['id'], $project). "\r\n";            
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
             
             $body = $this->getLang('issuemod_head').chr(10).chr(10).$this->getLang('issuemod_intro').chr(10).chr(13).
@@ -1429,7 +1431,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 /* send an e-mail to user due to issue modificaion
 */                            
     function _emailForDscr($project,$issue)
-    {       $subject = sprintf($this->getLang('issuedescrmod_subject'),$issue['id'], $project). "\r\n";            
+    {       if($this->getConf('userinfo_email') ===0) return;
+            $subject = sprintf($this->getLang('issuedescrmod_subject'),$issue['id'], $project). "\r\n";            
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
             global $ID;
             
