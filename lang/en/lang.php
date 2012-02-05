@@ -34,7 +34,8 @@ $lang['btn_showid_title']   = 'Show';
 
 $lang['msg_commentfalse']   = 'This comment does already exist and was not added again.';
 $lang['msg_commenttrue']    = 'Your comment has been successfully stored with ID #';
-$lang['msg_commentmodtrue'] = 'Your comment successfully modified as ID #';
+$lang['msg_commentmodtrue'] = 'Your comment was successfully modified as ID #';
+$lang['msg_commentdeltrue'] = 'Your comment #%s successfully deleted.';
 $lang['msg_commentmodfalse'] = 'No diff of comment ID #';
 $lang['msg_pfilemissing']   = 'Project file does not exist: %s .issues. ';
 $lang['msg_issuemissing']   = 'There does no Issue exist with ID ';
@@ -88,8 +89,12 @@ $lang['rsl_tab_open']       = 'add / modify Resolution';
 /* _emailForIssueMod
 */                            
 $lang['issuemod_subject']    = 'Service Request %s on %s was modified';
+$lang['cmnt_new_subject']    = 'New comment added to Service Request %s on %s ';
+$lang['cmnt_mod_subject']    = 'Comment modfification at Service Request %s on %s ';
+$lang['cmnt_del_subject']    = 'Comment deleted of Service Request %s on %s ';
 $lang['issuemod_head']       = 'Dear user,';
 $lang['issuemod_intro']      = 'Your reported issue got a new comment.';
+$lang['cmt_del_intro']       = 'A comment was deleted.';
 $lang['issuemod_issueid']    = 'ID:     ';
 $lang['issuemod_status']     = 'Status:   ';
 $lang['issuemod_product']    = 'Product:   ';

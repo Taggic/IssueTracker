@@ -6,11 +6,17 @@
  * @author   Taggic@t-online.de 
  */
 
-$meta['d_format']       = array('string');
-$meta['send_email']     = array('onoff');   // Send email off by default
-$meta['email_address']  = array('string');  // Who will be informed about new issues ? 
-$meta['registered_users'] = array('onoff'); // only registered users with edit permission on issue tracker page are allowed to create reports and add comments     
-$meta['userinfo_email'] = array('onoff');   // Send email off by default
+$meta['d_format']         = array('string');
+$meta['send_email']       = array('onoff');   // Send email off by default
+$meta['email_address']    = array('string');  // Who will be informed about new issues ? 
+$meta['registered_users'] = array('onoff');   // only registered users with edit permission on issue tracker page are allowed to create reports and add comments     
+$meta['userinfo_email']           = array('onoff');   // Send email off by default
+$meta['mail_add_comment']         = array('onoff');
+$meta['mail_modify_comment']      = array('onoff');
+$meta['mail_add_resolution']      = array('onoff');
+$meta['mail_modify_resolution']   = array('onoff');
+$meta['mail_modify__description'] = array('onoff');
+$meta['shw_mail_addr']  = array('onoff');   // show mail address instead of user names to registered users
 $meta['shwtbl_usr']	    =	array('multicheckbox', '_choices' => array('product', 'version', 'severity', 'created', 'status', 'user', 'title', 'description', 'assigned', 'resolution', 'modified'));
 $meta['use_captcha']    = array('onoff');   // Use captcha on by default
 $meta['severity']       = array('string');  // Configure allowed severities
