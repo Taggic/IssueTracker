@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2012-02-05',
+         'date'   => '2012-02-07',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -438,6 +438,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     $x_umail_select = $x_umail_select . "['".$x_umail."','".$x_umail."'],";
                 }
         }      
+        $x_umail_select .= "['',''],";
         
         $BASE = DOKU_BASE."lib/plugins/issuetracker/";
         return    "<script type=\"text/javascript\" src=\"".$BASE."prototype.js\"></script><script type=\"text/javascript\" src=\"".$BASE."fabtabulous.js\"></script>
@@ -1399,12 +1400,13 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
             $subject = sprintf($this->getLang('issue_resolved_subject'),$issue['id'], $project);            
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
             global $ID;
-            $body = $this->getLang('issuemod_head').chr(10).chr(10).$this->getLang('issue_resolved_intro').chr(10).chr(13).
+            $body = $this->getLang('issuemod_head').chr(10).chr(10).
+                    $this->getLang('issue_resolved_intro').chr(10).
                     $this->getLang('issuemod_issueid').$issue['id'].chr(10).
                     $this->getLang('issuemod_status').$issue['status'].chr(10).
                     $this->getLang('issuemod_product').$issue['product'].chr(10).
-                    $this->getLang('issuemod_version').$issue['version'].chr(10).
-                    $this->getLang('issue_resolved_text').$this->xs_format($issue['resolution']).chr(10).
+                    $this->getLang('issuemod_version').$issue['version'].chr(10).chr(10).
+                    $this->getLang('issue_resolved_text').$this->xs_format($issue['resolution']).chr(10).chr(10).
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
 
@@ -1435,10 +1437,11 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
               $body2 = $this->getLang('issuemod_intro').chr(10).chr(13);
               $body3 = $this->getLang('issuemod_cmntauthor').$comment['author'].chr(10).
                        $this->getLang('issuemod_date').$comment['timestamp'].chr(10).
-                       $this->getLang('issuemod_cmnt').$this->xs_format($comment['comment']).chr(10); 
+                       $this->getLang('issuemod_cmnt').$this->xs_format($comment['comment']).chr(10).chr(10); 
             }
             
-            $body = $this->getLang('issuemod_head').chr(10).chr(10).$body2.
+            $body = $this->getLang('issuemod_head').chr(10).chr(10).
+                    $body2.
                     $this->getLang('issuemod_issueid').$issue['id'].chr(10).
                     $this->getLang('issuemod_status').$issue['status'].chr(10).
                     $this->getLang('issuemod_product').$issue['product'].chr(10).
@@ -1470,16 +1473,17 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
             global $ID;
             
-            $body = $this->getLang('issuemod_head').chr(10).chr(10).$this->getLang('issuemod_intro').chr(10).chr(13).
+            $body = $this->getLang('issuemod_head').chr(10).chr(10).
+                    $this->getLang('issuemod_intro').chr(10).chr(13).
                     $this->getLang('issuemod_issueid').$issue['id'].chr(10).
                     $this->getLang('issuemod_status').$issue['status'].chr(10).
                     $this->getLang('issuemod_product').$issue['product'].chr(10).
                     $this->getLang('issuemod_version').$issue['version'].chr(10).
                     $this->getLang('issuemod_severity').$issue['severity'].chr(10).
-                    $this->getLang('issuemod_creator').$issue['user_name'].chr(10).
+                    $this->getLang('issuemod_creator').$issue['user_name'].chr(10).chr(10).
                     $this->getLang('issuemod_title').$issue['title'].chr(10).
-                    $this->getLang('issuemod_date').$comment['timestamp'].chr(10).
-                    $this->getLang('th_descr').chr(10).$issue['description'].chr(10).
+                    $this->getLang('issuemod_date').$comment['timestamp'].chr(10).chr(10).
+                    $this->getLang('th_descr').chr(10).$issue['description'].chr(10).chr(10).
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end'). "\r\n";
 

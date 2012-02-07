@@ -12,6 +12,7 @@ $lang['wmsg1'] = 'Please enter valid eMail address, preferrably your own, for cl
 $lang['wmsg2'] = 'Please enter a valid product version to relate this issue properly.';
 $lang['wmsg3'] = 'Please provide a better description of your issue.';
 $lang['wmsg4'] = '&nbsp;Please <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">Sign in</a> if you want to report an issue.';
+$lang['wmsg5'] = 'Please provide a descriptive issue title.';
 $lang['btn_reportsave'] = 'Submit';
 // further settings see 'th_...' options at Issue List controls section below 
 

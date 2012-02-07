@@ -165,7 +165,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                     $issues[$issue_id]['version'] = htmlspecialchars(stripslashes($_REQUEST['version']));
                                     $issues[$issue_id]['severity'] = htmlspecialchars(stripslashes($_REQUEST['severity']));
                                     $issues[$issue_id]['created'] = htmlspecialchars(stripslashes($_REQUEST['created']));
-                                    $issues[$issue_id]['status'] = "New";
+                                    $status = explode(',', $this->getConf('status')) ;
+                                    $issues[$issue_id]['status'] = $status [0];
                                     $issues[$issue_id]['user_name'] = htmlspecialchars(stripslashes($_REQUEST['user_name']));
                                     $issues[$issue_id]['user_mail'] = trim(htmlspecialchars(stripslashes($_REQUEST['user_mail'])));
                                     $issues[$issue_id]['user_phone'] = htmlspecialchars(stripslashes($_REQUEST['user_phone']));
@@ -184,7 +185,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                     $xdescription = $issues[$issue_id]['description'];
                                     //check user mail address, necessary for further clarification of the issue
                                     $valid_umail = $this->validEmail($xuser);
-                                    if (($valid_umail == true) && (strlen($issues[$issue_id]['description'])>9) && ((stripos($xdescription, " ") > 0) ||(strlen($xdescription)>10)) && (strlen($issues[$issue_id]['version']) >0))
+                                    if ( ($valid_umail == true) && ((stripos($xdescription, " ") > 0) || (strlen($xdescription)>5)) && (strlen($issues[$issue_id]['version']) >0))
                                     {                                
                                         //save issue-file
                                           $xvalue = io_saveFile($pfile,serialize($issues));
@@ -202,7 +203,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                         elseif (strlen($issues[$issue_id]['version']) <1)
                                             { $wmsg = $this->getLang('wmsg2'); }
                                         else 
-                                            { $wmsg = $this->getLang('wmsg3'); }
+                                            { $wmsg = $this->getLang('wmsg3').' ('.stripos($xdescription, " ").', '.strlen($xdescription).')'; }
                                         
                                         $Generated_Header = '<div class="it__negative_feedback">'.$wmsg.'</div>';
                                     }
@@ -315,7 +316,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 {
                     $x_umail_select = $x_umail_select . "['".$x_umail."','".$x_umail."'],";
                 }
-        }      
+        }
+        $x_umail_select .= "['',''],";      
         
         $BASE = DOKU_BASE."lib/plugins/issuetracker/";
         return    "<script type=\"text/javascript\" src=\"".$BASE."prototype.js\"></script><script type=\"text/javascript\" src=\"".$BASE."fabtabulous.js\"></script>
@@ -475,6 +477,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     $issue = $issues[$i];                    
                     $a_status = $this->_get_one_value($issue,'status');
                     $a_severity = $this->_get_one_value($issue,'severity');
+                    $a_product = $this->_get_one_value($issue,'product');
                 if ((($data['status']=='ALL') || (stristr($data['status'],$a_status)!= false)) && (($data['severity']=='ALL') || (stristr($data['severity'],$a_severity)!= false)) && (($data['product']=='ALL') || (stristr($data['product'],$a_product)!= false)))
                 {   
                     if ($y>=$step) break;
@@ -738,10 +741,51 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             // a file to store the comments regarding an issue going for and back
             $comments_file == metaFN($ID, '.cmnts');
             /*--------------------------------------------------------------------*/
-            // create the report template
+            // create the report template and check input on client site
             /*--------------------------------------------------------------------*/
-            $ret = '<div class="it__cir_form"><script type="text/javascript" src="include/selectupdate.js"></script>'.
-                   '<form class="issuetracker__form" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'"><p>';
+            $ret = '<div class="it__cir_form"><script type="text/javascript" src="include/selectupdate.js"></script>'.NL.
+                   '<script>
+                   // JavaScript Document
+                    function chkFormular (frm) {
+                        if (frm.product.value == "") {
+                          alert("Please select a valid product!");
+                          frm.product.focus();
+                          return false;
+                        }
+                        if (frm.version.value == "") {
+                          alert("'.$this->getLang('wmsg2').'");
+                          frm.version.focus();
+                          return false;
+                        }
+                        if (frm.user_name.value < 3) {
+                          alert("Please enter your user name!");
+                          frm.user_name.focus();
+                          return false;
+                        }
+
+                        if (frm.user_mail.value.indexOf("@") == -1) { 
+                          alert ("'.$this->getLang('wmsg1').'");
+                          frm.user_mail.focus();
+                          return false;
+                        }
+                         if (frm.severity.value == "") {
+                          alert ("Please select a severity");
+                          frm.severity.focus();
+                          return false;
+                        }
+                        if ((frm.title.value.length <= 5) & (frm.title.value.indexOf(" ") == -1)) {
+                          alert ("'.$this->getLang('wmsg5').'");
+                          frm.title.focus();
+                          return false;
+                        }
+                        if ((frm.description.value.length <= 5) & (frm.description.value.indexOf(" ") == -1)) {
+                          alert ("'.$this->getLang('wmsg3').'");
+                          frm.description.focus();
+                          return false;
+                      	}
+                    }
+                   </script>'.
+                   '<form class="issuetracker__form" name="issuetracker__form" method="post" onsubmit="return chkFormular(this)"'.'" accept-charset="'.$lang['encoding'].'"><p>';
             $ret .= formSecurityToken(false).
             '<input type="hidden" name="do" value="show" />'.
             '<input type="hidden" name="id" value="'.$ID.'" />'.
