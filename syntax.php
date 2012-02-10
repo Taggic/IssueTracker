@@ -166,7 +166,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                     $issues[$issue_id]['severity'] = htmlspecialchars(stripslashes($_REQUEST['severity']));
                                     $issues[$issue_id]['created'] = htmlspecialchars(stripslashes($_REQUEST['created']));
                                     $status = explode(',', $this->getConf('status')) ;
-                                    $issues[$issue_id]['status'] = $status [0];
+                                    $issues[$issue_id]['status'] = $status[0];
                                     $issues[$issue_id]['user_name'] = htmlspecialchars(stripslashes($_REQUEST['user_name']));
                                     $issues[$issue_id]['user_mail'] = trim(htmlspecialchars(stripslashes($_REQUEST['user_mail'])));
                                     $issues[$issue_id]['user_phone'] = htmlspecialchars(stripslashes($_REQUEST['user_phone']));
@@ -464,11 +464,16 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $dynatable_id = "t_".uniqid((double)microtime()*1000000,1);
             //Build table header according settings
             $configs = explode(',', $this->getConf('shwtbl_usr')) ;
-            $reduced_header = '';
+            $reduced_header ='';
+            $reduced_header = "<div class='itl__table'><table id='".$dynatable_id."' class='sortable editable resizable inline' width='100%'>".NL.
+                    "<thead><tr>".NL."<th class='sortfirstdesc' id='id'>".$this->getLang('th_id')."</th>".NL;
+
             foreach ($configs as $config)
             {
-                $reduced_header = $reduced_header."<th id='".$config."'>".strtoupper($config)."</th>";
+                $reduced_header .= "<th id='".$config."'>".$this->getLang('th_'.$config)."</th>".NL;
             }
+
+            $reduced_header .= "</tr></thead>".NL;
 
             //Build rows according settings
             $reduced_issues='';
@@ -519,6 +524,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                         elseif ($config == 'resolution')
                         {   $reduced_issues .='<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.NL;
                         }
+                        elseif ($config == 'description')
+                        {   $reduced_issues .='<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'description')).'</td>'.NL;
+                        }
                         else 
                         {
                             $reduced_issues .= '<td'.$style.$isval.'</td>'.NL;
@@ -528,7 +536,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 }
             }
             
-            $head = "<div class='issuetracker_div'>".NL."<table id='".$dynatable_id."' class='sortable resizable inline' width='100%'>".NL."<thead>".NL."<tr>".NL."<th class=\"sortfirstdesc\" id='id'>Id</th>".NL.$reduced_header."</tr>".NL."</thead>".NL;
+            $head = NL.$reduced_header.NL;
             $body = '<tbody>'.$reduced_issues.'</tbody>'.NL.'</table>'.NL.'</div>'.NL;
         }
 
@@ -553,7 +561,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                '<table class="itl__t1"><tbody>'.NL.
                '<tr class="itd__tables_tr">'.NL.
                   '<td colspan="4" align="left" valign="middle" height="40">'.NL.
-                      '<label class="it__cir_projectlabel">'.$this->getLang('lbl_issueqty').count($issues).'</label>'.NL.
+                      '<label class="it__cir_projectlabel">'.sprintf($this->getLang('lbl_issueqty'),$project).count($issues).'</label>'.NL.
                   '</td>'.NL.
                   '<td class="itl__showdtls" rowspan="2" width="35%">'.$li_count.'</td>'.NL.
                '</tr>'.NL.
@@ -820,10 +828,16 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 <td>'.$this->getLang('th_usermail').'</td>
                 <td><input class="it__cir_input" name="user_mail" value="'.$user_mail['userinfo']['mail'].'"/></td>
               </tr>'.
-             '<tr>
-                <td>'.$this->getLang('th_userphone').'</td>
-                <td><input class="it__cir_input" name="user_phone" value="'.$user_phone['userinfo']['phone'].'"/></td>
-              </tr>'.
+             '<tr>';
+                  //Check config if hidden
+                  if(strpos($this->getConf('ltdReport'),'User phone')!==false){
+                      $ret .= ' <input type="hidden" class="it__cir_input" name="user_phone" value="'.$user_phone['userinfo']['phone'].'"/>';
+                  } 
+                  else {
+                      $ret .= ' <td>'.$this->getLang('th_userphone').'</td>
+                                <td><input class="it__cir_input" name="user_phone" value="'.$user_phone['userinfo']['phone'].'"/></td>';
+                  }             
+              $ret .= '</tr>'.
              '<tr>';
                    //Check config if hidden
                   if(strpos($this->getConf('ltdReport'),'Add contact')!==false){
@@ -835,16 +849,24 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                   }             
         $ret .= '</tr>'.
             '<tr><td colspan=2>&nbsp;</td></tr>'.
-            '<tr>
-                <td>'.$this->getLang('th_severity').'</td>
-                <td><select class="element select small it__cir_select" name="severity">'.$STR_SEVERITY.'</select></td>
-             </tr>'.
+            '<tr>';
+                   //Check config if hidden
+                  if(strpos($this->getConf('ltdReport'),'Severity')!==false){
+                      $severity = explode(',', $this->getConf('severity')) ;
+                      $STR_SEVERITY = $severity[0]; 
+                      $ret .= ' <input type="hidden" class="it__cir_input" name="severity" value="'.$STR_SEVERITY.'"/>';
+                  } 
+                  else {
+                      $ret .= ' <td>'.$this->getLang('th_severity').'</td>
+                                <td><select class="element select small it__cir_select" name="severity">'.$STR_SEVERITY.'</select></td>';
+                  }             
+        $ret .= '</tr>'.
             '<tr>
                 <td>'.$this->getLang('th_title').'</td>
                 <td><input class="it__cir_linput" name="title" value="'.$_REQUEST['title'].'"/></input></td>
              </tr>'.
             '<tr>
-                <td>'.$this->getLang('th_descr').'</td>
+                <td>'.$this->getLang('th_description').'</td>
                 <td>';
 
 // mod for editor ---------------------------------------------------------------------

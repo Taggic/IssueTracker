@@ -18,7 +18,7 @@ $lang['btn_reportsave'] = 'Submit';
 
 /******************************************************************************/
 // Issue List controls
-$lang['lbl_issueqty']       = 'Quantity of Issues:&nbsp;';
+$lang['lbl_issueqty']       = 'Quantity of %s Issues:&nbsp;';
 $lang['lbl_scroll']         = 'Scroll issue List: &nbsp;&nbsp;&nbsp;';
 $lang['lbl_filtersev']      = 'Filter Severity:&nbsp;';
 $lang['lbl_filterstat']     = 'Filter Status:&nbsp;';
@@ -42,6 +42,7 @@ $lang['msg_pfilemissing']   = 'Project file does not exist: %s .issues. ';
 $lang['msg_issuemissing']   = 'There does no Issue exist with ID ';
 $lang['msg_captchawrong']   = 'Wrong answer to the antispam question.';
 $lang['msg_descrmodtrue']   = 'Description successfully modified.';
+$lang['msg_slinkmodtrue']   = 'Symptom links modified successfully.';
 
 $lang['lbl_project']        = 'Project:';
 $lang['lbl_issueid']        = 'ID:';
@@ -62,6 +63,7 @@ $lang['btn_mod']            = 'Update'; // to submit comment modification
 $lang['btn_mod_title']      = 'Update';
 $lang['del_title']          = 'Delete this comment';
 $lang['lbl_signin']         = 'Sign in</a> if you want to add a comment or resolution note.';       // </a> necessary to close the link tag
+$lang['lbl_please']         = 'Please ';
 
 $lang['th_project']         = 'Project';
 $lang['th_id']              = 'Id';
@@ -75,16 +77,17 @@ $lang['th_usermail']        = 'User email';
 $lang['th_userphone']       = 'User phone';
 $lang['th_reporteradcontact']  = 'Add contact';
 $lang['th_title']           = 'Title';
-$lang['th_descr']           = 'Issue Description';
+$lang['th_description']     = 'Issue Description';
 $lang['th_sympt']           = 'Symptom link ';
 $lang['th_assigned']        = 'Assigned to'; 
 $lang['th_resolution']      = 'Resolution';
 $lang['th_modified']        = 'Modified';        
 $lang['gen_tab_open']       = 'Details';
-$lang['descr_tab_mod']      = 'modify Description';
+$lang['descr_tab_mod']      = 'Modify';
 $lang['cmt_tab_open']       = 'add Comment';
 $lang['cmt_tab_mod']        = 'modify Comment';
 $lang['rsl_tab_open']       = 'add / modify Resolution';
+$lang['dtls_usr_hidden']       = 'user details hidden';
 /******************************************************************************/
 /* send an e-mail to user due to issue modificaion
 /* _emailForIssueMod
@@ -131,7 +134,7 @@ $lang['issuenew_intro']      = 'a new issue was created for the project:';
 $lang['issuenew_descr']      = 'Description:  ';
 
 /******************************************************************************/
-/* deviations from before for send an e-mail to assignee
+/* deviations from before for sending an e-mail to assignee
 /* _emailForNewIssue
 */
 $lang['issueassigned_subject']    = ' issue %s assigned to you';

@@ -102,16 +102,28 @@
     $issues[$id_issue][$field] = $value;
     $issues[$id_issue]['modified'] = date ('Y-m-d G:i:s');
     
+        // inform assigned workforce
+    if ($field == 'assigned') {
+        $issues[$id_issue]['assigned'] = $_POST['value'];
+        $status = explode(',', $conf['plugin']['issuetracker']['status']);
+        // No custom configuration in the event $conf does not contain issuetracker status field
+        // not the best idea to fall back to hard coded defaults but fast implemented
+        if($status[0]=='') $status[0]='New';
+        if($status[1]=='') $status[1]='Assigned';
+        
+        if($issues[$id_issue]['assigned']=='')
+        { // assignment deleted => set status to first config value
+          
+          $issues[$id_issue]['status'] = $status[0];
+        }
+        else $issues[$id_issue]['status'] = $status[1];
+        
+        _emailToAssigneeMod($project, $issues[$id_issue], $value);
+    }
     // Save issues file contents
     $fh = fopen($pfile, 'w');
     fwrite($fh, serialize($issues));
     fclose($fh);
     echo $_POST['value'];    
-
-        // inform assigned workforce
-    if ($field == 'assigned') {
-        $issues[$id_issue]['assigned'] = $_POST['value'];
-        _emailToAssigneeMod($project, $issues[$id_issue], $value);
-    }
 
 ?>

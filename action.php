@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2012-02-07',
+         'date'   => '2012-02-10',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -271,8 +271,38 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                               else { msg("Issue with ID: $issue_id not found.",-1); }
                         }
                     }
-                 }
-                 elseif (isset($_REQUEST['add_resolution'])) 
+                 } 
+                 elseif(isset($_REQUEST['mod_symptomlinks']))
+                 {
+                    // check if captcha is to be used by issue tracker in general
+                    if ($this->getConf('use_captcha') === 0) { $captcha_ok = 1;}
+                    else { $captcha_ok = ($this->_captcha_ok());}
+                    
+                    if ($captcha_ok)
+                    {   if (checkSecurityToken())
+                        {   // find issue and description
+                              $issue_id = trim($_REQUEST['comment_issue_ID']);
+                              $cFlag = false;
+     
+                              foreach ($issues as $value)
+                              { if ($value['id'] == $issue_id) 
+                                { $cFlag = true;
+                                  break;}
+                              }
+
+                              if ($cFlag === true)
+                              {   $issues[$issue_id]['attachment1'] = htmlspecialchars(stripslashes($_REQUEST['attachment1']));
+                                  $issues[$issue_id]['attachment2'] = htmlspecialchars(stripslashes($_REQUEST['attachment2']));
+                                  $issues[$issue_id]['attachment3'] = htmlspecialchars(stripslashes($_REQUEST['attachment3']));
+                                  //save issue-file
+                                  $xvalue = io_saveFile($pfile,serialize($issues));
+//                                  if($this->getConf('mail_modify__description') ===1) $this->_emailForDscr($_REQUEST['project'], $issues[$issue_id]);
+                                  $Generated_Message = '<div class="it__positive_feedback">'.$this->getLang('msg_slinkmodtrue').$issue_id.'</div>';
+                              }
+                              else { msg("Issue with ID: $issue_id not found.",-1); }
+                        }
+                    }
+                 }                 elseif (isset($_REQUEST['add_resolution'])) 
                  {  $renderer->info['cache'] = false;     
                     // get issues file contents
 //                    $pfile = metaFN($data['project'], '.issues'); 
@@ -583,11 +613,17 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         {   
             //Build table header according settings
             $configs = explode(',', $this->getConf('shwtbl_usr')) ;
-            $reduced_header = '';
+            $reduced_header ='';
+            $reduced_header = "<div class='itl__table'><table id='".$dynatable_id."' class='sortable editable resizable inline' width='100%'>".NL.
+                    "<thead><tr>".NL."<th class='sortfirstdesc' id='id'>".$this->getLang('th_id')."</th>".NL;
+
             foreach ($configs as $config)
             {
-                $reduced_header = $reduced_header."<th id='".$config."'>".strtoupper($config)."</th>";
+                $reduced_header .= "<th id='".$config."'>".$this->getLang('th_'.$config)."</th>".NL;
             }
+
+            $reduced_header .= "</tr></thead>".NL;
+
             //Build rows according settings
             $reduced_issues='';
             for ($i=$next_start-1;$i>=0;$i=$i-1)
@@ -638,6 +674,9 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         elseif ($config == 'resolution')
                         {   $reduced_issues .='<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.NL;
                         }
+                        elseif ($config == 'description')
+                        {   $reduced_issues .='<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'description')).'</td>'.NL;
+                        }
                         else 
                         {   $reduced_issues .= '<td'.$style.$isval.'</td>';
                         }
@@ -646,7 +685,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 }
             }
             
-            $head = "<div class='issuetracker_div'><table id='".$project."' class='sortable resizable inline'>"."<thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th>".$reduced_header."</tr></thead>";
+            $head = NL.$reduced_header.NL;
             $body = '<tbody>'.$reduced_issues.'</tbody></table></div>';
         }
         
@@ -671,7 +710,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                '<table class="itl__t1"><tbody>'.NL.
                '<tr class="itd__tables_tr">'.NL.
                   '<td colspan="4" align="left" valign="middle" height="40">'.NL.
-                      '<label class="it__cir_projectlabel">'.$this->getLang('lbl_issueqty').count($issues).'</label>'.NL.
+                      '<label class="it__cir_projectlabel">'.sprintf($this->getLang('lbl_issueqty'),$project).count($issues).'</label>'.NL.
                   '</td>'.NL.
                   '<td class="itl__showdtls" rowspan="2" width="35%">'.$li_count.'</td>'.NL.
                '</tr>'.NL.
@@ -762,16 +801,20 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
              (strpos($target2,$user_mail['userinfo']['mail']) != false)) && 
             ($this->getConf('shw_mail_addr')===1))
         {   $__assigened  = $issue[$issue_id]['assigned'];
+            $__assigenedaddr = $issue[$issue_id]['assigned'];
             $__reportedby = $issue[$issue_id]['user_mail'];
+            $__reportedbyaddr = $issue[$issue_id]['user_mail'];
         }
         else 
         {   foreach($target as $_assignee)
               { if($_assignee['mail'] === $issue[$issue_id]['assigned'])
                 {   $__assigened = $_assignee['name'];
+                    $__assigenedaddr = $_assignee['mail'];
                     break;
                 }
               }
             $__reportedby = $issue[$issue_id]['user_name'];
+            $__reportedbyaddr = $issue[$issue_id]['user_mail'];
         }
                    
 // scripts for xsEditor -------------------------------------------------------
@@ -942,7 +985,7 @@ $issue_edit_head .= '<tr class="itd_tr_standard">
 $issue_edit_head .= '<tr class="itd_tr_standard">                      
                       <td class="it__left_indent"></td>
                       <td class="itd__col2">'.$this->getLang('lbl_reporter').'</td>
-                      <td class="itd__col3"><a href="mailto:'.$__reportedby.'">'.$__reportedby.'</a></td>
+                      <td class="itd__col3"><a href="mailto:'.$__reportedbyaddr.'">'.$__reportedby.'</a></td>
                       <td class="itd__col4"></td>                   
                       <td class="itd__col5">'.$this->getLang('th_created').':</td>
                       <td class="itd__col6">'.date($this->getConf('d_format'),strtotime($issue[$issue_id]['created'])).'</td>
@@ -951,7 +994,7 @@ $issue_edit_head .= '<tr class="itd_tr_standard">
                     <tr class="itd_tr_standard">
                       <td class="it__left_indent"></td>
                       <td class="itd__col2">'.$this->getLang('th_assigned').':</td>
-                      <td class="itd__col3"><a href="mailto:'.$__assigened.'">'.$__assigened.'</a></td>
+                      <td class="itd__col3"><a href="mailto:'.$__assigenedaddr.'">'.$__assigened.'</a></td>
                       <td class="itd__col4"></td>                   
                       <td class="itd__col5">'.$this->getLang('th_modified').':</td>
                       <td class="itd__col6">'.date($this->getConf('d_format'),strtotime($issue[$issue_id]['modified'])).'</td>
@@ -1016,19 +1059,6 @@ $issue_client_details .= '</tbody><tr>'.NL.'
 /*------------------------------------------------------------------------------
  * Issue: 39, reported by lukas
  * hook-in to provide possibility of modifing the initial description
- * record new description and the possibility to see former ones
-------------------------------------------------------------------------------*/
-/*    - if user = report creator then provide edit text area option pre-filled  
-        with initial/current description  + update method
-      - provide edit textarea and preview method
- *    - upon diff of old description and textarea content 
- *       + store it as description
- *       + keep old description (optional) 
- *       + hidden output as drop-in box (optional)
- *       + feature to make hidden content/modifications visible (optional) 
-=> In the event of later modification of initial description add a comment 
-   including timestamp as "Alert" to the comments file or update last "Alert" to
-   prevent lots of such lines. 
 ------------------------------------------------------------------------------*/
         // retrive some basic information
         $cur_date = date ($this->getConf('d_format'));
@@ -1045,7 +1075,7 @@ $issue_initial_description = '<table class="itd__tables"><tbody>
                                   <td>'.$this->xs_format($x_comment).'</td>
                                 </tr>';
                              
-/* mod for edit description by ticket owner ----------------------------------*/
+/* mod for edit description by ticket owner and admin/assignee ---------------*/
 // check if current user is author of the comment and offer an edit button
             if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
             {     // add hidden edit toolbar and textarea
@@ -1080,7 +1110,7 @@ $issue_initial_description = '<table class="itd__tables"><tbody>
                                 $cell_ID = 'img_tab_open_comment'.$blink_id;
 
 $issue_initial_description .=  '<input  type="hidden" class="showid__option" name="showid" id="showid" size="10" value="'.$this->parameter.'"/>'.
-                               '<input  type="submit" class="button" id="btnmod_description" name="btnmod_description"  value="'.$this->getLang('btn_mod').'" title="'.$this->getLang('btn_mod_title').'");/>'.
+                               '<input  type="submit" class="button" id="btnmod_description" name="btnmod_description" value="'.$this->getLang('btn_mod').'" title="'.$this->getLang('btn_mod_title').'");/>'.
                                '</form>'.NL.'</td>'.NL.'</tr>'.NL.
                                '<tr>'.NL.'
                                    <td colspan="2" class="img_tab_open_comment" id="'.$cell_ID.'">'.NL.'
@@ -1095,19 +1125,76 @@ $issue_initial_description .= '</tbody></table>';
 
 $issue_attachments = '<table class="itd__tables"><tbody>
                       <tr>
-                        <td class="itd_tables_tdh">'.$this->getLang('lbl_symptlinks').'</td>
+                        <td colspan="2" class="itd_tables_tdh">'.$this->getLang('lbl_symptlinks').'</td>
                       </tr>
                       <tr  class="itd__tables_tr">
-                        <td style="padding-left:0.45em;">1. <a href="'.$issue[$issue_id]['attachment1'].'"><img border="0" alt="symptoms 1" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment1'].'" href="'.$issue[$issue_id]['attachment1'].'">'.$issue[$issue_id]['attachment1'].'</a></td>
-                      </tr>'.
+                        <td colspan="2" style="padding-left:0.45em;">1. <a href="'.$issue[$issue_id]['attachment1'].'"><img border="0" alt="symptoms 1" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment1'].'" href="'.$issue[$issue_id]['attachment1'].'">'.$issue[$issue_id]['attachment1'].'</a></td>
+                      </tr>'.NL.
                      '<tr  class="itd__tables_tr">
-                        <td style="padding-left:0.45em;">2. <a href="'.$issue[$issue_id]['attachment2'].'"><img border="0" alt="symptoms 2" style="margin-right:0.5em" vspace=1em align=absMiddle src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment2'].'" href="'.$issue[$issue_id]['attachment2'].'">'.$issue[$issue_id]['attachment2'].'</a></td>
-                      </tr>'.
+                        <td colspan="2" style="padding-left:0.45em;">2. <a href="'.$issue[$issue_id]['attachment2'].'"><img border="0" alt="symptoms 2" style="margin-right:0.5em" vspace=1em align=absMiddle src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment2'].'" href="'.$issue[$issue_id]['attachment2'].'">'.$issue[$issue_id]['attachment2'].'</a></td>
+                      </tr>'.NL.
                      '<tr  class="itd__tables_tr">
-                        <td style="padding-left:0.45em;">3. <a href="'.$issue[$issue_id]['attachment3'].'"><img border="0" alt="symptoms 3" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment3'].'" href="'.$issue[$issue_id]['attachment3'].'">'.$issue[$issue_id]['attachment3'].'</a></td>
-                      </tr>'.
-                     '</tbody></table>';              
-
+                        <td colspan="2" style="padding-left:0.45em;">3. <a href="'.$issue[$issue_id]['attachment3'].'"><img border="0" alt="symptoms 3" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment3'].'" href="'.$issue[$issue_id]['attachment3'].'">'.$issue[$issue_id]['attachment3'].'</a></td>
+                      </tr>'.NL;
+/* mod for edit symptom links by ticket owner and admin/assignee ---------------*/
+// check if current user is author of the comment and offer an edit button
+            if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
+            {     // add hidden edit toolbar and textarea
+                  $alink_id++;
+                  $blink_id = 'statanker_'.$alink_id;
+                  $anker_id = 'anker_'.$alink_id;
+                  $cell_ID = 'img_tab_open_reporterdtls'.$blink_id;                              
+$issue_attachments .= '<tbody style="display : none;" id="'.$blink_id.'">
+                        <tr><td colspan=2>'.NL.'
+                        <script type="text/javascript" src="include/selectupdate.js"></script>'.NL.
+                        '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
+$issue_attachments .= formSecurityToken(false). 
+                     '<input type="hidden" name="project" value="'.$project.'" />'.NL.
+                     '<input type="hidden" name="comment_issue_ID" value="'.$issue[$issue_id]['id'].'" />'.NL.        
+                     '<input type="hidden" name="mod_symptomlinks" value="1"/>'.NL;        
+                                         
+                                if ($this->getConf('use_captcha')==1) 
+                                {   $helper = null;
+                        		        if(@is_dir(DOKU_PLUGIN.'captcha'))
+                        			         $helper = plugin_load('helper','captcha');
+                        			         
+                        		        if(!is_null($helper) && $helper->isEnabled())
+                        			      {  $issue_attachments .= '<p>'.$helper->getHTML().'</p>'; }
+                                }                   //Check config if hidden
+                  if(strpos($this->getConf('ltdReport'),'Symptom link 1')!==false){
+                      $issue_attachments .= ' <input type="hidden" class="it__cir_linput" name="attachment1" value="'.$issue[$issue_id]['attachment1'].'"/>'.NL;
+                  } 
+                  else {
+                      $issue_attachments .= '<span style="margin-left:4em; float:left;">1.</span>
+                                   <span><input class="it__cir_linput" name="attachment1" value="'.$issue[$issue_id]['attachment1'].'"/></span><br />'.NL;
+                  }             
+                  if(strpos($this->getConf('ltdReport'),'Symptom link 2')!==false){
+                      $issue_attachments .= ' <input type="hidden" class="it__cir_linput" name="attachment2" value="'.$issue[$issue_id]['attachment2'].'"/>'.NL;
+                  } 
+                  else {
+                      $issue_attachments .= '<span style="margin-left:4em; float:left;">2.</span>
+                                   <span><input class="it__cir_linput" name="attachment2" value="'.$issue[$issue_id]['attachment2'].'"/></span><br />'.NL;
+                  }             
+                  if(strpos($this->getConf('ltdReport'),'Symptom link 3')!==false){
+                      $issue_attachments .= ' <input type="hidden" class="it__cir_linput" name="attachment3" value="'.$issue[$issue_id]['attachment3'].'"/>'.NL;
+                  } 
+                  else {
+                      $issue_attachments .= '<span style="margin-left:4em; float:left;">3.</span>
+                                   <span><input class="it__cir_linput" name="attachment3" value="'.$issue[$issue_id]['attachment3'].'"/></span><br/>'.NL;
+                  } 
+$issue_attachments .= '<input  type="hidden" class="showid__option" name="showid" id="showid" size="10" value="'.$this->parameter.'"/>'.
+                               '<input  type="submit" class="button" id="btnmod_description" name="btnmod_description" style="float:right;" value="'.$this->getLang('btn_mod').'" title="'.$this->getLang('btn_mod_title').'");/>'.
+                               '</form>'.NL.'</td></tr></tbody><tr>'.NL.'
+                            <td colspan="3" class="img_tab_open_comment" id="'.$cell_ID.'">'.NL.'
+                                <div class="lnk_tab_open_comment" id="'.$cell_ID.'">
+                                  <a id="'.$anker_id.'" onClick="tab_open(\''.$blink_id.'\',\''.$cell_ID.'\')">'.$this->getLang('descr_tab_mod').'</a>
+                                </div>'.NL.'
+                            </td>
+                            </tr>'.NL.'</table>';
+            }
+$issue_attachments .='</tbody></table>'.NL;
+/* END mod for edit description by ticket owner ----------------------------------*/  
+          
 $issue_comments_log ='<table class="itd__tables"><tbody>
                       <tr>
                         <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_cmts_wlog').'</td>
@@ -1145,7 +1232,7 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
                               if($tmp_name==false) $tmp_name = $compare;
                               $x_mail= '<a href="mailto:'.$compare.'">'.$tmp_name.'</a>';
                             }
-                        else {   $x_mail = '<i> (user details hidden) </i>';  }
+                        else {   $x_mail = '<i> ('.$this->getLang('dtls_usr_hidden').') </i>';  }
 
                         if($this->_get_one_value($a_comment,'mod_timestamp')) { $insert_lbl = '<label class="cmt_mod_exclamation">!</label>';}
                         else $insert_lbl ='';
@@ -1372,14 +1459,14 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
         else {
             $issue_edit_resolution ='<table class="itd__tables">
                                      <tr>
-                                        <td class="itd_tables_tdh" colSpan="2" >Resolution</td>
+                                        <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('th_resolution').'</td>
                                     </tr>';
             $issue_edit_resolution .= '<tr class="itd__tables_tr">
                                         <td width="1%"></td>
                                         <td>'.$this->xs_format($x_resolution).'</td>
                                       </tr></table>'.NL;
 
-            $wmsg = 'Please <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">'.$this->getLang('lbl_signin'); 
+            $wmsg = $this->getLang('lbl_please').'<a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">'.$this->getLang('lbl_signin'); 
             $issue_edit_resolution .= '<div class="it__standard_feedback">'.$wmsg.'</div>';                      
         }
 
@@ -1483,7 +1570,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                     $this->getLang('issuemod_creator').$issue['user_name'].chr(10).chr(10).
                     $this->getLang('issuemod_title').$issue['title'].chr(10).
                     $this->getLang('issuemod_date').$comment['timestamp'].chr(10).chr(10).
-                    $this->getLang('th_descr').chr(10).$issue['description'].chr(10).chr(10).
+                    $this->getLang('th_description').chr(10).$issue['description'].chr(10).chr(10).
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end'). "\r\n";
 
@@ -1652,8 +1739,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
              }
           }
         else
-        	{
-              // promt error message that issue with ID does not exist
+        	{   // promt error message that issue with ID does not exist
               $Generated_Header = '<div class="it__negative_feedback">'.sprintf($this->getLang('msg_pfilemissing'),$pfile).'</div><br />';
               echo $Generated_Header;
               return;
