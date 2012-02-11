@@ -1,133 +1,144 @@
-ï»¿<?php
-/******************************************************************************
-** Chinese language file for IssueTracker
-**
-** @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
-** @author     http://forum.dokuwiki.org/user/8556 = onwe - "IssueTracker works great even on Chinese" 
-*******************************************************************************/
+<?php
+/**
+ * English language file for IssueTracker
+ *
+ * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
+ * @author     Taggic <taggic@t-online.de>
+ */
+/******************************************************************************/
 // Issue Report controls
-$lang['msg_reporttrue']     = 'æ‚¨çš„éœ€æ±‚å·²æäº¤æˆåŠŸï¼ŒæŸ¥è©¢ç¢¼ç‚º #';
-$lang['wmsg1'] = 'ç‚ºä½¿èªè­‰æˆ–éœ€æ±‚å›å ±èƒ½æœ‰æ•ˆé€šçŸ¥æ‚¨ï¼Œè«‹è¼¸å…¥æœ‰æ•ˆçš„email';
-$lang['wmsg2'] = 'è«‹è¼¸å…¥æœ‰æ•ˆçš„ç‰ˆæ¬¡';
-$lang['wmsg3'] = 'è«‹æ›´å¥½çš„æè¿°æ‚¨æ‰€é‡åˆ°çš„å•é¡Œ';
-$lang['wmsg4'] = '&nbsp;è‹¥æ‚¨æƒ³æå‡ºéœ€æ±‚è«‹ <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">ç™»å…¥</a>';
-$lang['btn_reportsave'] = 'æäº¤';
+$lang['msg_reporttrue']     = '±zªº»İ¨D¤w´£¥æ¦¨¥\¡A¬d¸ß½X¬° #';
+$lang['wmsg1'] = '¬°¨Ï»{ÃÒ©Î»İ¨D¦^³ø¯à¦³®Ä³qª¾±z¡A½Ğ¿é¤J¦³®Äªºemail';
+$lang['wmsg2'] = '½Ğ¿é¤J¦³®Äªºª©¦¸';
+$lang['wmsg3'] = '½Ğ§ó¦nªº´y­z±z©Ò¹J¨ìªº°İÃD';
+$lang['wmsg4'] = '&nbsp;­Y±z·Q´£¥X»İ¨D½Ğ <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">µn¤J</a>';
+$lang['wmsg5'] = '½Ğ´£¨Ñ¤@­Ó¦³®Äªº¼ĞÃD';
+$lang['btn_reportsave'] = '´£¥æ';
 // further settings see 'th_...' options at Issue List controls section below 
 
 /******************************************************************************/
 // Issue List controls
-$lang['lbl_issueqty']       = 'éœ€æ±‚ç¸½æ•¸:&nbsp;';
-$lang['lbl_scroll']         = 'æ»¾å‹•éœ€æ±‚æ¸…å–®: &nbsp;&nbsp;&nbsp;';
-$lang['lbl_filtersev']      = 'é‡è¦åº¦:&nbsp;';
-$lang['lbl_filterstat']     = 'é€²åº¦:&nbsp;';
-$lang['btn_go']             = 'æŸ¥è©¢';
- 
+$lang['lbl_issueqty']       = '»İ¨DÁ`¼Æ:&nbsp;';
+$lang['lbl_scroll']         = 'ºu°Ê»İ¨D²M³æ: &nbsp;&nbsp;&nbsp;';
+$lang['lbl_filtersev']      = '­«­n«×:&nbsp;';
+$lang['lbl_filterstat']     = '¶i«×:&nbsp;';
+$lang['btn_go']             = '¬d¸ß';
+
 $lang['btn_previuos']       = '<<<';
-$lang['btn_previuos_title'] = 'ä¸Šä¸€ç­†éœ€æ±‚';
+$lang['btn_previuos_title'] = '¤W¤@µ§»İ¨D';
 $lang['btn_next']           = '>>>';
-$lang['btn_next_title']     = 'ä¸‹ä¸€ç­†éœ€æ±‚';
+$lang['btn_next_title']     = '¤U¤@µ§»İ¨D';
 
-$lang['lbl_showid']         = 'ç›´æ¥è·³è½‰æŒ‡å®šéœ€æ±‚ç¢¼çš„é é¢:';
-$lang['btn_showid']         = 'æŸ¥è©¢';
-$lang['btn_showid_title']   = 'æŸ¥è©¢';
+$lang['lbl_showid']         = 'ª½±µ¸õÂà«ü©w»İ¨D½Xªº­¶­±:';
+$lang['btn_showid']         = '¬d¸ß';
+$lang['btn_showid_title']   = '¬d¸ß';
 
-$lang['msg_commentfalse']   = 'é€™å‰‡å¸–å­å·²å­˜åœ¨ï¼Œè«‹å‹¿é‡è¤‡æå‡º';
-$lang['msg_commenttrue']    = 'æ‚¨çš„å¸–å­å·²æˆåŠŸæäº¤ç‚º ID #';
-$lang['msg_commentmodtrue'] = 'æ‚¨çš„å¸–å­å·²æˆåŠŸä¿®æ”¹ç‚º ID #';
-$lang['msg_commentmodfalse'] = 'å¸–å­æ²’æœ‰æ”¹è®Š ID #';
-$lang['msg_pfilemissing']   = 'å°ˆæ¡ˆä¸å­˜åœ¨: %s ã€‚éœ€æ±‚';
-$lang['msg_issuemissing']   = 'é€™å€‹éœ€æ±‚ä¸å­˜åœ¨ ';
-$lang['msg_captchawrong']   = 'è¼¸å…¥ä¸æ­£ç¢º';
-$lang['msg_descrmodtrue']   = 'æè¿°ä¿®æ”¹æˆåŠŸ.';
+$lang['msg_commentfalse']   = '³o«h©«¤l¤w¦s¦b¡A½Ğ¤Å­«½Æ´£¥X';
+$lang['msg_commenttrue']    = '±zªº©«¤l¤w¦¨¥\´£¥æ¬° ID #';
+$lang['msg_commentmodtrue'] = '±zªº©«¤l¤w¦¨¥\­×§ï¬° ID #';
+$lang['msg_commentdeltrue'] = '±zªº©«¤l #%s ¤w¸g¦¨¥\§R°£¤F';
+$lang['msg_commentmodfalse'] = '©«¤l¨S¦³§ïÅÜ ID #';
+$lang['msg_pfilemissing']   = '±M®×¤£¦s¦b: %s ¡C»İ¨D';
+$lang['msg_issuemissing']   = '³o­Ó»İ¨D¤£¦s¦b ';
+$lang['msg_captchawrong']   = '¿é¤J¤£¥¿½T';
+$lang['msg_descrmodtrue']   = '´y­z­×§ï¦¨¥\';
+$lang['msg_slinkmodtrue']   = '¯gª¬ÀÉ®×³sµ²­×§ï¦¨¥\';
 
-$lang['lbl_project']        = 'å°ˆæ¡ˆ:';
+$lang['lbl_project']        = '±M®×:';
 $lang['lbl_issueid']        = 'ID:';
-$lang['lbl_reporter']       = 'æå‡º:';
-$lang['lbl_reporterdtls']   = 'æå‡ºè€…è³‡æ–™';
-$lang['lbl_initdescr']      = 'åŸå§‹éœ€æ±‚æè¿°';
-$lang['lbl_reportername']   = 'æå‡º:';
+$lang['lbl_reporter']       = '´£¥X:';
+$lang['lbl_reporterdtls']   = '´£¥XªÌ¸ê®Æ';
+$lang['lbl_initdescr']      = '­ì©l»İ¨D´y­z';
+$lang['lbl_reportername']   = '´£¥X:';
 $lang['lbl_reportermail']   = 'eMail:';
-$lang['lbl_reporterphone']  = 'æ‰‹æ©Ÿè™Ÿç¢¼:';
-$lang['lbl_reporteradcontact']  = 'è¯ç¹«:';
-$lang['lbl_symptlinks']     = 'ç—‡ç‹€æª”æ¡ˆé€£çµ';
-$lang['lbl_cmts_wlog']      = 'å·¥ä½œç´€éŒ„';
-$lang['lbl_cmts_adcmt']     = 'æ–°å¢å¸–å­';
-$lang['lbl_cmts_edtres']    = 'è§£æ±ºæ–¹æ¡ˆ';
-$lang['btn_add']            = 'æ–°å¢';
-$lang['btn_add_title']      = 'æ–°å¢æ¨™é¡Œ';
-$lang['btn_mod']            = 'æ›´æ–°'; // to submit comment modification
-$lang['btn_mod_title']      = 'æ›´æ–°æ¨™é¡Œ';
-$lang['del_title']          = 'åˆªé™¤å¸–å­';
-$lang['lbl_signin']         = 'è«‹ç™»å…¥</a> è‹¥æ‚¨æƒ³è¦å¸–å­çš„è©±';       // </a> necessary to close the link tag
+$lang['lbl_reporterphone']  = '¤â¾÷¸¹½X:';
+$lang['lbl_reporteradcontact']  = 'ÁpÃ´:';
+$lang['lbl_symptlinks']     = '¯gª¬ÀÉ®×³sµ²';
+$lang['lbl_cmts_wlog']      = '¤u§@¬ö¿ı';
+$lang['lbl_cmts_adcmt']     = '·s¼W©«¤l';
+$lang['lbl_cmts_edtres']    = '¸Ñ¨M¤è®×';
+$lang['btn_add']            = '·s¼W';
+$lang['btn_add_title']      = '·s¼W¼ĞÃD';
+$lang['btn_mod']            = '§ó·s'; // to submit comment modification
+$lang['btn_mod_title']      = '§ó·s¼ĞÃD';
+$lang['del_title']          = '§R°£©«¤l';
+$lang['lbl_signin']         = '½Ğµn¤J</a> ­Y±z·Q­n¦^©«ªº¸Ü';       // </a> necessary to close the link tag
+$lang['lbl_please']         = '½Ğ ';
 
-$lang['th_project']         = 'å°ˆæ¡ˆ';
-$lang['th_id']              = 'éœ€æ±‚ç¢¼';
-$lang['th_created']         = 'æå‡ºæ™‚é–“';
-$lang['th_product']         = 'é …ç›®';
-$lang['th_version']         = 'ç‰ˆæ¬¡';
-$lang['th_severity']        = 'é‡è¦åº¦';
-$lang['th_status']          = 'é€²åº¦';
-$lang['th_username']        = 'æå‡º ';
+$lang['th_project']         = '±M®×';
+$lang['th_id']              = '»İ¨D½X';
+$lang['th_created']         = '´£¥X®É¶¡';
+$lang['th_product']         = '¶µ¥Ø';
+$lang['th_version']         = 'ª©¦¸';
+$lang['th_severity']        = '­«­n«×';
+$lang['th_status']          = '¶i«×';
+$lang['th_username']        = '´£¥X ';
 $lang['th_usermail']        = 'eMail';
-$lang['th_userphone']       = 'æ‰‹æ©Ÿ';
-$lang['th_reporteradcontact']  = 'è¯çµ¡æ–¹å¼';
-$lang['th_title']           = 'æ¨™é¡Œ';
-$lang['th_descr']           = 'æè¿°';
-$lang['th_sympt']           = 'ç—‡ç‹€æª”æ¡ˆé€£çµ ';
-$lang['th_assigned']        = 'æŒ‡æ´¾è‡³'; 
-$lang['th_resolution']      = 'è§£æ±ºæ–¹æ¡ˆ';
-$lang['th_modified']        = 'ä¿®æ”¹';        
-$lang['gen_tab_open']       = 'ç´°ç¯€';
-$lang['descr_tab_mod']      = 'ä¿®æ”¹æè¿°';
-$lang['cmt_tab_open']       = 'æ–°å¢';
-$lang['cmt_tab_mod']        = 'ä¿®æ”¹å¸–å­';
-$lang['rsl_tab_open']       = 'å‰µå»ºè§£æ±ºæ–¹æ¡ˆ';
+$lang['th_userphone']       = '¤â¾÷';
+$lang['th_reporteradcontact']  = 'Ápµ¸¤è¦¡';
+$lang['th_title']           = '¼ĞÃD';
+$lang['th_descr']           = '´y­z';
+$lang['th_sympt']           = '¯gª¬ÀÉ®×³sµ² ';
+$lang['th_assigned']        = '«ü¬£¦Ü'; 
+$lang['th_resolution']      = '¸Ñ¨M¤è®×';
+$lang['th_modified']        = '­×§ï';        
+$lang['gen_tab_open']       = '²Ó¸`';
+$lang['descr_tab_mod']      = '­×§ï´y­z';
+$lang['cmt_tab_open']       = '·s¼W';
+$lang['cmt_tab_mod']        = '­×§ï©«¤l';
+$lang['rsl_tab_open']       = '³Ğ«Ø¸Ñ¨M¤è®×';
+$lang['dtls_usr_hidden']       = 'ÁôÂÃ¥Ó½Ğ¤H¸ê®Æ';
 /******************************************************************************/
 /* send an e-mail to user due to issue modificaion
 /* _emailForIssueMod
 */                            
-$lang['issuemod_subject']    = 'éœ€æ±‚ç¢¼ %s åœ¨ %s æœ‰æ›´æ–°å–”';
-$lang['issuemod_head']       = 'è¦ªæ„›çš„ç”¨æˆ¶,';
-$lang['issuemod_intro']      = 'è«‹æ³¨æ„æŸ¥æ”¶ä»¥ä¸‹è¨Šæ¯';
-$lang['issuemod_issueid']    = 'éœ€æ±‚ç¢¼ã€€ã€€ã€€:';
-$lang['issuemod_status']     = 'é€²åº¦ã€€ã€€ã€€ã€€:';
-$lang['issuemod_product']    = 'é …ç›®ã€€ã€€ã€€ã€€:';
-$lang['issuemod_version']    = 'ç‰ˆæœ¬ã€€ã€€ã€€ã€€:';
-$lang['issuemod_severity']   = 'é‡è¦åº¦ã€€ã€€ã€€:';
-$lang['issuemod_creator']    = 'æå‡ºã€€ã€€ã€€ã€€:';
-$lang['issuemod_title']      = 'æ¨™é¡Œã€€ã€€ã€€ã€€:';
-$lang['issuemod_cmntauthor'] = 'ç™¼å¸–ã€€ã€€ã€€ã€€:';
-$lang['issuemod_date']       = 'æäº¤æ—¥ã€€ã€€ã€€:';
-$lang['issuemod_cmnt']       = 'å¸–å­ã€€ã€€ã€€ã€€:';
-$lang['issuemod_see']        = 'æ‰“é–‹ç¶²é ã€€ã€€: ';
-$lang['issuemod_br']         = 'ç¥æ‚¨æœ‰ç¾å¥½çš„ä¸€å¤©';
-$lang['issuemod_end']        = 'éœ€æ±‚è¿½è¹¤';    // project name placed before this
- 
+$lang['issuemod_subject']    = '»İ¨D½X %s ¦b %s ¦³§ó·s³á';
+$lang['cmnt_new_subject']    = '³o­Ó»İ¨Dªº %s ¦³·s©«¤l %s ';
+$lang['cmnt_mod_subject']    = '³o­Ó»İ¨Dªº %s ©«¤l¦b %s ³Q­×§ï¤F';
+$lang['cmnt_del_subject']    = '³o­Ó»İ¨Dªº %s ©«¤l¦b %s ³Q§R°£¤F';
+$lang['issuemod_head']       = '¿Ë·Rªº¥Î¤á,';
+$lang['issuemod_intro']      = '±zªº»İ¨D¦³·sªº©«¤l';
+$lang['cmt_del_intro']       = '¤@«h©«¤l³Q§R°£¤F';
+$lang['issuemod_issueid']    = '»İ¨D½X¡@¡@¡@:';
+$lang['issuemod_status']     = '¶i«×¡@¡@¡@¡@:';
+$lang['issuemod_product']    = '¶µ¥Ø¡@¡@¡@¡@:';
+$lang['issuemod_version']    = 'ª©¥»¡@¡@¡@¡@:';
+$lang['issuemod_severity']   = '­«­n«×¡@¡@¡@:';
+$lang['issuemod_creator']    = '´£¥X¡@¡@¡@¡@:';
+$lang['issuemod_title']      = '¼ĞÃD¡@¡@¡@¡@:';
+$lang['issuemod_cmntauthor'] = 'µo©«¡@¡@¡@¡@:';
+$lang['issuemod_date']       = '´£¥æ¤é¡@¡@¡@:';
+$lang['issuemod_cmnt']       = '©«¤l¡@¡@¡@¡@:';
+$lang['issuemod_see']        = '¥´¶}ºô­¶¡@¡@: ';
+$lang['issuemod_br']         = '¯¬±z¦³¬ü¦nªº¤@¤Ñ';
+$lang['issuemod_end']        = '»İ¨D°lÂÜ';    // project name placed before this
+$lang['issuedescrmod_subject'] = '­ì©l´y­z¦b»İ¨D %s ¦b %s ³Q­×§ï¤F';
+
 /******************************************************************************/
 /* send an e-mail to user due to issue set to resolved on details
 /* _emailForResolutionMod
 */                            
-$lang['issue_resolved_subject']    = 'éœ€æ±‚ç¢¼ %s åœ¨ %s å·²ç¶“è§£æ±ºäº†';
-$lang['issue_resolved_intro']      = 'æ‚¨æ‰€æå‡ºçš„éœ€æ±‚å·²è§£æ±º';
-$lang['issue_resolved_status']     = 'å·²è§£æ±º';
-$lang['issue_resolved_text']       = 'è§£æ±ºæ–¹æ¡ˆã€€ã€€:';
-$lang['msg_resolution_true']       = 'æ‚¨çš„è§£æ±ºæ–¹æ¡ˆæäº¤æˆåŠŸ';
+$lang['issue_resolved_subject']    = '»İ¨D½X %s ¦b %s ¤w¸g¸Ñ¨M¤F';
+$lang['issue_resolved_intro']      = '±z©Ò´£¥Xªº»İ¨D¤w¸Ñ¨M';
+$lang['issue_resolved_status']     = '¤w¸Ñ¨M';
+$lang['issue_resolved_text']       = '¸Ñ¨M¤è®×¡@¡@:';
+$lang['msg_resolution_true']       = '±zªº¸Ñ¨M¤è®×´£¥æ¦¨¥\';
  
 /******************************************************************************/
 /* deviations from before for send an e-mail to admin due to new issue created
 /* _emailForNewIssue
 */
-$lang['issuenew_subject']    = 'æœ‰æ–°çš„ %s éœ€æ±‚åœ¨ %s ä¸Š : %s (%s)';
-$lang['issuenew_head']       = 'ä¸»ç®¡æ‚¨å¥½,';
-$lang['issuenew_intro']      = 'ä½¿ç”¨è€…æœ‰æ–°çš„éœ€æ±‚ï¼Œè«‹æŒ‡æ´¾å°æ‡‰äººå“¡';
-$lang['issuenew_descr']      = 'æè¿°:  ';
+$lang['issuenew_subject']    = '¦³·sªº %s »İ¨D¦b %s ¤W : %s (%s)';
+$lang['issuenew_head']       = '¥DºŞ±z¦n,';
+$lang['issuenew_intro']      = '¨Ï¥ÎªÌ¦³·sªº»İ¨D¡A½Ğ«ü¬£¹ïÀ³¤H­û';
+$lang['issuenew_descr']      = '´y­z:  ';
 
 /******************************************************************************/
 /* deviations from before for send an e-mail to assignee
 /* _emailForNewIssue
 */
-$lang['issueassigned_subject']    = 'éœ€æ±‚ç¢¼ %s è¢«æŒ‡æ´¾çµ¦æ‚¨äº†';
-$lang['issueassigned_head']       = 'æ‚¨å¥½,';
-$lang['issueassigned_intro']      = 'æ‚¨è¢«æŒ‡æ´¾å°æ‡‰ä¸‹åˆ—çš„ä½¿ç”¨è€…éœ€æ±‚:';
+$lang['issueassigned_subject']    = '»İ¨D½X %s ³Q«ü¬£µ¹±z¤F';
+$lang['issueassigned_head']       = '±z¦n,';
+$lang['issueassigned_intro']      = '±z³Q«ü¬£¹ïÀ³¤U¦Cªº¨Ï¥ÎªÌ»İ¨D:';
 
-/******************************************************************************/ 
+/******************************************************************************/
