@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2012-02-10',
+         'date'   => '2012-02-13',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -85,6 +85,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $this->itl_stat = $_GET['itl_stat_filter'];
             $this->itl_sev = $_GET['itl_sev_filter'];
             $this->itl_prod = $_GET['itl_prod_filter'];
+         }
+         elseif ($event->data === 'showmodlog') {
+            $this->parameter = $_GET['showid'];
+            $this->project = $_GET['project'];
          }
          else return;
          
@@ -302,7 +306,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                               else { msg("Issue with ID: $issue_id not found.",-1); }
                         }
                     }
-                 }                 elseif (isset($_REQUEST['add_resolution'])) 
+                 }                 
+                 elseif (isset($_REQUEST['add_resolution'])) 
                  {  $renderer->info['cache'] = false;     
                     // get issues file contents
 //                    $pfile = metaFN($data['project'], '.issues'); 
@@ -343,6 +348,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                   if($this->getConf('mail_modify_resolution') ===1) $this->_emailForRes($_REQUEST['project'], $issues[$_REQUEST['comment_issue_ID']]);
                                   $Generated_Message = '<div class="it__positive_feedback"><a href="#'.$anker_id.'"></a>'.$this->getLang('msg_resolution_true').$issue_id.'</div>';
                                   msg($this->getLang('msg_resolution_true').$issue_id.'.',1);
+                                  $this->_log_mods($project, $issues[$issue_id], $usr, 'resolution', $issues[$issue_id]['resolution']);
                               }
                               else { msg("Issue with ID: $issue_id not found.",-1); }
                                 
@@ -410,9 +416,45 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 if ($sev_filter == '') {$sev_filter='ALL';}
                 $productfilter = $this->itl_prod;
                 if ($productfilter == '') {$productfilter='ALL';}
-                $Generated_Header = '';                       
-                $Generated_Table = $this->_table_render($a,$step,$start,$next_start,$stat_filter,$sev_filter,$productfilter); 
+                $Generated_Header  = '';                       
+                $Generated_Table   = $this->_table_render($a,$step,$start,$next_start,$stat_filter,$sev_filter,$productfilter); 
                 $Generated_Scripts = $this->_scripts_render();
+        }
+        elseif ($data->data == 'showmodlog'){
+            $data->preventDefault();
+            $issue_id = $this->parameter;
+            $project = $this->project;
+            $Generated_Header  = '';
+            $Generated_Scripts = '';
+            $Generated_Report  = '';
+            $Generated_Message = '';
+
+            // get mod-log file contents
+            $modfile = metaFN($project.'_'.$issue_id, '.mod-log');
+            if (@file_exists($modfile))
+                {$mods  = unserialize(@file_get_contents($modfile));}
+            else 
+                {msg('No Modification log file found for this issue',-1);
+                 return;}
+
+            $Generated_Table  .= '<h1>'.$this->getLang('h_modlog').$issue_id.'</h1>';
+            $Generated_Table  .= '<div class="dokuwiki"><table class="inline tbl_showmodlog">'.NL;
+            $Generated_Table  .= '<tr><th>Date</th><th>User</th><th>Field</th><th>new Value</th></tr>'.NL;
+
+            foreach($mods as $mod) {          
+                $Generated_Table  .= '<tr>'.NL;
+                $Generated_Table  .= '  <td>'.$this->_get_one_value($mod,'timestamp').'</td>'.NL;
+                $Generated_Table  .= '  <td>'.$this->_get_one_value($mod,'user').'</td>'.NL;
+                $Generated_Table  .= '  <td>'.$this->_get_one_value($mod,'field').'</td>'.NL;
+                $Generated_Table  .= '  <td>'.$this->_get_one_value($mod,'new_value').'</td>'.NL;
+                $Generated_Table  .= '</tr>'.NL;
+            }
+
+            $Generated_Table  .= '</table></div>'.NL;
+            // build parameter for $_GET method
+            $pstring = sprintf("showid=%s&amp;project=%s", urlencode($issue_id), urlencode($project));
+            $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->getLang('back').'">'.$this->getLang('back').'</a>';
+            $Generated_Table  .= $itl_item_title.NL;        
         }
         else return;
         
@@ -749,7 +791,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                '   </td>'.NL.
                '</tr>'.NL.'</tbody>'.NL.'</table>'.NL.'</div>'.NL;
 
-         $ret = $ret.$head.$body;              
+         $usr = '<span style="display:none;" id="currentuser">'.$user_grp['userinfo']['name'].'</span>' ; //to log issue mods
+         $ret = $usr.$ret.$head.$body;              
         return $ret;
     }
 /******************************************************************************
@@ -804,12 +847,14 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $__assigenedaddr = $issue[$issue_id]['assigned'];
             $__reportedby = $issue[$issue_id]['user_mail'];
             $__reportedbyaddr = $issue[$issue_id]['user_mail'];
+            $mail_allowed = true;
         }
         else 
         {   foreach($target as $_assignee)
               { if($_assignee['mail'] === $issue[$issue_id]['assigned'])
                 {   $__assigened = $_assignee['name'];
                     $__assigenedaddr = $_assignee['mail'];
+                    $mail_allowed = true;
                     break;
                 }
               }
@@ -984,24 +1029,38 @@ $issue_edit_head .= '<tr class="itd_tr_standard">
 
 $issue_edit_head .= '<tr class="itd_tr_standard">                      
                       <td class="it__left_indent"></td>
-                      <td class="itd__col2">'.$this->getLang('lbl_reporter').'</td>
-                      <td class="itd__col3"><a href="mailto:'.$__reportedbyaddr.'">'.$__reportedby.'</a></td>
-                      <td class="itd__col4"></td>                   
+                      <td class="itd__col2">'.$this->getLang('lbl_reporter').'</td>'.NL;
+if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
+                        {$issue_edit_head .= '<td class="itd__col3"><a href="mailto:'.$__reportedbyaddr.'">'.$__reportedby.'</a></td>'.NL;}
+else{$issue_edit_head .= '<td class="itd__col3">'.$__reportedby.'</td>'.NL;}
+
+$issue_edit_head .= ' <td class="itd__col4"></td>                   
                       <td class="itd__col5">'.$this->getLang('th_created').':</td>
                       <td class="itd__col6">'.date($this->getConf('d_format'),strtotime($issue[$issue_id]['created'])).'</td>
                     </tr>
                    
                     <tr class="itd_tr_standard">
                       <td class="it__left_indent"></td>
-                      <td class="itd__col2">'.$this->getLang('th_assigned').':</td>
-                      <td class="itd__col3"><a href="mailto:'.$__assigenedaddr.'">'.$__assigened.'</a></td>
-                      <td class="itd__col4"></td>                   
+                      <td class="itd__col2">'.$this->getLang('th_assigned').':</td>'.NL;
+if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
+                        {$issue_edit_head .= '<td class="itd__col3"><a href="mailto:'.$__assigenedaddr.'">'.$__assigened.'</a></td>'.NL;}
+else{$issue_edit_head .= '<td class="itd__col3">'.$__assigened.'</td>'.NL;}
+
+$issue_edit_head .= '<td class="itd__col4"></td>                   
                       <td class="itd__col5">'.$this->getLang('th_modified').':</td>
                       <td class="itd__col6">'.date($this->getConf('d_format'),strtotime($issue[$issue_id]['modified'])).'</td>
-                    </tr>
-                    </tbody></table>';
-
-
+                    </tr>'.NL;
+/*------------------------------------------------------------------------------
+  #60: to view mod-log
+------------------------------------------------------------------------------*/
+            $modfile = metaFN($project.'_'.$issue[$issue_id]['id'], '.mod-log');
+            if (@file_exists($modfile)) {  
+              $pstring = sprintf("showid=%s&amp;project=%s", urlencode($issue[$issue_id]['id']), urlencode($project));
+              $modlog_link = '<a href="doku.php?id='.$ID.'&do=showmodlog&'.$pstring.'" title="'.$this->getLang('th_showmodlog').'">'.$this->getLang('th_showmodlog').'</a>';
+              $issue_edit_head .= '<tr><td class="itd__modlog_link" colspan="6">['.$modlog_link.']</td></tr>'.NL;                    
+              $issue_edit_head .= '</tbody></table>'.NL;
+            }
+/*----------------------------------------------------------------------------*/
                   $alink_id++;
                   $blink_id = 'statanker_'.$alink_id;
                   $anker_id = 'anker_'.$alink_id;
@@ -1474,7 +1533,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
         
         //2011-12-02: bwenz code proposal (Issue 11)                                   
 //        $ret = $issue_edit_head . $issue_client_details . $issue_initial_description . $issue_attachments . $issue_comments_log . $issue_add_comment;
-        $ret = $issue_edit_head . $issue_client_details . $issue_initial_description . $issue_attachments . $issue_comments_log . $issue_add_comment . $issue_edit_resolution;
+        $usr = '<span style="display:none;" id="currentuser">'.$user_grp['userinfo']['name'].'</span>' ;  //to log issue mods
+        $ret = $usr.$issue_edit_head . $issue_client_details . $issue_initial_description . $issue_attachments . $issue_comments_log . $issue_add_comment . $issue_edit_resolution;
 
         return $ret;
     }
@@ -1745,4 +1805,30 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
               return;
           }
     }
+/******************************************************************************/
+/* log issue modificaions
+ * who changed what and when per issue
+*/                                          
+    function _log_mods($project, $issue, $usr, $column, $new_value)
+    {     global $conf;
+          // get mod-log file contents
+          $modfile = metaFN($project.'_'.$issue['id'], '.mod-log');
+          if (@file_exists($modfile))
+              {$mods  = unserialize(@file_get_contents($modfile));}
+          else 
+              {$mods = array();}
+          
+          $mod_id = count($mods);
+          
+          $mods[$mod_id]['timestamp'] = $issue['modified'];
+          $mods[$mod_id]['user'] = $usr;
+          $mods[$mod_id]['field'] = $column;
+          $mods[$mod_id]['new_value'] = $new_value;
+          
+          // Save issues file contents
+          $fh = fopen($modfile, 'w');
+          fwrite($fh, serialize($mods));
+          fclose($fh);
+    }
+/******************************************************************************/
 }

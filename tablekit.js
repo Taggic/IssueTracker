@@ -875,7 +875,8 @@ TableKit.Editable.CellEditor.prototype = {
 		var head = $(TableKit.getHeaderCells(null, cell)[TableKit.getCellIndex(cell)]);
 		var row = cell.up('tr');
 		var table = cell.up('table');
-		var s = '&row=' + (TableKit.getRowIndex(row)+1) + '&cell=' + (TableKit.getCellIndex(cell)+1) + '&id=' + row.id + '&field=' + head.id + '&' + Form.serialize(form);
+    var auser = document.getElementById("currentuser");
+		var s = '&row=' + (TableKit.getRowIndex(row)+1) + '&cell=' + (TableKit.getCellIndex(cell)+1) + '&id=' + row.id + '&field=' + head.id + '&' + Form.serialize(form) + '&usr=' + auser.innerHTML;
 		this.ajax = new Ajax.Updater(cell, op.ajaxURI || TableKit.option('editAjaxURI', table.id)[0], Object.extend(op.ajaxOptions || TableKit.option('editAjaxOptions', table.id)[0], {
 //		this.ajax = new Ajax.Updater(cell, op.ajaxURI , Object.extend(op.ajaxOptions, {
 			postBody : s,

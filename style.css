@@ -287,3 +287,13 @@ table.itd_tr_standard {
   margin-right: -10px ;
   float:right;
 }
+
+.itd__modlog_link {
+  text-align:              right;
+  font-size:   0.75em !important;
+	font-style:             italic;  
+}
+
+.tbl_showmodlog td {
+  padding: 0 1.5em 0 1.5em !important;
+}

@@ -4,13 +4,12 @@
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Michael Strunck, ITC Live Network, www.itclive.de
- * update      2012-02-10 by Taggic 
  */
 /******************************************************************************/
 // Issue Report controls
 $lang['msg_reporttrue']	= 'Ticket wurde gespeichert #';
-$lang['wmsg1']					= 'Bitte geben Sie eine gueltige E-Mail Adresse ein.';
-$lang['wmsg2']					= 'Bitte geben Sie eine gueltige Produkt-Version ein.';
+$lang['wmsg1']					= 'Bitte geben Sie eine g&uuml;ltige E-Mail Adresse ein.';
+$lang['wmsg2']					= 'Bitte geben Sie eine g&uuml;ltige Produkt-Version ein.';
 $lang['wmsg3']					= 'Bitte geben Sie einen beschreibenden Text ein.';
 $lang['wmsg4']					= '&nbsp;Bitte erst <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">einloggen</a> um ein Ticket zu speichern.';
 $lang['wmsg5']          = 'Die Beschreibung ist nicht aussagekräftig.';
@@ -28,7 +27,7 @@ $lang['btn_go']					= 'Go';
 $lang['btn_previuos']			= '<<<';
 $lang['btn_previuos_title']		= 'vorheriges Ticket';
 $lang['btn_next']				= '>>>';
-$lang['btn_next_title']			= 'naechstes Ticket';
+$lang['btn_next_title']			= 'n&auml;chstes Ticket';
 
 $lang['lbl_showid']				= 'Zeige Details der Tickets:';
 $lang['btn_showid']				= 'Zeigen';
@@ -37,7 +36,7 @@ $lang['btn_showid_title']		= 'Zeigen';
 $lang['msg_commentfalse']		= 'Dieser Kommentar existiert bereits und wurde daher nicht noch einmal gespeichert.';
 $lang['msg_commenttrue']		= 'Ihr Kommentar wurde gespeichert mit der ID #';
 $lang['msg_commentmodtrue'] = 'Ihr Kommentar wurde erfolgreich aktualisiert unter der ID #';
-$lang['msg_commentdeltrue'] = 'Ihr Kommentar #%s wurde erfolgreich geloescht.';
+$lang['msg_commentdeltrue'] = 'Ihr Kommentar #%s wurde erfolgreich gel&ouml;scht.';
 $lang['msg_commentmodfalse'] = 'Eswurde kein Unterschied festgestellt zum bereits existierenden Kommentar #';
 $lang['msg_pfilemissing']		= 'Projektdatei existiert nicht: %s .issues. ';
 $lang['msg_issuemissing']		= 'Es gibt keine Tickets mit der ID ';
@@ -53,17 +52,17 @@ $lang['lbl_initdescr']			= 'Beschreibung';
 $lang['lbl_reportername']		= 'Name:';
 $lang['lbl_reportermail']		= 'E-Mail:';
 $lang['lbl_reporterphone']		= 'Telefon:';
-$lang['lbl_reporteradcontact']	= 'Kontakt hinzufuegen:';
+$lang['lbl_reporteradcontact']	= 'Kontakt hinzuf&uuml;gen:';
 $lang['lbl_symptlinks']			= 'Link ';
 $lang['lbl_cmts_wlog']			= 'Kommentare';
-$lang['lbl_cmts_adcmt']			= 'Kommentar hinzufuegen';
-$lang['lbl_cmts_edtres']		= 'Loesung';
+$lang['lbl_cmts_adcmt']			= 'Kommentar hinzuf&uuml;gen';
+$lang['lbl_cmts_edtres']		= 'L&ouml;sung';
 $lang['btn_add']				    = 'Speichern';
 $lang['btn_add_title']			= 'Speichern';
 $lang['btn_mod']            = 'Aktualisieren'; // to submit comment modification
 $lang['btn_mod_title']      = 'Aktualisieren';
-$lang['del_title']          = 'Kommentar loeschen';
-$lang['lbl_signin']				  = 'loggen Sie sich ein</a> wenn Sie einen Kommentar oder eine Loesung hinzufuegen moechten.';       // </a> necessary to close the link tag
+$lang['del_title']          = 'Kommentar l&ouml;schen';
+$lang['lbl_signin']				  = 'loggen Sie sich ein</a> wenn Sie einen Kommentar oder eine L&ouml;sung hinzuf&uuml;gen m&ouml;chten.';       // </a> necessary to close the link tag
 $lang['lbl_please']         = 'Bitte ';
 
 $lang['th_project']				= 'Projekt';
@@ -81,25 +80,28 @@ $lang['th_title']				  = 'Titel';
 $lang['th_description']		= 'Beschreibung';
 $lang['th_sympt']				  = 'Link ';
 $lang['th_assigned']			= 'Zugewiesen'; 
-$lang['th_resolution']		= 'Loesung';
-$lang['th_modified']			= 'Geaendert';        
+$lang['th_resolution']		= 'L&ouml;sung';
+$lang['th_modified']			= 'Ge&auml;ndert';        
+$lang['th_showmodlog']    = 'Status log';
+$lang['h_modlog']         = 'Status &auml;nderungen von #';
+$lang['back']             = 'zur&uuml;ck';
 $lang['gen_tab_open']			= 'Details';
-$lang['descr_tab_mod']    = 'Aendern';
-$lang['cmt_tab_open']			= 'Kommentar hinzufuegen';
-$lang['cmt_tab_mod']      = 'Kommentar aendern';
-$lang['rsl_tab_open']			= 'Loesung hinzufuegen/aendern';
+$lang['descr_tab_mod']    = '&auml;ndern';
+$lang['cmt_tab_open']			= 'Kommentar hinzuf&uuml;gen';
+$lang['cmt_tab_mod']      = 'Kommentar &auml;ndern';
+$lang['rsl_tab_open']			= 'L&ouml;sung hinzuf&uuml;gen/&auml;ndern';
 $lang['dtls_usr_hidden']  = 'Benutzerdaten ausgeblendet';
 /******************************************************************************/
 /* send an e-mail to user due to issue modificaion
 /* _emailForIssueMod
 */                            
-$lang['issuemod_subject']		= 'Wiki Issue Tracker - Ticket %s wurde geaendert';
+$lang['issuemod_subject']		= 'Wiki Issue Tracker - Ticket %s wurde ge&auml;ndert';
 $lang['cmnt_new_subject']   = 'Es wurde ein neuer Beitrag zum Ticket %s von %s erstellt.'; 
-$lang['cmnt_mod_subject']   = 'Ein Kommentar zum Ticket %s von %s wurde geaendert';
-$lang['cmnt_del_subject']   = 'Ein Kommentar zum Ticket %s von %s wurde geloescht';
+$lang['cmnt_mod_subject']   = 'Ein Kommentar zum Ticket %s von %s wurde ge&auml;ndert';
+$lang['cmnt_del_subject']   = 'Ein Kommentar zum Ticket %s von %s wurde gel&ouml;scht';
 $lang['issuemod_head']			= 'Hallo!';
-$lang['issuemod_intro']			= 'Ihr Ticket wurde geaendert.';
-$lang['cmt_del_intro']      = 'Es wurde ein Kommentar geloescht.';
+$lang['issuemod_intro']			= 'Ihr Ticket wurde ge&auml;ndert.';
+$lang['cmt_del_intro']      = 'Es wurde ein Kommentar gel&ouml;scht.';
 $lang['issuemod_issueid']		= 'ID:           ';
 $lang['issuemod_status']		= 'Status:       ';
 $lang['issuemod_product']		= 'Produkt:      ';
@@ -111,19 +113,19 @@ $lang['issuemod_cmntauthor']	= 'Kommentierer: ';
 $lang['issuemod_date']			= 'Gesendet am:  ';
 $lang['issuemod_cmnt']			= 'Kommentar:    ';
 $lang['issuemod_see']			  = 'Details:      ';
-$lang['issuemod_br']		  	= 'Mit freundlichen Gruessen,';
+$lang['issuemod_br']		  	= 'Mit freundlichen Gr&uuml;ssen,';
 $lang['issuemod_end']			= 'Wiki Issue Tracker';    // project name placed before this
-$lang['issuedescrmod_subject'] = 'Die urspruengliche Beschreibung des Tickets %s von %s wurde verändert.';
+$lang['issuedescrmod_subject'] = 'Die urspr&uuml;ngliche Beschreibung des Tickets %s von %s wurde verändert.';
  
 /******************************************************************************/
 /* send an e-mail to user due to issue set to resolved on details
 /* _emailForResolutionMod
 */                            
-$lang['issue_resolved_subject']	= 'Wiki Issue Tracker - Das Ticket %s von %s wurde geloest';
-$lang['issue_resolved_intro']	= 'Ihr Ticket wurde geloest!';
-$lang['issue_resolved_status']	= 'Geloest';
-$lang['issue_resolved_text']	= 'Loesung:';
-$lang['msg_resolution_true']	= 'Ihre Loesung wurde hinzugefuegt.';
+$lang['issue_resolved_subject']	= 'Wiki Issue Tracker - Das Ticket %s von %s wurde gel&ouml;st';
+$lang['issue_resolved_intro']	= 'Ihr Ticket wurde gel&ouml;st!';
+$lang['issue_resolved_status']	= 'Gel&ouml;st';
+$lang['issue_resolved_text']	= 'L&ouml;sung:';
+$lang['msg_resolution_true']	= 'Ihre L&ouml;sung wurde hinzugef&uuml;gt.';
 
 /******************************************************************************/
 /* deviations from before for send an e-mail to admin due to new issue created
@@ -131,7 +133,7 @@ $lang['msg_resolution_true']	= 'Ihre Loesung wurde hinzugefuegt.';
 */
 $lang['issuenew_subject']		= 'Wiki Issue Tracker - Neues Ticket mit Schweregrad %s zum Projekt %s';
 $lang['issuenew_head']			= 'Hallo Administrator!';
-$lang['issuenew_intro']			= 'Ein neues Ticket wurde fuer folgendes Projekt angelegt:';
+$lang['issuenew_intro']			= 'Ein neues Ticket wurde f&uuml;r folgendes Projekt angelegt:';
 $lang['issuenew_descr']			= 'Beschreibung:  ';
 
 /******************************************************************************/

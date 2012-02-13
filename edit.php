@@ -79,13 +79,38 @@
 
     }
 /******************************************************************************/
+/* log issue modificaions
+ * who changed what and when per issue
+*/                                          
+    function _log_mods($project, $issue, $usr, $column, $new_value)
+    {     global $conf;
+          // get mod-log file contents
+          $modfile = metaFN($project.'_'.$issue['id'], '.mod-log');
+          if (@file_exists($modfile))
+              {$mods  = unserialize(@file_get_contents($modfile));}
+          else 
+              {$mods = array();}
+          
+          $mod_id = count($mods);
+          if($new_value=='') $new_value = '[deleted]';
+          $mods[$mod_id]['timestamp'] = $issue['modified'];
+          $mods[$mod_id]['user'] = $usr;
+          $mods[$mod_id]['field'] = $column;
+          $mods[$mod_id]['new_value'] = $new_value;
+          
+          // Save issues file contents
+          $fh = fopen($modfile, 'w');
+          fwrite($fh, serialize($mods));
+          fclose($fh);
+    }
+/******************************************************************************/
     global $ID;
     global $conf;
         
     $exploded = explode(' ',htmlspecialchars(stripslashes($_POST['id'])));
     $project = $exploded[0];
     $id_issue = intval($exploded[1]);
-    
+    $usr = $_POST['usr']; 
     // get issues file contents
     $pfile = metaFN($project, '.issues');
     if (@file_exists($pfile))
@@ -101,6 +126,7 @@
     
     $issues[$id_issue][$field] = $value;
     $issues[$id_issue]['modified'] = date ('Y-m-d G:i:s');
+    _log_mods($project, $issues[$id_issue], $usr, $field, $value);
     
         // inform assigned workforce
     if ($field == 'assigned') {

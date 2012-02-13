@@ -600,8 +600,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                '   </td>'.NL.
                '</tr>'.NL.'</tbody>'.NL.'</table>'.NL.'</div>'.NL;
          }
-    
-         $ret = $ret.$head.$body;              
+         $usr = '<span style="display:none;" id="currentuser">'.$user_grp['userinfo']['name'].'</span>' ;   //to log issue mods
+         $ret = $usr.$ret.$head.$body;              
          return $ret;
     }
 /******************************************************************************/
