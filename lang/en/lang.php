@@ -95,13 +95,13 @@ $lang['dtls_usr_hidden']       = 'user details hidden';
 /* send an e-mail to user due to issue modificaion
 /* _emailForIssueMod
 */                            
-$lang['issuemod_subject']    = 'Service Request %s on %s was modified';
 $lang['cmnt_new_subject']    = 'New comment added to Service Request %s on %s ';
 $lang['cmnt_mod_subject']    = 'Comment modfification at Service Request %s on %s ';
 $lang['cmnt_del_subject']    = 'Comment deleted of Service Request %s on %s ';
+$lang['cmt_del_intro']       = 'A comment was deleted.';
+$lang['issuemod_subject']    = 'Service Request %s on %s was modified';
 $lang['issuemod_head']       = 'Dear user,';
 $lang['issuemod_intro']      = 'Your reported issue got a new comment.';
-$lang['cmt_del_intro']       = 'A comment was deleted.';
 $lang['issuemod_issueid']    = 'ID:     ';
 $lang['issuemod_status']     = 'Status:   ';
 $lang['issuemod_product']    = 'Product:   ';

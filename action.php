@@ -1557,15 +1557,18 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
 
+//            $body = utf8_encode($body);
             $from=$this->getConf('email_address') ;
 
             $user_mail = pageinfo();
-            if($user_mail['userinfo']['mail']===$issue['user_mail']) $to=$issue['assigned']. "\r\n";
-            elseif($user_mail['userinfo']['mail']===$issue['assigned']) $to=$issue['user_mail']. "\r\n";
-            else $to=$issue['user_mail'].', '.$issue['assigned']. "\r\n";
+            if($user_mail['userinfo']['mail']===$issue['user_mail']) $to=$issue['assigned'];
+            elseif($user_mail['userinfo']['mail']===$issue['assigned']) $to=$issue['user_mail'];
+            else $to=$issue['user_mail'].', '.$issue['assigned'];
             
             $cc=$issue['add_user_mail'];
-            mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
+            $headers = "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
+            mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers, $params=null);
+
     }
 /******************************************************************************/
 /* send an e-mail to user due to issue modificaion
@@ -1600,16 +1603,19 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end'). "\r\n";
 
+//            $body = utf8_encode($body);
             
             $from=$this->getConf('email_address'). "\r\n";
             
             $user_mail = pageinfo();
-            if($user_mail['userinfo']['mail']===$issue['user_mail']) $to=$issue['assigned']. "\r\n";
-            elseif($user_mail['userinfo']['mail']===$issue['assigned']) $to=$issue['user_mail']. "\r\n";
-            else $to=$issue['user_mail'].', '.$issue['assigned']. "\r\n";
+            if($user_mail['userinfo']['mail']===$issue['user_mail']) $to=$issue['assigned'];
+            elseif($user_mail['userinfo']['mail']===$issue['assigned']) $to=$issue['user_mail'];
+            else $to=$issue['user_mail'].', '.$issue['assigned'];
             
-            $cc=$issue['add_user_mail']. "\r\n";
-            mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
+            $cc=$issue['add_user_mail'];
+            $headers = "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
+            mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers, $params=null);
+
     }
 /******************************************************************************/
 /* send an e-mail to user due to issue modificaion
@@ -1634,6 +1640,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end'). "\r\n";
 
+//            $body = utf8_encode($body);
             $from=$this->getConf('email_address'). "\r\n";
             
             $user_mail = pageinfo();
@@ -1642,7 +1649,10 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
             else $to=$issue['user_mail'].', '.$issue['assigned']. "\r\n";
             
             $cc=$issue['add_user_mail']. "\r\n";
-            mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
+            $headers = "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
+            mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers, $params=null);
+            
+
     }
 /******************************************************************************/
 /* pic-up a single value

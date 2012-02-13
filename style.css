@@ -65,6 +65,7 @@ div.it__cir_form {
 /* ----- Issue List Elements ------- */
 .it__cir_projectlabel, .itl__showid_input, .itl__showid_button, .itl__step_input, div.itl__table, div.issuetracker_div, itl_sev_filter, .itl__buttons, .itl__sev_filter, .itl__stat_filter, .itd__tables_tr div  { 
 	font-size:              0.85em;
+  padding:     0 0.85em 0 0.85em;
 }
 
 .itd__tables_tr div  { 
@@ -91,10 +92,6 @@ itl__count_div {
 	margin-left:             2.5em;
 	margin-right:           0.75em;
 	border-radius:             5px;
-}
-
-.itl__showid_button {
-	width:                     3em;
 }
 
 .itl__step_input {

@@ -23,7 +23,7 @@
             // Include the language file  
             include 'lang/'.$conf['lang'].'/lang.php';
             
-            $subject= sprintf($lang['issuemod_subject'], $issue['id'], $project);
+            $subject= utf8_encode (sprintf($lang['issuemod_subject'], $issue['id'], $project));
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
 
             $body = $lang['issuemod_head'].chr(10).chr(10).
@@ -32,18 +32,19 @@
                     $lang['issuemod_product'].$issue['product'].chr(10).
                     $lang['issuemod_version'].$issue['version'].chr(10).
                     $lang['issuemod_severity'].$issue['severity'].chr(10).
+                    $lang['issuemod_status'].$issue['status'].chr(10).
                     $lang['issuemod_creator'].$issue['user_name'].chr(10).
                     $lang['issuemod_title'].$issue['title'].chr(10).
                     $lang['issuenew_descr'].$issue['description'].chr(10).
                     $lang['issuemod_see'].DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $lang['issuemod_br'].chr(10).$lang['issuemod_end'];
-
+            
             $from = $conf['plugin']['issuetracker']['email_address'];
             $to   = $issue['user_mail'];
             $cc   = $issue['add_user_mail'];
             
-            mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
-
+            $headers .= 'Content-type: text/html; charset=utf-8' . "\r\n"; 
+            mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers, $params=null);
         }
     }
 /******************************************************************************/
@@ -57,7 +58,7 @@
             // Include the language file  
             include 'lang/'.$conf['lang'].'/lang.php';
             
-            $subject= $project.sprintf($lang['issueassigned_subject'],$issue['id']);
+            $subject= utf8_encode ($project.sprintf($lang['issueassigned_subject'],$issue['id']));
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
 
             $body = $lang['issueassigned_head'].chr(10).chr(10).
@@ -75,7 +76,9 @@
             $from = $conf['plugin']['issuetracker']['email_address'];
             $to   = $value;
 
-            mail_send($to, $subject, $body, $from, $cc='', $bcc='', $headers=null, $params=null);
+            $headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
+            mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers, $params=null);
+
 
     }
 /******************************************************************************/
