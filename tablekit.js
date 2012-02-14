@@ -798,15 +798,21 @@ TableKit.Editable = {
 TableKit.Editable.CellEditor = Class.create();
 TableKit.Editable.CellEditor.prototype = {
 	initialize : function(name, options){
+    var langOK;
+    var langCancel;  
+
+    langOK = document.getElementById("table_kit_OK").innerHTML;
+    langCancel = document.getElementById("table_kit_Cancel").innerHTML;
+            
 		this.name = name;
 		this.options = Object.extend({
 			element : 'input',
 			attributes : {name : 'value', type : 'text'},
 			selectOptions : [],
 			showSubmit : true,
-			submitText : 'OK',
+			submitText : langOK,
 			showCancel : true,
-			cancelText : 'Cancel',
+			cancelText : langCancel,
 			ajaxURI : null,
 			ajaxOptions : null
 		}, options || {});

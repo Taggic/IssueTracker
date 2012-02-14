@@ -120,7 +120,6 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     function render($mode, &$renderer, $data) {        
         global $ID;
         $project = $data['project'];           
-              
         if ($mode == 'xhtml'){
             
             $renderer->info['cache'] = false;     
@@ -348,6 +347,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     function _table_render($issues,$data,$step,$start)
     {
         global $ID;
+        global $lang;
         if ($step==0) $step=10;
         if ($start==0) $start=count($issues)-$step+1;
         $next_start = $start + $step + 1;
@@ -465,7 +465,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             //Build table header according settings
             $configs = explode(',', $this->getConf('shwtbl_usr')) ;
             $reduced_header ='';
-            $reduced_header = "<div class='itl__table'><table id='".$dynatable_id."' class='sortable editable resizable inline' width='100%'>".NL.
+            $reduced_header = "<div class='itl__table'><table id='".$dynatable_id."' class='sortable resizable inline' width='100%'>".NL.
                     "<thead><tr>".NL."<th class='sortfirstdesc' id='id'>".$this->getLang('th_id')."</th>".NL;
 
             foreach ($configs as $config)
@@ -560,10 +560,10 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                '     </script>'.NL.
                '<table class="itl__t1"><tbody>'.NL.
                '<tr class="itd__tables_tr">'.NL.
-                  '<td colspan="4" align="left" valign="middle" height="40">'.NL.
+                  '<td colspan="4" align="left" valign="middle" height="30">'.NL.
                       '<label class="it__cir_projectlabel">'.sprintf($this->getLang('lbl_issueqty'),$project).count($issues).'</label>'.NL.
                   '</td>'.NL.
-                  '<td class="itl__showdtls" rowspan="2" width="35%">'.$li_count.'</td>'.NL.
+                  '<td class="itl__showdtls" rowspan="2" width="30%">'.$li_count.'</td>'.NL.
                '</tr>'.NL.
 
                '<tr class="itd__tables_tr">'.NL.
@@ -572,7 +572,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                                       $this->getLang('lbl_filtersev').' <br />'.NL.
                                                       $this->getLang('lbl_filterstat').' </p>'.NL.
                '   </td>'.NL.
-               '   <td align ="left" valign="top" width="20%">'.NL.
+               '   <td align ="left" valign="top" width="25%">'.NL.
                '    <form name="myForm" action="" method="post">'.NL.
                '       <input type="hidden" name="itl_start" id="itl_start" value="'.$start.'"/>'.NL.
                '       <input type="hidden" name="itl_step" id="itl_step" value="'.$step.'"/>'.NL.
@@ -588,20 +588,29 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                '    </form>'.NL.                      
                '   </td>'.NL.
                '   <td width="2%">&nbsp;</td>'.NL.
-               '   <td class="itl__showdtls" align ="left" width="30%">'.NL.
+               '   <td class="itl__showdtls" align ="left" width="40%">'.NL.
                '    <form  method="post" action="doku.php?id=' . $ID . '&do=showcase">'.NL.
-               '       <label class="it__cir_projectlabel">'.$this->getLang('lbl_showid').'</label><br />'.NL.
-               '       <input class="itl__showid_input" name="showid" id="showid" type="text" value="0"/>'.NL.
+               '       <label class="it__searchlabel">'.$this->getLang('lbl_showid').'</label>'.NL.
+               '       <input class="itl__sev_filter" name="showid" id="showid" type="text" value="0"/>'.NL.
                '       <input type="hidden" name="project" id="project" value="'.$project.'"/>'.NL.
                '       <input type="hidden" name="itl_sev_filter" id="itl_sev_filter" value="'.$sev_filter.'"/>'.NL.
                '       <input type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$stat_filter.'"/>'.NL.
                '       <input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="'.$this->getLang('btn_showid').'" title="'.$this->getLang('btn_showid_title').'"/>'.NL.
+               '    </form><br />'.NL.
+               '    <form  method="post" action="doku.php?id=' . $ID . '&do=it_search">'.NL.
+               '       <label class="it__searchlabel">'.$this->getLang('lbl_search').'</label>'.NL.
+               '       <input class="itl__sev_filter" name="it_str_search" id="it_str_search" type="text" value="'.$search.'"/>'.NL.
+               '       <input type="hidden" name="project" id="project" value="'.$project.'"/>'.NL.
+               '       <input class="itl__search_button" id="searchcase" type="submit" name="searchcase" value="'.$this->getLang('btn_search').'" title="'.$this->getLang('btn_search_title').'"/>'.NL.
                '    </form>'.NL.
                '   </td>'.NL.
                '</tr>'.NL.'</tbody>'.NL.'</table>'.NL.'</div>'.NL;
          }
-         $usr = '<span style="display:none;" id="currentuser">'.$user_grp['userinfo']['name'].'</span>' ;   //to log issue mods
-         $ret = $usr.$ret.$head.$body;              
+
+         $usr = '<span style="display:none;" id="currentuser">'.$user_grp['userinfo']['name'].'</span>' ;   //to log issue mods            
+         $a_lang  = '<span style="display:none;" name="table_kit_OK" id="table_kit_OK">'.$this->getLang('table_kit_OK').'</span>'; // for tablekit.js
+         $a_lang .= '<span style="display:none;" name="table_kit_Cancel" id="table_kit_Cancel">'.$this->getLang('table_kit_Cancel').'</span>'; // for tablekit.js
+         $ret  = $a_lang.$usr.$ret.$head.$body;              
          return $ret;
     }
 /******************************************************************************/

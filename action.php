@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2012-02-13',
+         'date'   => '2012-02-14',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -44,29 +44,33 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
      function _handle_act(&$event, $param) {
          if (($event->data === 'showcase') || ($event->data === 'store_resolution')){
              $this->parameter = $_POST['showid'];
-             $this->project = $_POST['project'];         
+             $this->project   = $_POST['project'];         
          }
          elseif ($event->data === 'showcaselink') {
-            $this->parameter = $_GET['showid'];
-            $this->project = $_GET['project'];
+            $this->parameter  = $_GET['showid'];
+            $this->project    = $_GET['project'];
+         }
+         elseif ($event->data === 'it_search') {
+            $this->parameter  = $_POST['it_str_search'];
+            $this->project    = $_POST['project'];
          }
          elseif ($event->data === 'issuelist_next') {
-            $this->itl_start = $_POST['itl_start'];
-            $this->itl_step = $_POST['itl_step'];
-            $this->itl_next = $_POST['itl_next'];
-            $this->itl_pjct = $_POST['itl_project'];
-            $this->itl_stat = $_POST['itl_stat_filter'];
-            $this->itl_sev = $_POST['itl_sev_filter'];
-            $this->itl_prod = $_POST['itl_prod_filter'];
+            $this->itl_start  = $_POST['itl_start'];
+            $this->itl_step   = $_POST['itl_step'];
+            $this->itl_next   = $_POST['itl_next'];
+            $this->itl_pjct   = $_POST['itl_project'];
+            $this->itl_stat   = $_POST['itl_stat_filter'];
+            $this->itl_sev    = $_POST['itl_sev_filter'];
+            $this->itl_prod   = $_POST['itl_prod_filter'];
          }
          elseif ($event->data === 'issuelist_previous') {
-            $this->itl_start = $_POST['itl_start'];
-            $this->itl_step = $_POST['itl_step'];
-            $this->itl_next = $_POST['itl_next'];
-            $this->itl_pjct = $_POST['itl_project'];
-            $this->itl_stat = $_POST['itl_stat_filter'];
-            $this->itl_sev = $_POST['itl_sev_filter'];
-            $this->itl_prod = $_POST['itl_prod_filter'];
+            $this->itl_start  = $_POST['itl_start'];
+            $this->itl_step   = $_POST['itl_step'];
+            $this->itl_next   = $_POST['itl_next'];
+            $this->itl_pjct   = $_POST['itl_project'];
+            $this->itl_stat   = $_POST['itl_stat_filter'];
+            $this->itl_sev    = $_POST['itl_sev_filter'];
+            $this->itl_prod   = $_POST['itl_prod_filter'];
          }
          elseif ($event->data === 'issuelist_filter') {
             $this->itl_start = $_POST['itl_start'];
@@ -456,6 +460,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->getLang('back').'">'.$this->getLang('back').'</a>';
             $Generated_Table  .= $itl_item_title.NL;        
         }
+        elseif ($data->data == 'it_search'){
+            $data->preventDefault();
+            include('itsearch.php');
+        }
         else return;
         
         // Render            
@@ -656,7 +664,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             //Build table header according settings
             $configs = explode(',', $this->getConf('shwtbl_usr')) ;
             $reduced_header ='';
-            $reduced_header = "<div class='itl__table'><table id='".$dynatable_id."' class='sortable editable resizable inline' width='100%'>".NL.
+            $reduced_header = "<div class='itl__table'><table id='".$dynatable_id."' class='sortable resizable inline' width='100%'>".NL.
                     "<thead><tr>".NL."<th class='sortfirstdesc' id='id'>".$this->getLang('th_id')."</th>".NL;
 
             foreach ($configs as $config)
@@ -779,20 +787,29 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                '    </form>'.NL.                      
                '   </td>'.NL.
                '   <td width="2%">&nbsp;</td>'.NL.
-               '   <td class="itl__showdtls" align ="left" width="30%">'.NL.
+               '   <td class="itl__showdtls" align ="left" width="40%">'.NL.
                '    <form  method="post" action="doku.php?id=' . $ID . '&do=showcase">'.NL.
-               '       <label class="it__cir_projectlabel">'.$this->getLang('lbl_showid').'</label><br />'.NL.
-               '       <input class="itl__showid_input" name="showid" id="showid" type="text" value="0"/>'.NL.
+               '       <label class="it__searchlabel">'.$this->getLang('lbl_showid').'</label>'.NL.
+               '       <input class="itl__sev_filter" name="showid" id="showid" type="text" value="0"/>'.NL.
                '       <input type="hidden" name="project" id="project" value="'.$project.'"/>'.NL.
                '       <input type="hidden" name="itl_sev_filter" id="itl_sev_filter" value="'.$sev_filter.'"/>'.NL.
                '       <input type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$stat_filter.'"/>'.NL.
                '       <input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="'.$this->getLang('btn_showid').'" title="'.$this->getLang('btn_showid_title').'"/>'.NL.
+               '    </form><br />'.NL.
+               '    <form  method="post" action="doku.php?id=' . $ID . '&do=it_search">'.NL.
+               '       <label class="it__searchlabel">'.$this->getLang('lbl_search').'</label>'.NL.
+               '       <input class="itl__sev_filter" name="it_str_search" id="it_str_search" type="text" value="'.$_REQUEST['it_str_search'].'"/>'.NL.
+               '       <input type="hidden" name="project" id="project" value="'.$project.'"/>'.NL.
+               '       <input class="itl__search_button" id="searchcase" type="submit" name="searchcase" value="'.$this->getLang('btn_search').'" title="'.$this->getLang('btn_search_title').'"/>'.NL.
                '    </form>'.NL.
                '   </td>'.NL.
                '</tr>'.NL.'</tbody>'.NL.'</table>'.NL.'</div>'.NL;
 
-         $usr = '<span style="display:none;" id="currentuser">'.$user_grp['userinfo']['name'].'</span>' ; //to log issue mods
-         $ret = $usr.$ret.$head.$body;              
+         $usr  = '<span style="display:none;" id="currentuser">'.$user_grp['userinfo']['name'].'</span>' ; // to log issue mods
+         $a_lang  = '<span style="display:none;" name="table_kit_OK" id="table_kit_OK">'.$this->getLang('table_kit_OK').'</span>'; // for tablekit.js
+         $a_lang .= '<span style="display:none;" name="table_kit_Cancel" id="table_kit_Cancel">'.$this->getLang('table_kit_Cancel').'</span>'; // for tablekit.js
+
+         $ret  = $a_lang.$usr.$ret.$head.$body;              
         return $ret;
     }
 /******************************************************************************
@@ -1297,7 +1314,7 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
                         else $insert_lbl ='';
 
                         $issue_comments_log .= '<tr  class="itd__tables_tr">
-                                                  <td class="itd_comment_trh"><label>['.$this->_get_one_value($a_comment,'id').'] </label>&nbsp;&nbsp;&nbsp;
+                                                  <td class="itd_comment_trh"><label name="a'.$x_id.'" id="a'.$x_id.'">['.$this->_get_one_value($a_comment,'id').'] </label>&nbsp;&nbsp;&nbsp;
                                                                             <label>'.date($this->getConf('d_format'),strtotime($this->_get_one_value($a_comment,'timestamp'))).' </label>&nbsp;&nbsp;&nbsp;'.NL.'
                                                                             <label>'.$x_mail.'</label>'.NL;
                         if($this->_get_one_value($a_comment,'mod_timestamp')) {

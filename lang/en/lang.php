@@ -145,3 +145,20 @@ $lang['issueassigned_head']       = 'Hi,';
 $lang['issueassigned_intro']      = 'you are assigned to following service request:';
 
 /******************************************************************************/
+/* following text is related to search feature                                
+*/
+$lang['lbl_search']         = 'Search for following:&nbsp;&nbsp;';
+$lang['btn_search']         = 'Start';
+$lang['btn_search_title']   = 'Search';
+$lang['search_hl1']         = '<h1>Search</h1>';
+$lang['search_txt1']        = "You can find the results of your search below. Please remember that this is a simple search, which is looking for single word items and does not understand query logics.";
+$lang['search_hl2']         = '<h2>Result</h2>';
+$lang['search_Issue']       = 'Issue';
+$lang['search_Comment']     = 'Comment';
+$lang['search_Type']        = 'Type';
+$lang['search_ID']          = 'ID';
+$lang['search_Subject']     = 'Subject';
+
+/******************************************************************************/
+$lang['table_kit_OK']             = 'OK';
+$lang['table_kit_Cancel']         = ' Cancel';

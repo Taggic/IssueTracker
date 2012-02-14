@@ -63,9 +63,15 @@ div.it__cir_form {
 }
 
 /* ----- Issue List Elements ------- */
-.it__cir_projectlabel, .itl__showid_input, .itl__showid_button, .itl__step_input, div.itl__table, div.issuetracker_div, itl_sev_filter, .itl__buttons, .itl__sev_filter, .itl__stat_filter, .itd__tables_tr div  { 
+.it__cir_projectlabel, .itl__showid_input, .itl__showid_button, .itl__step_input, div.itl__table, div.issuetracker_div, itl_sev_filter, .itl__buttons, .itl__sev_filter, .itl__stat_filter, .itd__tables_tr div, .itl__search_button  { 
 	font-size:              0.85em;
   padding:     0 0.85em 0 0.85em;
+}
+
+.it__searchlabel {
+	font-size:              0.85em;
+  margin: 0;
+  padding: 0;
 }
 
 .itd__tables_tr div  { 
@@ -93,6 +99,19 @@ itl__count_div {
 	margin-right:           0.75em;
 	border-radius:             5px;
 }
+
+.itl__search_input {
+	width:                    12em;
+	height:                  1.3em;
+	border:      1px solid #CED2DB;
+	font-size:              0.85em;
+	text-align:               left;
+	padding-left:           0.15em;
+	margin-left:             2.5em;
+	margin-right:           0.75em;
+	border-radius:             5px;
+}
+
 
 .itl__step_input {
 	width:                     6em;
@@ -293,4 +312,22 @@ table.itd_tr_standard {
 
 .tbl_showmodlog td {
   padding: 0 1.5em 0 1.5em !important;
+}
+
+.it_search_result{
+  border: 0 !important;
+  text-align:              left;
+  font-size:   0.8em !important;  
+}
+
+.it_search_result tr td{
+  border-top: 1px solid lightgrey !important;
+  border-bottom: 1px solid lightgrey !important;
+  border-left: 0  !important;
+  border-right: 0 !important;
+}
+.it_searchbox {
+  border: 1px solid lightblue;
+  padding: 0.3em 1em 0.3em 1em ;
+
 }
