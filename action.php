@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2012-02-14',
+         'date'   => '2012-02-15',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -425,6 +425,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 $Generated_Scripts = $this->_scripts_render();
         }
         elseif ($data->data == 'showmodlog'){
+            global $auth;
             $data->preventDefault();
             $issue_id = $this->parameter;
             $project = $this->project;
@@ -450,7 +451,20 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 $Generated_Table  .= '  <td>'.$this->_get_one_value($mod,'timestamp').'</td>'.NL;
                 $Generated_Table  .= '  <td>'.$this->_get_one_value($mod,'user').'</td>'.NL;
                 $Generated_Table  .= '  <td>'.$this->_get_one_value($mod,'field').'</td>'.NL;
-                $Generated_Table  .= '  <td>'.$this->_get_one_value($mod,'new_value').'</td>'.NL;
+                
+                $__assigened       = $this->_get_one_value($mod,'new_value');
+                if(stripos($this->_get_one_value($mod,'field'),'assign')!== false) {
+
+                    $filter['grps']=$this->getConf('assign');
+                    $target = $auth->retrieveUsers(0,0,$filter);
+          
+                    foreach($target as $_assignee)
+                    { if($_assignee['mail'] === $__assigened) {   
+                        $__assigened = $_assignee['name'];
+                        break; }
+                    }
+                }
+                $Generated_Table  .= '  <td>'.$__assigened.'</td>'.NL;
                 $Generated_Table  .= '</tr>'.NL;
             }
 
