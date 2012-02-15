@@ -352,6 +352,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                   if($this->getConf('mail_modify_resolution') ===1) $this->_emailForRes($_REQUEST['project'], $issues[$_REQUEST['comment_issue_ID']]);
                                   $Generated_Message = '<div class="it__positive_feedback"><a href="#'.$anker_id.'"></a>'.$this->getLang('msg_resolution_true').$issue_id.'</div>';
                                   msg($this->getLang('msg_resolution_true').$issue_id.'.',1);
+                                  $usr = $_POST['usr'];
                                   $this->_log_mods($project, $issues[$issue_id], $usr, 'resolution', $issues[$issue_id]['resolution']);
                               }
                               else { msg("Issue with ID: $issue_id not found.",-1); }
@@ -1427,7 +1428,7 @@ $issue_comments_log .= '<input  type="hidden" class="showid__option" name="showi
         if($user_mail['userinfo']['mail']=='') {$u_mail_check ='unknown';}
         else {$u_mail_check = $user_mail['userinfo']['mail'];}
         $user_check = $this->getConf('registered_users');
-
+        $u_name = $user_mail['userinfo']['name'];
         //2011-12-02: bwenz code proposal (Issue 11)
         $x_resolution = $this->convertlabel($issue[$issue_id]['resolution']);
         if(!$x_resolution) { $x_resolution = "&nbsp;"; }
@@ -1519,6 +1520,7 @@ $issue_edit_resolution .= '<form name="edit_resolution" method="post" action="'.
 $issue_edit_resolution .= formSecurityToken(false).
                           '<input type="hidden" name="project"value="'.$project.'"/>'.NL.
                           '<input type="hidden" name="comment_issue_ID" value="'.$issue[$issue_id]['id'].'"/>'.NL.
+                          '<input type="hidden" name="usr" value="'.$u_name.'"/>'.NL.
                           '<input type="hidden" name="add_resolution" value="1"/>'.NL;        
     
 $issue_edit_resolution .= "<textarea id='x_resolution' name='x_resolution' type='text' cols='106' rows='7' value=''>".strip_tags($x_resolution)."</textarea>";
@@ -1533,8 +1535,7 @@ $issue_edit_resolution .= "<textarea id='x_resolution' name='x_resolution' type=
                       }
                       
                       $cell_ID = 'img_tab_open_comment'.$blink_id;
-                      // check if only registered users are allowed to add comments
-                      // ¦ perm — the user's permissions related to the current page ($ID)
+
 $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="showid" id="showid" type="text" size="10" value="'.$this->parameter.'"/>'.
                       '<input class="button" id="store_resolution" type="submit" name="store_resolution" value="'.$this->getLang('btn_add').'" title="'.$this->getLang('btn_add_title').'");/>'.
                       '</form>'.NL.'</td>'.NL.'</tr>'.NL.
