@@ -352,7 +352,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                   if($this->getConf('mail_modify_resolution') ===1) $this->_emailForRes($_REQUEST['project'], $issues[$_REQUEST['comment_issue_ID']]);
                                   $Generated_Message = '<div class="it__positive_feedback"><a href="#'.$anker_id.'"></a>'.$this->getLang('msg_resolution_true').$issue_id.'</div>';
                                   msg($this->getLang('msg_resolution_true').$issue_id.'.',1);
-                                  $usr = $_POST['usr'];
+                                  $usr = $_POST['usr'];                                                                    
                                   $this->_log_mods($project, $issues[$issue_id], $usr, 'resolution', $issues[$issue_id]['resolution']);
                               }
                               else { msg("Issue with ID: $issue_id not found.",-1); }
@@ -449,7 +449,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 
             foreach($mods as $mod) {          
                 $Generated_Table  .= '<tr>'.NL;
-                $Generated_Table  .= '  <td>'.$this->_get_one_value($mod,'timestamp').'</td>'.NL;
+                $Generated_Table  .= '  <td>'.date($this->getConf('d_format'),strtotime($this->_get_one_value($mod,'timestamp'))).'</td>'.NL;
                 $Generated_Table  .= '  <td>'.$this->_get_one_value($mod,'user').'</td>'.NL;
                 $Generated_Table  .= '  <td>'.$this->_get_one_value($mod,'field').'</td>'.NL;
                 

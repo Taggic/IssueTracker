@@ -188,6 +188,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                     {                                
                                         //save issue-file
                                           $xvalue = io_saveFile($pfile,serialize($issues));
+                                          $this->_log_mods($data['project'], $issues[$issue_id], $issues[$issue_id]['user_name'], 'status', $issues[$issue_id]['status']);
 //                                        echo "\$xvalue = ".$xvalue;
                                           $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_reporttrue').$issue_id.'</div>';
                                           $this->_emailForNewIssue($data['project'],$issues[$issue_id]);
@@ -719,7 +720,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $project = $data['project'];
         // retrive some basic information
         $user_mail = pageinfo();  //to get mail address of reporter
-        $cur_date = date ($this->getConf('d_format'));
+        $cur_date = date ('Y-m-d G:i:s');
         $user_check = $this->getConf('registered_users');
 
         $_cFlag = false;             
@@ -1233,6 +1234,31 @@ address format and the domain exists.
 //        $x_comment = '<a href="'.$x_comment.'">'.$x_comment.'</a>');
 
       return $x_comment;
+    }
+/******************************************************************************/
+/* log issue modificaions
+ * who changed what and when per issue
+*/                                          
+    function _log_mods($project, $issue, $usr, $column, $new_value)
+    {     global $conf;
+          // get mod-log file contents
+          $modfile = metaFN($project.'_'.$issue['id'], '.mod-log');
+          if (@file_exists($modfile))
+              {$mods  = unserialize(@file_get_contents($modfile));}
+          else 
+              {$mods = array();}
+          
+          $mod_id = count($mods);
+          
+          $mods[$mod_id]['timestamp'] = $issue['created'];
+          $mods[$mod_id]['user'] = $usr;
+          $mods[$mod_id]['field'] = $column;
+          $mods[$mod_id]['new_value'] = $new_value;
+          
+          // Save issues file contents
+          $fh = fopen($modfile, 'w');
+          fwrite($fh, serialize($mods));
+          fclose($fh);
     }
 /******************************************************************************/
 }
