@@ -84,6 +84,7 @@ $lang['th_resolution']			= 'L&ouml;sung';
 $lang['th_modified']	  		= 'Ge&auml;ndert';        
 $lang['th_showmodlog']			= 'Statusverlauf';
 $lang['h_modlog']		    		= 'Status&auml;nderungen von #';
+$lang['mod_valempty']       ='[gelöscht]';
 $lang['back']				      	= 'zur&uuml;ck';
 $lang['gen_tab_open']	  		= 'Details';
 $lang['descr_tab_mod']			= '&auml;ndern';

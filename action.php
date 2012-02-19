@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2012-02-15',
+         'date'   => '2012-02-19',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -103,12 +103,13 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 */
     function convertlabel($txt){ 
         $len = strlen($txt); 
-        $res = ""; 
-        for($i = 0; $i < $len; ++$i) { 
-            $ord = ord($txt{$i}); 
-            // replace all linefeeds          
-            if($ord === 10){ $res .= "<br />";  } 
-            else { $res .= $txt{$i}; }                    
+        $res = "";
+        $tmp = explode(chr(10),$txt);
+        foreach($tmp as $line) {
+          if((stripos($line,'ul')===false) && (stripos($line,'ol')===false) && (stripos($line,'li')===false)) {
+              $res .= $line."<br />";
+          }
+          else $res .= $line;
         } 
         return $res; 
     } 
@@ -454,6 +455,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 $Generated_Table  .= '  <td>'.$this->_get_one_value($mod,'field').'</td>'.NL;
                 
                 $__assigened       = $this->_get_one_value($mod,'new_value');
+                $__assigened       = $this->xs_format($__assigened);
                 if(stripos($this->_get_one_value($mod,'field'),'assign')!== false) {
 
                     $filter['grps']=$this->getConf('assign');
@@ -507,13 +509,6 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $x_products_select = $x_products_select . "['".$x_products."','".$x_products."'],";
         } 
         
-        // Build string to load versions select
-/*        $versions = explode(',', $this->getConf('versions')) ;
-        foreach ($versions as $x_versions)
-        {
-            $x_versions_select = $x_versions_select . "['".$x_versions."','".$x_versions."'],";
-        }
-*/         
         // Build string to load severity select
         $severity = explode(',', $this->getConf('severity')) ;
         foreach ($severity as $x_severity)
@@ -634,6 +629,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 if ((($stat_filter=='ALL') || (stristr($stat_filter,$a_status)!= false)) && (($sev_filter=='ALL') || (stristr($sev_filter,$a_severity)!= false)) && (($productfilter=='ALL') || (stristr($productfilter,$a_product)!= false)))
                 {   
                     if ($y>=$step) break;
+                    if ((stripos($this->getConf('status_special'),$a_status) !== false) && (stripos($stat_filter,$this->getConf('status_special')) === false)) continue;                   
                     $y=$y+1;
                     // check if status image or text to be displayed
                     if ($noStatIMG === false) {                    
@@ -700,6 +696,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 if ((($stat_filter=='ALL') || (stristr($stat_filter,$a_status)!= false)) && (($sev_filter=='ALL') || (stristr($sev_filter,$a_severity)!= false)) && (($productfilter=='ALL') || (stristr($productfilter,$a_product)!= false)))
                 {   
                     if ($y>=$step) break;
+                    if ((stripos($this->getConf('status_special'),$a_status) !== false) && (stripos($stat_filter,$this->getConf('status_special')) === false)) continue;
                     $y=$y+1;
                     $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" onMouseover="this.bgColor=\'#DDDDDD\'" onMouseout="this.bgColor=\'#FFFFFF\'">'.
                                                       '<td'.$style.$this->_get_one_value($issue,'id').'</td>';
@@ -1431,7 +1428,7 @@ $issue_comments_log .= '<input  type="hidden" class="showid__option" name="showi
         $u_name = $user_mail['userinfo']['name'];
         //2011-12-02: bwenz code proposal (Issue 11)
         $x_resolution = $this->convertlabel($issue[$issue_id]['resolution']);
-        if(!$x_resolution) { $x_resolution = "&nbsp;"; }
+//        if(!$x_resolution) { $x_resolution = "&nbsp;"; }
                         
         $_cFlag = false;             
         if($user_check == false)
@@ -1494,7 +1491,7 @@ $issue_add_comment .= formSecurityToken(false).
 
 $issue_edit_resolution ='<table class="itd__tables">
                          <tr>
-                            <td class="itd_tables_tdh" colSpan="2" >Resolution</td>
+                            <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('th_resolution').'</td>
                         </tr>';
 $issue_edit_resolution .= '<tr class="itd__tables_tr">
                             <td width="1%"></td>
@@ -1717,8 +1714,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
         {
             if (($productfilter=='ALL') || (stristr($productfilter,$this->_get_one_value($issue,'product'))!= false))
             {
-                $status = $this->_get_one_value($issue,'status');
-                if ($status != '')
+                $status = trim($this->_get_one_value($issue,'status'));
+                if (($status != '') && (stripos($this->getConf('status_special'),$status)===false))
                     if ($this->_get_one_value($count,$status)=='')
                         {$count[$status] = array(1,$status);}
                     else
@@ -1786,6 +1783,9 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
         $x_comment = preg_replace("/\[link\]www.(.*?)\[\/link\]/si", "<a target=\"_blank\" href=\"http://www.\\1\">www.\\1</a>", $x_comment); 
         $x_comment = preg_replace("/\[link\](.*?)\[\/link\]/si", "<a target=\"_blank\" href=\"\\1\">\\1</a>", $x_comment);
 
+        $x_comment = preg_replace('/\[img\]/i', '<img src="', $x_comment);
+        $x_comment = preg_replace('/\[\/img\]/i', '" class="it_cmnt_pics" alt="" />', $x_comment);    
+
 /*---------------------------------------------------------------------------------
 *  think about parsing content by dokuwiki renderer for dokuwiki syntax recognition
 *        $x_comment = p_render('xhtml',p_get_instructions($x_comment),$info);
@@ -1816,6 +1816,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
       	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','$type')\">".NL;
       	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','$type')\">".NL;
       	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/img.png\" name=\"btn_img\" title=\"Image\" onClick=\"doAddTags('[img]','[/img]','$type')\">".NL;
+      	$it_edit_tb .= "<a href=\"http://www.imageshack.us/\" target=\"_blank\"><<img class=\"xseditor_button\" src=\"".$imgBASE."/imageshack.png\" name=\"btn_ishack\" title=\"ImageShack upload (ext TaC !)\">></a>".NL;
         $it_edit_tb .= "<br></div>".NL; 
         return $it_edit_tb;                     
     }
@@ -1861,7 +1863,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
               {$mods = array();}
           
           $mod_id = count($mods);
-          
+          if($new_value=='') $new_value = $this->getLang('mod_valempty');
           $mods[$mod_id]['timestamp'] = $issue['modified'];
           $mods[$mod_id]['user'] = $usr;
           $mods[$mod_id]['field'] = $column;

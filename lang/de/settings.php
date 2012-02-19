@@ -22,6 +22,7 @@ $lang['shwtbl_usr']			  = 'Folgende Spalten sollen dem Benutzer angezeigt werden
 $lang['use_captcha']		  = 'CAPTCHA benutzen?'; 
 $lang['severity']			    = 'Schweregrade die benutzt werden sollen<br>(kommagetrennt, Namen mit passenden Bilddateien)';
 $lang['status']				    = 'Status-Levels die benutzt werden sollen<br>(kommagetrennt, Namen mit passenden Bilddateien)';
+$lang['status_special']   = 'ausgeblendet (gel&ouml;scht), nur Einzelwert zul&auml;ssig !';
 $lang['products']			    = 'Produktnamen die benutzt werden sollen<br>(kommagetrennt)';
 //$lang['versions']			  = 'Erlaubte Versionsnummer der Produktnamen<br>(kommagetrennt, senkrechter Strich "|" als Trennzeichen)';
 $lang['assign']				    = 'Wiki Benutzergruppe denen Tickets zugewiesen werden k&ouml;nnen<br>(senkrechter Strich "|" als Trennzeichen)';

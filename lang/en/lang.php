@@ -84,6 +84,7 @@ $lang['th_resolution']      = 'Resolution';
 $lang['th_modified']        = 'Modified';
 $lang['th_showmodlog']      = 'Status history';
 $lang['h_modlog']           = 'Status modification history of #';
+$lang['mod_valempty']       ='[deleted]';
 $lang['back']               = 'back';
 $lang['gen_tab_open']       = 'Details';
 $lang['descr_tab_mod']      = 'Modify';
@@ -96,7 +97,7 @@ $lang['dtls_usr_hidden']       = 'user details hidden';
 /* _emailForIssueMod
 */                            
 $lang['cmnt_new_subject']    = 'New comment added to Service Request %s on %s ';
-$lang['cmnt_mod_subject']    = 'Comment modfification at Service Request %s on %s ';
+$lang['cmnt_mod_subject']    = 'Comment modification at Service Request %s on %s ';
 $lang['cmnt_del_subject']    = 'Comment deleted of Service Request %s on %s ';
 $lang['cmt_del_intro']       = 'A comment was deleted.';
 $lang['issuemod_subject']    = 'Service Request %s on %s was modified';

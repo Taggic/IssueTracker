@@ -21,6 +21,7 @@
         {   global $ID;
         
             // Include the language file  
+            if ($conf['lang']=='') $conf['lang']=='en'; 
             include 'lang/'.$conf['lang'].'/lang.php';
             
             $subject= utf8_encode (sprintf($lang['issuemod_subject'], $issue['id'], $project));
@@ -55,8 +56,10 @@
             global $ID;
             global $conf;
         
-            // Include the language file  
+            // Include the language file
+            if ($conf['lang']=='') $conf['lang']=='en'; 
             include 'lang/'.$conf['lang'].'/lang.php';
+            
             
             $subject= utf8_encode ($project.sprintf($lang['issueassigned_subject'],$issue['id']));
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
@@ -94,17 +97,32 @@
           else 
               {$mods = array();}
           
+          
           $mod_id = count($mods);
           if($new_value=='') $new_value = '[deleted]';
-          $mods[$mod_id]['timestamp'] = $issue['modified'];
-          $mods[$mod_id]['user'] = $usr;
-          $mods[$mod_id]['field'] = $column;
-          $mods[$mod_id]['new_value'] = $new_value;
+          $mods[$mod_id]['timestamp']   = $issue['modified'];
+          $mods[$mod_id]['user']        = $usr;
+          $mods[$mod_id]['field']       = $column;
+          $mods[$mod_id]['new_value']   = $new_value;
           
           // Save issues file contents
           $fh = fopen($modfile, 'w');
           fwrite($fh, serialize($mods));
           fclose($fh);
+    }
+/******************************************************************************/
+/* improved implode needed
+*/
+    function array_implode($arrays, &$target = array()) 
+    {         
+         foreach ($arrays as $item) {
+             if (is_array($item)) {
+                 $this->array_implode($item, $target);
+             } else {
+                 $target[] = $item;
+             }
+         }
+         return $target;
     }
 /******************************************************************************/
     global $ID;
@@ -124,7 +142,14 @@
     
     $field = strtolower(htmlspecialchars(stripslashes($_POST['field'])));
     $value = htmlspecialchars(stripslashes($_POST['value']));
-    
+   
+   // do not send notification mail if status set to deleted
+    if($conf['status_special']=='') $conf['status_special']='Deleted';
+    if (($field == 'status') && (stripos($conf['status_special'],$value) !== false)) {
+      // for now do nothing, maybe later implementation
+      // will define further action on issues marked as 'deleted'
+    }
+    else
     _emailForIssueMod($project, $issues[$id_issue], $issues[$id_issue][$field], $field, $value);
     
     $issues[$id_issue][$field] = $value;

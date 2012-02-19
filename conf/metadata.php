@@ -21,6 +21,7 @@ $meta['shwtbl_usr']	    =	array('multicheckbox', '_choices' => array('product', 
 $meta['use_captcha']    = array('onoff');   // Use captcha on by default
 $meta['severity']       = array('string');  // Configure allowed severities
 $meta['status']         = array('string');  // Configure allowed status info
+$meta['status_special'] = array('string');  // hidden issues, only single status value allowed !
 $meta['products']       = array('string');  // Configure Products coverd by one project
 //$meta['versions']       = array('string');// Configure allowed versions of defined products
 $meta['assign']         = array('string');  // Configure groups usable for issue asignments

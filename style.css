@@ -246,7 +246,7 @@ table.itd_tr_standard {
   margin:           0 !important;
   padding:          0 !important;
   font-size:      1em !important;
-  line-height:  1.2em !important;
+  line-height:    1em !important;
   font-weight: normal !important;
   position:relative;
 }
@@ -329,5 +329,10 @@ table.itd_tr_standard {
 .it_searchbox {
   border: 1px solid lightblue;
   padding: 0.3em 1em 0.3em 1em ;
-
 }
+.it_cmnt_pics {
+  max-width:650px;
+  margin: 12px 12px 12px 3px;
+  float:left;
+  vertical-align:text-top;
+} 

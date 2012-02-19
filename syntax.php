@@ -141,7 +141,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 
             if (stristr($data['display'],'FORM')!= false) 
             {
-                //If it s a user report add it to the db-file
+                //If it is a user report add it to the db-file
                 if (isset($_REQUEST['severity'])) 
                 {
                     if ($_REQUEST['severity'])
@@ -249,8 +249,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         {
             if (($productfilter=='ALL') || (stristr($productfilter,$this->_get_one_value($issue,'product'))!= false))
             {
-                $status = $this->_get_one_value($issue,'status');
-                if ($status != '')
+                $status = trim($this->_get_one_value($issue,'status'));
+                if (($status != '') && (stripos($this->getConf('status_special'),$status)===false))
                     if ($this->_get_one_value($count,$status)=='')
                         {$count[$status] = array(1,$status);}
                     else
@@ -283,7 +283,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $pattern = $pattern . "|" .  $x_status;
             $x_status_select = $x_status_select . "['".$x_status."','".$x_status."'],";
         }
-        
+                
         // Build string to load products select
         $products = explode(',', $this->getConf('products')) ;
         foreach ($products as $x_products)
@@ -291,13 +291,6 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $x_products_select = $x_products_select . "['".$x_products."','".$x_products."'],";
         } 
         
-        // Build string to load versions select
-/*        $versions = explode(',', $this->getConf('versions')) ;
-        foreach ($versions as $x_versions)
-        {
-            $x_versions_select = $x_versions_select . "['".$x_versions."','".$x_versions."'],";
-        }
-*/         
         // Build string to load severity select
         $severity = explode(',', $this->getConf('severity')) ;
         foreach ($severity as $x_severity)
@@ -392,7 +385,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 break;  } 
         }      
         
-        // members of defined groups allowed$user_grps changing issue contents 
+        // members of defined groups $user_grps allowed to change issue contents 
         if ($cFlag === true)       
         {   
             $dynatable_id = "t_".uniqid((double)microtime()*1000000,1);
@@ -413,13 +406,14 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             for ($i=$next_start-1;$i>=0;$i=$i-1)
             {   // check start and end of rows to be displayed
                     $issue = $issues[$i];                    
-                    $a_status = $this->_get_one_value($issue,'status');
-                    $a_severity = $this->_get_one_value($issue,'severity');
-                    $a_product = $this->_get_one_value($issue,'product');
+                    $a_status = strtoupper($this->_get_one_value($issue,'status'));
+                    $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
+                    $a_product = strtoupper($this->_get_one_value($issue,'product'));
                     
                 if ((($data['status']=='ALL') || (stristr($data['status'],$a_status)!= false)) && (($data['severity']=='ALL') || (stristr($data['severity'],$a_severity)!= false)) && (($data['product']=='ALL') || (stristr($data['product'],$a_product)!= false)))
                 {   
                     if ($y>=$step) break;
+                    if (stripos($this->getConf('status_special'),$a_status) !== false) continue;
                     $y=$y+1;
                     // check if status image or text to be displayed
                     if ($noStatIMG === false) {                    
@@ -481,12 +475,14 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             for ($i=$next_start-1;$i>=0;$i=$i-1)
             {   // check start and end of rows to be displayed
                     $issue = $issues[$i];                    
-                    $a_status = $this->_get_one_value($issue,'status');
-                    $a_severity = $this->_get_one_value($issue,'severity');
-                    $a_product = $this->_get_one_value($issue,'product');
+                    $a_status = strtoupper($this->_get_one_value($issue,'status'));
+                    $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
+                    $a_product = strtoupper($this->_get_one_value($issue,'product'));
+                    
                 if ((($data['status']=='ALL') || (stristr($data['status'],$a_status)!= false)) && (($data['severity']=='ALL') || (stristr($data['severity'],$a_severity)!= false)) && (($data['product']=='ALL') || (stristr($data['product'],$a_product)!= false)))
                 {   
                     if ($y>=$step) break;
+                    if (stripos($this->getConf('status_special'),$a_status) !== false) continue;
                     $y=$y+1;
 
                     $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" onMouseover="this.bgColor=\'#DDDDDD\'" onMouseout="this.bgColor=\'#FFFFFF\'">'.NL.
@@ -677,7 +673,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $cc=$issue['add_user_mail'];
             mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
         }
-    }/******************************************************************************/
+    }
+/******************************************************************************/
 /* send an e-mail to user due to issue modificaion
 */
     function _emailForIssueMod($project,$issue,$comment)
@@ -1023,6 +1020,8 @@ $ret .= '<div class="it_edittoolbar" style="margin-left:30px; margin-top:6px;">
 	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','description')\">".NL;
 	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','description')\">".NL;
 	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','description')\">".NL;
+	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/img.png\" name=\"btn_img\" title=\"Image\" onClick=\"doAddTags('[img]','[/img]','$type')\">".NL;
+	$it_edit_tb .= "<a href=\"http://www.imageshack.us/\" target=\"_blank\"><<img class=\"xseditor_button\" src=\"".$imgBASE."/imageshack.png\" name=\"btn_ishack\" title=\"ImageShack upload (ext TaC !)\">></a>".NL;
   $ret .= "<br></div>";
 
           $ret .= '<textarea class="it__cir_linput" id="description" name="description" cols="109" rows="7">'.$_REQUEST['description'].'</textarea></td>
@@ -1229,9 +1228,16 @@ address format and the domain exists.
         $x_comment = preg_replace('/\[blu\]/i', '<span style="color:blue;">', $x_comment);
         $x_comment = preg_replace('/\[\/blu\]/i', '</span>', $x_comment);    
 
-//        $x_comment = preg_replace("|\[link\].*?\[/link\]|si","", $x_comment);
-//        echo 'comment: '.$x_comment.'<br />'; 
-//        $x_comment = '<a href="'.$x_comment.'">'.$x_comment.'</a>');
+        $urlsuch[]="/([^]_a-z0-9-=\"'\/])((https?|ftp):\/\/|www\.)([^ \r\n\(\)\^\$!`\"'\|\[\]\{\}<>]*)/si";
+        $urlsuch[]="/^((https?|ftp):\/\/|www\.)([^ \r\n\(\)\^\$!`\"'\|\[\]\{\}<>]*)/si";
+        $urlreplace[]="\\1[link]\\2\\4[/link]";
+        $urlreplace[]="[link]\\1\\3[/link]";
+        $x_comment = preg_replace($urlsuch, $urlreplace, $x_comment);   
+        $x_comment = preg_replace("/\[link\]www.(.*?)\[\/link\]/si", "<a target=\"_blank\" href=\"http://www.\\1\">www.\\1</a>", $x_comment); 
+        $x_comment = preg_replace("/\[link\](.*?)\[\/link\]/si", "<a target=\"_blank\" href=\"\\1\">\\1</a>", $x_comment);
+
+        $x_comment = preg_replace('/\[img\]/i', '<img src="', $x_comment);
+        $x_comment = preg_replace('/\[\/img\]/i', '" class="it_cmnt_pics" alt="" />', $x_comment);    
 
       return $x_comment;
     }
