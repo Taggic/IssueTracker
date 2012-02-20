@@ -127,6 +127,11 @@
 /******************************************************************************/
     global $ID;
     global $conf;
+
+            // Include the language file
+            if ($conf['lang']=='') $conf['lang']=='en'; 
+            include 'lang/'.$conf['lang'].'/lang.php';
+
         
     $exploded = explode(' ',htmlspecialchars(stripslashes($_POST['id'])));
     $project = $exploded[0];
@@ -155,6 +160,13 @@
     $issues[$id_issue][$field] = $value;
     $issues[$id_issue]['modified'] = date ('Y-m-d G:i:s');
     _log_mods($project, $issues[$id_issue], $usr, $field, $value);
+   
+    if(($field == 'resolution') && ($value !== false)) {
+      $issues[$id_issue]['status'] = $lang['issue_resolved_status'];
+      echo '->'.$lang['issue_resolved_status'].'<-';
+    }
+     
+   
     
         // inform assigned workforce
     if ($field == 'assigned') {
@@ -167,7 +179,6 @@
         
         if($issues[$id_issue]['assigned']=='')
         { // assignment deleted => set status to first config value
-          
           $issues[$id_issue]['status'] = $status[0];
         }
         else $issues[$id_issue]['status'] = $status[1];

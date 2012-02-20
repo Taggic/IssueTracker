@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * German language file for IssueTracker
  *
