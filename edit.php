@@ -163,7 +163,6 @@
    
     if(($field == 'resolution') && ($value !== false)) {
       $issues[$id_issue]['status'] = $lang['issue_resolved_status'];
-      echo '->'.$lang['issue_resolved_status'].'<-';
     }
      
    
