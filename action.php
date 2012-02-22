@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2012-02-19',
+         'date'   => '2012-02-22',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -49,6 +49,11 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
          elseif ($event->data === 'showcaselink') {
             $this->parameter  = $_GET['showid'];
             $this->project    = $_GET['project'];
+         }
+         elseif($event->data === 'btn_add_contact') {
+             $this->project     = $_POST['project'];
+             $this->issue_ID    = $_POST['issue_ID'];
+             $this->add_contact = $_POST['add_contact'];
          }
          elseif ($event->data === 'it_search') {
             $this->parameter  = $_POST['it_str_search'];
@@ -280,7 +285,42 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                               else { msg("Issue with ID: $issue_id not found.",-1); }
                         }
                     }
-                 } 
+                 }  
+                 elseif(isset($_REQUEST['mod_contacts']))
+                 {  // check if captcha is to be used by issue tracker in general
+                    if ($this->getConf('use_captcha') === 0) { $captcha_ok = 1;}
+                    else { $captcha_ok = ($this->_captcha_ok());}
+                    if ($captcha_ok)
+                    {   if (checkSecurityToken())
+                        {   // find issue and description
+                            $issue_id = trim($_REQUEST['issue_ID']);
+                            $a1 = $_REQUEST['add_contact'];
+                            $a1 = preg_replace("/ +/", ',', $a1);
+                            $a1 = preg_replace('/;/',',',$a1); 
+                            $a1 = preg_replace('/,+/',',',$a1);
+                            $xvalue = false;
+                            //check if register or unregister a follower
+                            if((strlen($a1)>0) && (stripos($issues[$issue_id]['add_user_mail'],$a1) === false)) {
+                                $issues[$issue_id]['add_user_mail'] .= ",".$a1; 
+                                //save issue-file
+                                $xvalue = io_saveFile($pfile,serialize($issues));
+                                if($xvalue!==false) { msg(sprintf($this->getLang('msg_addFollower_true'),$issue_id).$a1,1);}
+                            }
+                            // delete mail address from followers
+                            elseif((strlen($a1)>0) && (stripos($issues[$issue_id]['add_user_mail'],$a1) !== false)) {
+                                $tmp = explode(',', $issues[$issue_id]['add_user_mail']);
+                                foreach($tmp as $email) {
+                                    if (stripos($email,$a1) === false) $ret_mails .= $email.',';
+                                } 
+                                //save issue-file
+                                $issues[$issue_id]['add_user_mail'] = $ret_mails;
+                                $xvalue = io_saveFile($pfile,serialize($issues));
+                                if($xvalue!==false) { msg(sprintf($this->getLang('msg_rmvFollower_true'),$issue_id).$a1,1);}
+                            }
+                            if($xvalue===false) { msg(sprintf($this->getLang('msg_addFollower_failed'),$issue_id).$a1,-1); }
+                        }
+                    }
+                 }
                  elseif(isset($_REQUEST['mod_symptomlinks']))
                  {
                     // check if captcha is to be used by issue tracker in general
@@ -456,7 +496,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 
                 $__assigened       = $this->_get_one_value($mod,'new_value');
                 $__assigened       = $this->xs_format($__assigened);
-                if(stripos($this->_get_one_value($mod,'field'),'assign')!== false) {
+                if((stripos($this->_get_one_value($mod,'field'),'assign')!== false) && ($this->getConf('auth_ad_overflow') == false)) {
 
                     $filter['grps']=$this->getConf('assign');
                     $target = $auth->retrieveUsers(0,0,$filter);
@@ -516,20 +556,24 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $x_severity_select = $x_severity_select . "['".$x_severity."','".$x_severity."'],";
         } 
         
-        // Build string to load 'assign to' select from all user_mail of defined DW user groups
-        global $auth;        
-        $filter['grps']=$this->getConf('assign');
-        $target = $auth->retrieveUsers(0,0,$filter); 
-        $target2 = $this->array_implode($target);
-        foreach ($target2 as $x_umail)
-        {
-                if (strrpos($x_umail, "@") > 0)
-                {
-                    $x_umail_select = $x_umail_select . "['".$x_umail."','".$x_umail."'],";
-                }
-        }      
-        $x_umail_select .= "['',''],";
-        
+        // see issue 37: AUTH:AD switch to provide text input instead 
+        // select with retriveing all_users from AD
+        if($this->getConf('auth_ad_overflow') == false) {
+            global $auth;        
+            $filter['grps'] = $this->getConf('assign');
+            $target         = $auth->retrieveUsers(0,0,$filter); 
+            $target2        = $this->array_implode($target);
+            foreach ($target2 as $x_umail)
+            {
+                    if (strrpos($x_umail, "@") > 0)
+                    {
+                        $x_umail_select = $x_umail_select . "['".$x_umail."','".$x_umail."'],";
+                    }
+            }      
+            $x_umail_select .= "['',''],";
+            $authAD_selector = "TableKit.Editable.selectInput('assigned',{}, [".$x_umail_select."]);";
+        }
+
         $BASE = DOKU_BASE."lib/plugins/issuetracker/";
         return    "<script type=\"text/javascript\" src=\"".$BASE."prototype.js\"></script><script type=\"text/javascript\" src=\"".$BASE."fabtabulous.js\"></script>
         <script type=\"text/javascript\" src=\"".$BASE."tablekit.js\"></script>
@@ -538,7 +582,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             TableKit.Editable.selectInput('status',{}, [".$x_status_select."]);
             TableKit.Editable.selectInput('product',{}, [".$x_products_select."]);
             TableKit.Editable.selectInput('severity',{}, [".$x_severity_select."]);
-            TableKit.Editable.selectInput('assigned',{}, [".$x_umail_select."]);
+            ".$authAD_selector."
             TableKit.Editable.multiLineInput('description');
             TableKit.Editable.multiLineInput('resolution');
             var _tabs = new Fabtabs('tabs');
@@ -586,8 +630,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         else
         {   $user_grps = 'all';  }
 
-        $ret = '<br /><br /><script type="text/javascript" src="include/selectupdate.js"></script>'.
-               '<form class="issuetracker__form2" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'"><p>';
+        $ret = '<br /><br /><form class="issuetracker__form2" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'"><p>';
         $ret .= formSecurityToken(false).'<input type="hidden" name="do" value="show" />';        
 
         // the user maybe member of different user groups
@@ -864,31 +907,38 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         // do not show personal contact details if issue details not viewed by admin/assignee nor the original reporter itself
         //---------------------------------------------------------------------------------------------------------------------
         $user_mail = pageinfo();  //to get mail address of reporter
-        $filter['grps']=$this->getConf('assign');
-        $target = $auth->retrieveUsers(0,0,$filter);
-        $target2 = $this->array_implode($target);
-        $target2 = implode($target2);
+        if($this->getConf('auth_ad_overflow') == false) {
+            $filter['grps']=$this->getConf('assign');
+            $target = $auth->retrieveUsers(0,0,$filter);
+            $target2 = $this->array_implode($target);
+            $target2 = implode($target2);
         
-        if((($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or 
-             (strpos($target2,$user_mail['userinfo']['mail']) != false)) && 
-            ($this->getConf('shw_mail_addr')===1))
-        {   $__assigened  = $issue[$issue_id]['assigned'];
-            $__assigenedaddr = $issue[$issue_id]['assigned'];
-            $__reportedby = $issue[$issue_id]['user_mail'];
-            $__reportedbyaddr = $issue[$issue_id]['user_mail'];
-            $mail_allowed = true;
+            if((($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or 
+                 (strpos($target2,$user_mail['userinfo']['mail']) != false)) && 
+                ($this->getConf('shw_mail_addr')===1))
+            {   $__assigened  = $issue[$issue_id]['assigned'];
+                $__assigenedaddr = $issue[$issue_id]['assigned'];
+                $__reportedby = $issue[$issue_id]['user_mail'];
+                $__reportedbyaddr = $issue[$issue_id]['user_mail'];
+                $mail_allowed = true;
+            }
+            else 
+            {   foreach($target as $_assignee)
+                  { if($_assignee['mail'] === $issue[$issue_id]['assigned'])
+                    {   $__assigened = $_assignee['name'];
+                        $__assigenedaddr = $_assignee['mail'];
+                        $mail_allowed = true;
+                        break;
+                    }
+                  }
+                $__reportedby = $issue[$issue_id]['user_name'];
+                $__reportedbyaddr = $issue[$issue_id]['user_mail'];
+            }
         }
-        else 
-        {   foreach($target as $_assignee)
-              { if($_assignee['mail'] === $issue[$issue_id]['assigned'])
-                {   $__assigened = $_assignee['name'];
-                    $__assigenedaddr = $_assignee['mail'];
-                    $mail_allowed = true;
-                    break;
-                }
-              }
-            $__reportedby = $issue[$issue_id]['user_name'];
-            $__reportedbyaddr = $issue[$issue_id]['user_mail'];
+        else {  // auth_ad_overflow = true
+                $__reportedby = $issue[$issue_id]['user_name'];
+                $__reportedbyaddr = $issue[$issue_id]['user_mail'];
+                $mail_allowed = true;
         }
                    
 // scripts for xsEditor -------------------------------------------------------
@@ -1013,6 +1063,15 @@ $issue_edit_head .= '<span>
                       document.getElementById(cell_ID).style.backgroundPosition = "0px -19px";
                   }
               } 
+             function span_open(blink_id) 
+              {   if (document.getElementById(blink_id).style.display == "block")
+                  {   document.getElementById(blink_id).style.display = "none";
+                  }
+                  else
+                  {   document.getElementById(blink_id).style.display = "block";
+                  }
+              } 
+
         </script></span>'.NL;
 //--------------------------------------
 // Tables for the Issue details view:
@@ -1113,9 +1172,59 @@ $issue_client_details = '<table class="itd__tables" id="tbl_'.$anker_id.'"><tbod
                              else {echo "current user != Reporting user <br /><br />";}
                           if(strpos($target2,$user_mail['userinfo']['mail']) != false) {echo "current user is a member of assignees <br /><br />";}
                              else {echo "current user is not a member of assignees <br /><br />";}
-*/                               
-                        if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
-                        {
+*/
+//--------------------------------------------------------------------------------------------------------------
+//create output for followers on registered users only
+if(($user_mail['userinfo']['mail'] !== false))
+{         $blink2_id = 'statanker2_'.$alink_id;
+          $anker2_id = 'anker2_'.$alink_id;
+          $tmp = explode(',', $issue[$issue_id]['add_user_mail']);
+          $follower = 0;
+$issue_addcontacts .='      <td class="itd_tables_tdc3">'.NL;
+                            foreach($tmp as $email) {
+                              //show only own mail address
+                              if((strlen($email)>2) && (stripos($user_mail['userinfo']['mail'],$email)!==false)) {
+                                  $issue_addcontacts .='<a href="mailto:'.$email.'">'.$email.'</a>, '.NL;
+                                  $ademail .= $email;
+                                  $follower++;
+                              }
+                              //admin/assignee to see all followers
+                              elseif((strlen($email)>2) && (strpos($target2,$user_mail['userinfo']['mail']) != false)) {
+                                  $issue_addcontacts .='<a href="mailto:'.$email.'">'.$email.'</a>, '.NL;
+                                  $ademail .= $email;
+                                  $follower++;
+                              }
+                              // to count follower
+                              elseif(strlen($email)>2) $follower++;
+                            }
+                            if($follower==0) $follower='0';
+                            $ademail = str_replace(',,',',',$ademail);
+$issue_addcontacts .='      <span style="display : none;" id="'.$blink2_id.'">
+                                 <form name="add_contact" method="post" accept-charset="'.$lang['encoding'].'">'
+                                  .formSecurityToken(false).'
+                                  <input type="hidden" name="project" value="'.$project.'" />        
+                                  <input type="hidden" name="issue_ID" value="'.$issue[$issue_id]['id'].'" />
+                                  <input type="hidden" name="mod_contacts" value="1"/>
+                                  <input type="text" style="width:95%; font-size: 9pt;" name="add_contact" value="'.$user_mail['userinfo']['mail'].'" /><br />';
+                                  if ($this->getConf('use_captcha')==1) 
+                                    {   $helper = null;
+                            		        if(@is_dir(DOKU_PLUGIN.'captcha'))
+                            			         $helper = plugin_load('helper','captcha');
+                            			         
+                            		        if(!is_null($helper) && $helper->isEnabled())
+                            			      {  $issue_client_details .= '<p>'.$helper->getHTML().'</p>'; }
+                                    }
+$issue_addcontacts .='            <input  type="submit" class="button" style="font-size:8pt;" id="btn_add_contact" name="btn_add_contact" value="'.$this->getLang('btn_add').'" title="'.$this->getLang('btn_add').'");/>
+                                </form>
+                              </span>
+                            </td>'.NL;
+$issue_addimg = '<img class="cmt_list_plus_img" alt="add" src="'.DOKU_BASE.'lib/plugins/issuetracker/images/blank.gif" id="'.$anker2_id.'" onClick="span_open(\''.$blink2_id.'\')" />
+                 <p style="margin-top:-6px;"><span style="font-size:7pt;">'.sprintf($this->getLang('itd_follower'),$follower).'</span></p>';
+}
+//--------------------------------------------------------------------------------------------------------------
+                               
+                        if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) || (strpos($target2,$user_mail['userinfo']['mail']) != false)) 
+                        {  
 $issue_client_details .= '<tr class="itd__tables_tr">
                             <td class="it__left_indent"></td>
                             <td class="itd_tables_tdc2">'.$this->getLang('lbl_reportermail').'</td>
@@ -1128,8 +1237,9 @@ $issue_client_details .= '<tr class="itd__tables_tr">
                           </tr>
                           <tr class="itd__tables_tr">
                             <td class="it__left_indent"></td>
-                            <td class="itd_tables_tdc2">'.$this->getLang('lbl_reporteradcontact').'</td>
-                            <td class="itd_tables_tdc3"><a href="mailto:'.$issue[$issue_id]['add_user_mail'].'">'.$issue[$issue_id]['add_user_mail'].'</a></td>
+                            <td class="itd_tables_tdc2">'.$this->getLang('lbl_reporteradcontact').NL.
+                            $issue_addimg;
+$issue_client_details .=    '</td>'.$issue_addcontacts.'
                           </tr>'; 
                         }
 
@@ -1165,7 +1275,7 @@ $issue_initial_description = '<table class="itd__tables"><tbody>
                              
 /* mod for edit description by ticket owner and admin/assignee ---------------*/
 // check if current user is author of the comment and offer an edit button
-            if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
+            if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) || (strpos($target2,$user_mail['userinfo']['mail']) != false)) 
             {     // add hidden edit toolbar and textarea
                   $alink_id++;
                   $blink_id = 'statanker_'.$alink_id;
@@ -1176,8 +1286,7 @@ $issue_initial_description = '<table class="itd__tables"><tbody>
                     
             $issue_initial_description .= $this->it_edit_toolbar('description_mod');
                     
-            $issue_initial_description .= '<script type="text/javascript" src="include/selectupdate.js"></script>'.NL.
-                                           '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
+            $issue_initial_description .= '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
                                           
             $issue_initial_description .= formSecurityToken(false). 
                                          '<input type="hidden" name="project" value="'.$project.'" />'.NL.
@@ -1193,7 +1302,7 @@ $issue_initial_description = '<table class="itd__tables"><tbody>
                         			         $helper = plugin_load('helper','captcha');
                         			         
                         		        if(!is_null($helper) && $helper->isEnabled())
-                        			      {  $issue_comments_log .= '<p>'.$helper->getHTML().'</p>'; }
+                        			      {  $issue_initial_description .= '<p>'.$helper->getHTML().'</p>'; }
                                 }
                                 $cell_ID = 'img_tab_open_comment'.$blink_id;
 
@@ -1226,15 +1335,14 @@ $issue_attachments = '<table class="itd__tables"><tbody>
                       </tr>'.NL;
 /* mod for edit symptom links by ticket owner and admin/assignee ---------------*/
 // check if current user is author of the comment and offer an edit button
-            if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
+            if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) || (strpos($target2,$user_mail['userinfo']['mail']) != false))
             {     // add hidden edit toolbar and textarea
                   $alink_id++;
                   $blink_id = 'statanker_'.$alink_id;
                   $anker_id = 'anker_'.$alink_id;
                   $cell_ID = 'img_tab_open_reporterdtls'.$blink_id;                              
 $issue_attachments .= '<tbody style="display : none;" id="'.$blink_id.'">
-                        <tr><td colspan=2>'.NL.'
-                        <script type="text/javascript" src="include/selectupdate.js"></script>'.NL.
+                        <tr><td colspan=2>'.NL.
                         '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
 $issue_attachments .= formSecurityToken(false). 
                      '<input type="hidden" name="project" value="'.$project.'" />'.NL.
@@ -1301,13 +1409,13 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
                         if((($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) 
                             or (strpos($target2,$user_mail['userinfo']['mail']) != false) 
                             or ($user_mail['userinfo']['mail'] === $this->_get_one_value($a_comment,'author')))
-                            && ($this->getConf('shw_mail_addr')===1))
+                            && ($this->getConf('shw_mail_addr')===1) && ($this->getConf('auth_ad_overflow') == false))
                         {   $x_mail = '<a href="mailto:'.$this->_get_one_value($a_comment,'author').'">'.$this->_get_one_value($a_comment,'author').'</a>'; }
                         // show mailto with name instead user mail address
                         elseif((($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) 
                             or (strpos($target2,$user_mail['userinfo']['mail']) != false) 
                             or ($user_mail['userinfo']['mail'] === $this->_get_one_value($a_comment,'author')))
-                            && ($this->getConf('shw_mail_addr')===0)) 
+                            && ($this->getConf('shw_mail_addr')===0) && ($this->getConf('auth_ad_overflow') == false)) 
                             {
                               $compare = $this->_get_one_value($a_comment,'author');
                               $dw_users = $auth->retrieveUsers();
@@ -1320,6 +1428,8 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
                               if($tmp_name==false) $tmp_name = $compare;
                               $x_mail= '<a href="mailto:'.$compare.'">'.$tmp_name.'</a>';
                             }
+                        elseif($this->getConf('auth_ad_overflow') == true) {
+                            $x_mail = '<a href="mailto:'.$this->_get_one_value($a_comment,'author').'">'.$this->_get_one_value($a_comment,'author').'</a>'; }
                         else {   $x_mail = '<i> ('.$this->getLang('dtls_usr_hidden').') </i>';  }
 
                         if($this->_get_one_value($a_comment,'mod_timestamp')) { $insert_lbl = '<label class="cmt_mod_exclamation">!</label>';}
@@ -1366,7 +1476,8 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
 /*------------------------------------------------------------------------------
  *   Modify comment                                                           */
                 // check if current user is author of the comment and offer an edit button
-                if(($user_mail['userinfo']['mail'] === $this->_get_one_value($a_comment,'author')) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
+                if((($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) || (strpos($target2,$user_mail['userinfo']['mail']) != false)) or 
+                (($this->getConf('auth_ad_overflow') == true)))
                 {     // add hidden edit toolbar and textarea
                       $alink_id++;
                       $blink_id = 'statanker_'.$alink_id;
@@ -1377,8 +1488,7 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
                     
                     $issue_comments_log .= $this->it_edit_toolbar('comment_mod');
                     
-                    $issue_comments_log .= '<script type="text/javascript" src="include/selectupdate.js"></script>'.NL.
-                                           '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
+                    $issue_comments_log .= '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
                                           
                     $issue_comments_log .= formSecurityToken(false). 
                                          '<input type="hidden" name="project" value="'.$project.'" />'.NL.
@@ -1422,7 +1532,7 @@ $issue_comments_log .= '<input  type="hidden" class="showid__option" name="showi
         //--------------------------------------------------------------------------------------------------------------
         // retrive some basic information
         $cur_date = date ($this->getConf('d_format'));
-        if($user_mail['userinfo']['mail']=='') {$u_mail_check ='unknown';}
+        if(strlen($user_mail['userinfo']['mail']) == 0) {$u_mail_check ='unknown';}
         else {$u_mail_check = $user_mail['userinfo']['mail'];}
         $user_check = $this->getConf('registered_users');
         $u_name = $user_mail['userinfo']['name'];
@@ -1452,8 +1562,7 @@ $issue_add_comment .='<table class="itd__tables">'.
 $issue_add_comment .= $this->it_edit_toolbar('comment');                     
 // mod for editor ---------------------------------------------------------------------
 
-$issue_add_comment .= '<script type="text/javascript" src="include/selectupdate.js"></script>'.NL.
-                      '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
+$issue_add_comment .= '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
                       
 $issue_add_comment .= formSecurityToken(false). 
                      '<input type="hidden" name="project" value="'.$project.'" />'.NL.
@@ -1544,6 +1653,21 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                           </td>'.NL.'
                        </tr></table>'.NL;
         }
+        // the user maybe registered within group "all" but the registered flag is turned on
+        // eigther the user has to be moved into group "user" or the flag to be switched off
+        elseif(($user_mail['perm'] < 2) && (strlen($user_mail['userinfo']['mail'])>1)) {
+            $issue_edit_resolution ='<table class="itd__tables">
+                                     <tr>
+                                        <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('th_resolution').'</td>
+                                    </tr>';
+            $issue_edit_resolution .= '<tr class="itd__tables_tr">
+                                        <td width="1%"></td>
+                                        <td>'.$this->xs_format($x_resolution).'</td>
+                                      </tr></table>'.NL;
+
+            $wmsg = $this->getLang('lbl_lessPermission'); 
+            $issue_edit_resolution .= '<div class="it__standard_feedback">'.$wmsg.'</div>';                      
+        }
         else {
             $issue_edit_resolution ='<table class="itd__tables">
                                      <tr>
@@ -1557,7 +1681,6 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
             $wmsg = $this->getLang('lbl_please').'<a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">'.$this->getLang('lbl_signin'); 
             $issue_edit_resolution .= '<div class="it__standard_feedback">'.$wmsg.'</div>';                      
         }
-
 
         
         //2011-12-02: bwenz code proposal (Issue 11)                                   

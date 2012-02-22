@@ -144,7 +144,6 @@
     else 
         {$issues = array();}
     
-    
     $field = strtolower(htmlspecialchars(stripslashes($_POST['field'])));
     $value = htmlspecialchars(stripslashes($_POST['value']));
    
@@ -164,10 +163,8 @@
     if(($field == 'resolution') && ($value !== false)) {
       $issues[$id_issue]['status'] = $lang['issue_resolved_status'];
     }
-     
-   
-    
-        // inform assigned workforce
+      
+        // inform assigned workforce for new issue
     if ($field == 'assigned') {
         $issues[$id_issue]['assigned'] = $_POST['value'];
         $status = explode(',', $conf['plugin']['issuetracker']['status']);
@@ -188,6 +185,7 @@
     $fh = fopen($pfile, 'w');
     fwrite($fh, serialize($issues));
     fclose($fh);
-    echo $_POST['value'];    
+//    echo $_POST['value'];
+    echo $value;    
 
 ?>

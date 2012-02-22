@@ -10,6 +10,7 @@ $meta['d_format']         = array('string');
 $meta['send_email']       = array('onoff');   // Send email off by default
 $meta['email_address']    = array('string');  // Who will be informed about new issues ? 
 $meta['registered_users'] = array('onoff');   // only registered users with edit permission on issue tracker page are allowed to create reports and add comments     
+$meta['auth_ad_overflow'] = array('onoff');
 $meta['userinfo_email']           = array('onoff');   // Send email off by default
 $meta['mail_add_comment']         = array('onoff');
 $meta['mail_modify_comment']      = array('onoff');

@@ -119,7 +119,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 */
     function render($mode, &$renderer, $data) {        
         global $ID;
-        $project = $data['project'];           
+        $project = $data['project']; 
+        
         if ($mode == 'xhtml'){
             
             $renderer->info['cache'] = false;     
@@ -137,8 +138,6 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $Generated_Scripts = '';
             $Generated_Report = '';
             
-
-
             if (stristr($data['display'],'FORM')!= false) 
             {
                 //If it is a user report add it to the db-file
@@ -298,20 +297,25 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $x_severity_select = $x_severity_select . "['".$x_severity."','".$x_severity."'],";
         } 
         
-        // Build string to load 'assign to' select from all user_mail of defined DW user groups
-        global $auth;        
-        $filter['grps']=$this->getConf('assign');
-        $target = $auth->retrieveUsers(0,0,$filter); 
-        $target2 = $this->array_implode($target);
-        foreach ($target2 as $x_umail)
-        {
-                if (strrpos($x_umail, "@") > 0)
-                {
-                    $x_umail_select = $x_umail_select . "['".$x_umail."','".$x_umail."'],";
-                }
+        // see issue 37: AUTH:AD switch to provide text input instead 
+        // select with retriveing all_users from AD
+        // search also action.php for 'auth_ad_overflow'
+        if($this->getConf('auth_ad_overflow') == false) {
+            global $auth;        
+            $filter['grps'] = $this->getConf('assign');
+            $target         = $auth->retrieveUsers(0,0,$filter); 
+            $target2        = $this->array_implode($target);
+            foreach ($target2 as $x_umail)
+            {
+                    if (strrpos($x_umail, "@") > 0)
+                    {
+                        $x_umail_select = $x_umail_select . "['".$x_umail."','".$x_umail."'],";
+                    }
+            }      
+            $x_umail_select .= "['',''],";
+            $authAD_selector = "TableKit.Editable.selectInput('assigned',{}, [".$x_umail_select."]);";
         }
-        $x_umail_select .= "['',''],";      
-        
+
         $BASE = DOKU_BASE."lib/plugins/issuetracker/";
         return    "<script type=\"text/javascript\" src=\"".$BASE."prototype.js\"></script><script type=\"text/javascript\" src=\"".$BASE."fabtabulous.js\"></script>
         <script type=\"text/javascript\" src=\"".$BASE."tablekit.js\"></script>
@@ -320,7 +324,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             TableKit.Editable.selectInput('status',{}, [".$x_status_select."]);
             TableKit.Editable.selectInput('product',{}, [".$x_products_select."]);
             TableKit.Editable.selectInput('severity',{}, [".$x_severity_select."]);
-            TableKit.Editable.selectInput('assigned',{}, [".$x_umail_select."]);
+            ".$authAD_selector."
             TableKit.Editable.multiLineInput('description');
             TableKit.Editable.multiLineInput('resolution');
             var _tabs = new Fabtabs('tabs');
@@ -359,18 +363,14 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $sev_filter = $data['severity'];
                 
         if(array_key_exists('userinfo', $user_grp))
-        {
-            foreach ($user_grp['userinfo']['grps'] as $ugrp)
-            {
-                $user_grps = $user_grps . $ugrp;
-            }
+        {   foreach ($user_grp['userinfo']['grps'] as $ugrp)
+            {  $user_grps = $user_grps . $ugrp;  }
         }
         else
         {   $user_grps = 'all';  }
         
         if (strtolower($data['controls'])==='on') {
-        $ret = '<br /><br /><script type="text/javascript" src="include/selectupdate.js"></script>'.
-               '<form class="issuetracker__form2" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'"><p>';
+        $ret = '<br /><br /><form class="issuetracker__form2" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'"><p>';
         $ret .= formSecurityToken(false).'<input type="hidden" name="do" value="show" />';        
         }
         // the user maybe member of different user groups
@@ -378,8 +378,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $allowed_users = explode('|', $this->getConf('assign'));
         $cFlag = false;
         foreach ($allowed_users as $w) 
-        { // check if one of the assigned user roles does match with current user roles
-
+        {   // check if one of the assigned user roles does match with current user roles
             if (strpos($user_grps,$w)!== false)
             {   $cFlag = true;
                 break;  } 
@@ -387,8 +386,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         
         // members of defined groups $user_grps allowed to change issue contents 
         if ($cFlag === true)       
-        {   
-            $dynatable_id = "t_".uniqid((double)microtime()*1000000,1);
+        {   $dynatable_id = "t_".uniqid((double)microtime()*1000000,1);
             $head = "<div class='itl__table'><table id='".$dynatable_id."' class='sortable editable resizable inline' width='100%'>".NL.
                     "<thead><tr><th class=\"sortfirstdesc\" id='id'>".$this->getLang('th_id')."</th>".NL.
                     "<th id='created'>".$this->getLang('th_created')."</th>".NL.
@@ -758,8 +756,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             /*--------------------------------------------------------------------*/
             // create the report template and check input on client site
             /*--------------------------------------------------------------------*/
-            $ret = '<div class="it__cir_form"><script type="text/javascript" src="include/selectupdate.js"></script>'.NL.
-                   '<script>
+            $ret = '<div class="it__cir_form"><script>
                    // JavaScript Document
                     function chkFormular (frm) {
                         if (frm.product.value == "") {
@@ -877,8 +874,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 <td>';
 
 // mod for editor ---------------------------------------------------------------------
-$ret .= '<div class="it_edittoolbar" style="margin-left:30px; margin-top:6px;">
-         <script>
+$ret .= '<script>
           function doHLine(tag1,obj)
           { textarea = document.getElementById(obj);
           	if (document.selection) 
@@ -1004,25 +1000,7 @@ $ret .= '<div class="it_edittoolbar" style="margin-left:30px; margin-top:6px;">
          </script>';                      
 // mod for editor ---------------------------------------------------------------------
 
-	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','description')\">".NL;
-  $ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','description')\">".NL;
-	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','description')\">".NL;
-	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','description')\">".NL;
-	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','description')\">".NL;
-	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','description')\">".NL;
-	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','description')\">".NL;
-	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/ordered.png\" name=\"btnList\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','description')\">".NL;
-	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/unordered.png\" name=\"btnList\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','description')\">".NL;
-	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','description')\">".NL; 
-	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','description')\">".NL;
-	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','description')\">".NL;
-	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','description')\">".NL;
-	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','description')\">".NL;
-	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','description')\">".NL;
-	$ret .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','description')\">".NL;
-	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/img.png\" name=\"btn_img\" title=\"Image\" onClick=\"doAddTags('[img]','[/img]','$type')\">".NL;
-	$it_edit_tb .= "<a href=\"http://www.imageshack.us/\" target=\"_blank\"><<img class=\"xseditor_button\" src=\"".$imgBASE."/imageshack.png\" name=\"btn_ishack\" title=\"ImageShack upload (ext TaC !)\">></a>".NL;
-  $ret .= "<br></div>";
+  $ret .= $this->it_edit_toolbar('description');
 
           $ret .= '<textarea class="it__cir_linput" id="description" name="description" cols="109" rows="7">'.$_REQUEST['description'].'</textarea></td>
              </tr>'.
@@ -1066,6 +1044,21 @@ $ret .= '<div class="it_edittoolbar" style="margin-left:30px; margin-top:6px;">
          //<input name="do[save]" type="submit" value="Save" class="button" id="edbtn__save" accesskey="s" tabindex="4" title="Save [S]" />
             $ret .= '<p><input name="submit" type="submit" value="'.$this->getLang('btn_reportsave').'" class="button" id="edbtn__save" title="'.$this->getLang('btn_reportsave').'"/>'.
             '</p></form></div>';
+        }
+        // the user maybe registered within group "all" but the registered flag is turned on
+        // eigther the user has to be moved into group "user" or the flag to be switched off
+        elseif(($user_mail['perm'] < 2) && (strlen($user_mail['userinfo']['mail'])>1)) {
+            $issue_edit_resolution ='<table class="itd__tables">
+                                     <tr>
+                                        <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('th_resolution').'</td>
+                                    </tr>';
+            $issue_edit_resolution .= '<tr class="itd__tables_tr">
+                                        <td width="1%"></td>
+                                        <td>'.$this->xs_format($x_resolution).'</td>
+                                      </tr></table>'.NL;
+
+            $wmsg = $this->getLang('lbl_lessPermission'); 
+            $issue_edit_resolution .= '<div class="it__standard_feedback">'.$wmsg.'</div>';                      
         }
         else { 
            $ret .= '<div class="it__standard_feedback">'.$this->getLang('wmsg4').'</div>';                      
@@ -1250,7 +1243,41 @@ address format and the domain exists.
         $x_comment = preg_replace("/\[img\](.*?)\[\/img\]/si", "<img src=\"\\1\" title=\"\\1\" \/>", $x_comment);
         $x_comment = preg_replace("/\[img=(.*?)\](.*?)\[\/img\]/si", "<img src=\"\\1\" title=\"\\2\" \/>", $x_comment);
 
+
+/*---------------------------------------------------------------------------------
+*  think about parsing content by dokuwiki renderer for dokuwiki syntax recognition
+*        $x_comment = p_render('xhtml',p_get_instructions($x_comment),$info);
+*        take care to strip IssueTracker syntax to prevent endless loop
+---------------------------------------------------------------------------------*/
+
       return $x_comment;
+    }
+/******************************************************************************/
+/* return html-code for edit toolbar
+*/
+    function it_edit_toolbar($type) {
+        $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
+        $it_edit_tb  = '<div class="itr_edittoolbar">'.NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','$type')\">".NL;
+        $it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/ordered.png\" name=\"btnList\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/unordered.png\" name=\"btnList\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','$type')\">".NL; 
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/img.png\" name=\"btn_img\" title=\"Image\" onClick=\"doAddTags('[img]','[/img]','$type')\">".NL;
+      	$it_edit_tb .= "<a href=\"http://www.imageshack.us/\" target=\"_blank\"><<img class=\"xseditor_button\" src=\"".$imgBASE."/imageshack.png\" name=\"btn_ishack\" title=\"ImageShack upload (ext TaC !)\">></a>".NL;
+        $it_edit_tb .= "<br></div>".NL; 
+        return $it_edit_tb;                     
     }
 /******************************************************************************/
 /* log issue modificaions

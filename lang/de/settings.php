@@ -11,6 +11,7 @@ $lang['d_format']			    = 'G:i:s d-m-Y';
 $lang['send_email']			  = '&Uuml;ber neue Aufgaben per E-Mail informieren?'; 
 $lang['email_address']		= 'Wer wird informiert?';
 $lang['registered_users']	= 'Nur registrierten Benutzern mit passenden Zugangsrechten ist es erlaubt im Issue Tracker neue Aufgaben und Kommentare anzulegen';
+$lang['auth_ad_overflow'] = 'Kompensierung AUTH:AD Fehler (>1.000 user Objekte)';
 $lang['userinfo_email']		= 'Den Benutzer &uuml;ber &Auml;nderungen per E-Mail informieren?';
 $lang['mail_add_comment']         = 'Mailinfo bei neuen Kommentaren';
 $lang['mail_modify_comment']      = 'Mailinfo bei Kommentar&auml;nderung';

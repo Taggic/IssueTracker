@@ -43,6 +43,10 @@ $lang['msg_issuemissing']		= 'Es gibt keine Tickets mit der ID ';
 $lang['msg_captchawrong']		= 'Falsche Antwort zur Anti-Spam Frage.';
 $lang['msg_descrmodtrue']		= 'Die Beschreibung wurde erfolgreich aktualisiert.';
 $lang['msg_slinkmodtrue']		= 'Die Links zu den Indizien wurden erfolgreich aktualisiert.';
+$lang['msg_addFollower_true']   = 'ID: %s -> Interessenten hinzugefügt: ';
+$lang['msg_rmvFollower_true']   = 'ID: %s -> Interessenten gelöscht: ';
+$lang['msg_addFollower_failed'] = 'ID: %s -> Fehler bei der Aktualisierung des Interessenten: ';
+$lang['itd_follower']           = '(Interessenten: %s)';
 
 $lang['lbl_project']		  	= 'Projekt:';
 $lang['lbl_issueid']	  		= 'ID:';
@@ -64,6 +68,7 @@ $lang['btn_mod_title']			= 'Aktualisieren';
 $lang['del_title']		  		= 'Kommentar loeschen';
 $lang['lbl_signin']		  		= 'loggen Sie sich ein</a> wenn Sie einen Kommentar oder eine L&ouml;sung hinzuf&uuml;gen m&ouml;chten.';       // </a> necessary to close the link tag
 $lang['lbl_please']		  		= 'Bitte ';
+$lang['lbl_lessPermission'] = 'Ihre Berechtigungsstufe ist zu niedrig. Bitte kontaktieren Sie den Administrator.';
 
 $lang['th_project']		  		= 'Projekt';
 $lang['th_id']			    		= 'ID';

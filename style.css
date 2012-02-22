@@ -251,11 +251,15 @@ table.itd_tr_standard {
   position:relative;
 }
 
-.it_edittoolbar {
+.it_edittoolbar, .itr_edittoolbar {
   width:                   330px;
   border:     1px dotted #69859E;
   padding:     4px 12px 0px 12px;
 	border-radius:             4px;
+}
+
+.itr_edittoolbar {
+  margin-left:               2em;
 }
 
 .img_tab_open_comment {
@@ -290,6 +294,14 @@ table.itd_tr_standard {
   float:                   right;
 }
 
+.cmt_list_plus_img {
+  background-image:url(images/list-plus.gif);
+  background-repeat:no-repeat;
+}
+.cmt_list_plus_img:hover {
+  background-image:url(images/list-plus_hov.gif) !important;
+  background-repeat:no-repeat;
+}
 .cmt_del_img {
   background-image:url(images/delete.gif);
   margin-top: -10px ;
