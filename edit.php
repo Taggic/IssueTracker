@@ -97,10 +97,10 @@
           else 
               {$mods = array();}
           
-          
+          $cur_date = date('Y-m-d G:i:s');
           $mod_id = count($mods);
           if($new_value=='') $new_value = '[deleted]';
-          $mods[$mod_id]['timestamp']   = $issue['modified'];
+          $mods[$mod_id]['timestamp']   = $cur_date;
           $mods[$mod_id]['user']        = $usr;
           $mods[$mod_id]['field']       = $column;
           $mods[$mod_id]['new_value']   = $new_value;
@@ -136,7 +136,8 @@
     $exploded = explode(' ',htmlspecialchars(stripslashes($_POST['id'])));
     $project = $exploded[0];
     $id_issue = intval($exploded[1]);
-    $usr = $_POST['usr']; 
+    $usr = $_POST['usr'];
+    $cur_date = date('Y-m-d G:i:s'); 
     // get issues file contents
     $pfile = metaFN($project, '.issues');
     if (@file_exists($pfile))
@@ -157,7 +158,7 @@
     _emailForIssueMod($project, $issues[$id_issue], $issues[$id_issue][$field], $field, $value);
     
     $issues[$id_issue][$field] = $value;
-    $issues[$id_issue]['modified'] = date ('Y-m-d G:i:s');
+    $issues[$id_issue]['modified'] = $cur_date;
     _log_mods($project, $issues[$id_issue], $usr, $field, $value);
    
     if(($field == 'resolution') && ($value !== false)) {

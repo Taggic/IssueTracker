@@ -693,7 +693,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     $this->getLang('issuemod_creator').$issue['user_name'].chr(10).chr(10).
                     $this->getLang('issuemod_title').$issue['title'].chr(10).
                     $this->getLang('issuemod_cmntauthor').$comment['author'].chr(10).
-                    $this->getLang('issuemod_date').$comment['timestamp'].chr(10).chr(10).
+                    $this->getLang('issuemod_date').date($this->getConf('d_format'),strtotime($comment['timestamp'])).chr(10).chr(10).
                     $this->getLang('issuemod_cmnt').$this->xs_format($comment['comment']).chr(10).chr(10).
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
@@ -715,7 +715,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $project = $data['project'];
         // retrive some basic information
         $user_mail = pageinfo();  //to get mail address of reporter
-        $cur_date = date ('Y-m-d G:i:s');
+        $cur_date = date('Y-m-d G:i:s');
         $user_check = $this->getConf('registered_users');
 
         $_cFlag = false;             
@@ -1295,7 +1295,7 @@ address format and the domain exists.
           
           $mod_id = count($mods);
           
-          $mods[$mod_id]['timestamp'] = $issue['created'];
+          $mods[$mod_id]['timestamp'] = date ('Y-m-d G:i:s');
           $mods[$mod_id]['user'] = $usr;
           $mods[$mod_id]['field'] = $column;
           $mods[$mod_id]['new_value'] = $new_value;

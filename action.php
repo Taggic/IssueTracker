@@ -219,7 +219,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                             $checkFlag=true; 
                                         }
                                      else
-                                     {  $cur_date = date ($this->getConf('d_format'));
+                                     {  $cur_date = date('Y-m-d G:i:s');
                                         $comments[$comment_id]['mod_timestamp'] = $cur_date;
                                         $comments[$comment_id]['comment'] = htmlspecialchars(stripslashes($_REQUEST['comment_mod']));
                                         $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_commentmodtrue').$comment_id.'.</div><br />';
@@ -235,7 +235,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                        $comments[$comment_id]['id'] = $comment_id;
                                        
                                        $comments[$comment_id]['author'] = htmlspecialchars(stripslashes($_REQUEST['author']));
-                                       $cur_date = date ($this->getConf('d_format'));
+                                       $cur_date = date('Y-m-d G:i:s');
                                        $comments[$comment_id]['timestamp'] = $cur_date;
                                        $comments[$comment_id]['comment'] = htmlspecialchars(stripslashes($_REQUEST['comment']));
                                        //Create comments file
@@ -247,7 +247,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                     if ($checkFlag === false)
                                     {   // inform user (or assignee) about update
                                         // update modified date
-                                        $issues[$_REQUEST['comment_issue_ID']]['modified'] = date($this->getConf('d_format')); 
+                                        $cur_date = date('Y-m-d G:i:s');
+                                        $issues[$_REQUEST['comment_issue_ID']]['modified'] = $cur_date; 
                                         $xvalue = io_saveFile($pfile,serialize($issues));
                                         // if($this->getConf('mail_modify_comment') ===1) $this->_emailForMod($_REQUEST['project'],$issues[$_REQUEST['comment_issue_ID']], $comments[$comment_id], 'modify');
                                         $anker_id = 'resolved_'. uniqid((double)microtime()*1000000,1);                                   
@@ -1259,7 +1260,7 @@ $issue_client_details .= '</tbody><tr>'.NL.'
  * hook-in to provide possibility of modifing the initial description
 ------------------------------------------------------------------------------*/
         // retrive some basic information
-        $cur_date = date ($this->getConf('d_format'));
+        $cur_date = date('Y-m-d G:i:s');
         if($user_mail['userinfo']['mail']=='') {$u_mail_check ='unknown';}
         else {$u_mail_check = $user_mail['userinfo']['mail'];}
         $user_check = $this->getConf('registered_users');
@@ -1467,7 +1468,7 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
         // only admin/assignees and reporter are allowed to add comments if only user edit option is set
         //--------------------------------------------------------------------------------------------------------------
         // retrive some basic information
-        $cur_date = date ($this->getConf('d_format'));
+        $cur_date = date('Y-m-d G:i:s');
         if($user_mail['userinfo']['mail']=='') {$u_mail_check ='unknown';}
         elseif($this->getConf('shw_mail_addr')===0) {$u_mail_check =$user_mail['userinfo']['name'];}
         else {$u_mail_check = $user_mail['userinfo']['mail'];}
@@ -1531,7 +1532,7 @@ $issue_comments_log .= '<input  type="hidden" class="showid__option" name="showi
         // only admin/assignees and reporter are allowed to add comments if only user edit option is set
         //--------------------------------------------------------------------------------------------------------------
         // retrive some basic information
-        $cur_date = date ($this->getConf('d_format'));
+        $cur_date = date('Y-m-d G:i:s');
         if(strlen($user_mail['userinfo']['mail']) == 0) {$u_mail_check ='unknown';}
         else {$u_mail_check = $user_mail['userinfo']['mail'];}
         $user_check = $this->getConf('registered_users');
@@ -1738,7 +1739,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
             else {
               $body2 = $this->getLang('issuemod_intro').chr(10).chr(13);
               $body3 = $this->getLang('issuemod_cmntauthor').$comment['author'].chr(10).
-                       $this->getLang('issuemod_date').$comment['timestamp'].chr(10).
+                       $this->getLang('issuemod_date').date($this->getConf('d_format'),strtotime($comment['timestamp'])).chr(10).
                        $this->getLang('issuemod_cmnt').$this->xs_format($comment['comment']).chr(10).chr(10); 
             }
             
@@ -1770,7 +1771,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 
     }
 /******************************************************************************/
-/* send an e-mail to user due to issue modificaion
+/* send an e-mail to user due to issue modificaion on Descriptions
 */                            
     function _emailForDscr($project,$issue)
     {       if($this->getConf('userinfo_email') ===0) return;
@@ -1787,7 +1788,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                     $this->getLang('issuemod_severity').$issue['severity'].chr(10).
                     $this->getLang('issuemod_creator').$issue['user_name'].chr(10).chr(10).
                     $this->getLang('issuemod_title').$issue['title'].chr(10).
-                    $this->getLang('issuemod_date').$comment['timestamp'].chr(10).chr(10).
+                    $this->getLang('issuemod_date').date($this->getConf('d_format'),strtotime($comment['timestamp'])).chr(10).chr(10).
                     $this->getLang('th_description').chr(10).$issue['description'].chr(10).chr(10).
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end'). "\r\n";
@@ -1996,10 +1997,10 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
               {$mods  = unserialize(@file_get_contents($modfile));}
           else 
               {$mods = array();}
-          
+          $cur_date = date('Y-m-d G:i:s');
           $mod_id = count($mods);
           if($new_value=='') $new_value = $this->getLang('mod_valempty');
-          $mods[$mod_id]['timestamp'] = $issue['modified'];
+          $mods[$mod_id]['timestamp'] = $cur_date;
           $mods[$mod_id]['user'] = $usr;
           $mods[$mod_id]['field'] = $column;
           $mods[$mod_id]['new_value'] = $new_value;
