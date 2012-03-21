@@ -111,10 +111,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         $res = "";
         $tmp = explode(chr(10),$txt);
         foreach($tmp as $line) {
-          if((stripos($line,'ul')===false) && (stripos($line,'ol')===false) && (stripos($line,'li')===false)) {
-              $res .= $line."<br />";
+          if((stripos($line,'ul]')!==false) || (stripos($line,'ol]')!==false) || (stripos($line,'li]')!==false)) {
+              $res .= $line;
           }
-          else $res .= $line;
+          else $res .= $line."<br />";
         } 
         return $res; 
     } 
@@ -490,7 +490,12 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $Generated_Table  .= '<tr><th>Date</th><th>User</th><th>Field</th><th>new Value</th></tr>'.NL;
 
             foreach($mods as $mod) {          
-                $Generated_Table  .= '<tr>'.NL;
+                
+                if($rowEven==="it_roweven") $rowEven="it_rowodd";
+                else $rowEven="it_roweven";
+                echo 'rowEven: '.$rowEven.'<br />';
+                        
+                $Generated_Table  .= '<tr class="'.$rowEven.'" >'.NL;
                 $Generated_Table  .= '  <td>'.date($this->getConf('d_format'),strtotime($this->_get_one_value($mod,'timestamp'))).'</td>'.NL;
                 $Generated_Table  .= '  <td>'.$this->_get_one_value($mod,'user').'</td>'.NL;
                 $Generated_Table  .= '  <td>'.$this->_get_one_value($mod,'field').'</td>'.NL;
@@ -677,14 +682,14 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     $y=$y+1;
                     // check if status image or text to be displayed
                     if ($noStatIMG === false) {                    
-                        $status_img = $imgBASE . implode('', explode(' ',strtolower($a_status))).'.gif';
+                        $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_status))).'.gif';
 //                        if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
                         $status_img =' align="center"> <img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16">';
                     }                    
                     else { $status_img = $style.$a_status; }
                     // check if severity image or text to be displayed                                            
                     if ($noSevIMG === false) {                    
-                        $severity_img = $imgBASE . implode('', explode(' ',strtolower($a_severity))).'.gif';
+                        $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_severity))).'.gif';
 
 //                        if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
                         $severity_img =' align="center"> <img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16">';
@@ -695,8 +700,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
                         $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a>';
                     
+                    if($rowEven==="it_roweven") $rowEven="it_rowodd";
+                    else $rowEven="it_roweven";
                                             
-                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" onMouseover="this.bgColor=\'#DDDDDD\'" onMouseout="this.bgColor=\'#FFFFFF\'">'.                       
+                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.                       
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.
                              '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'product').'</td>'.
@@ -742,7 +749,11 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     if ($y>=$step) break;
                     if ((stripos($this->getConf('status_special'),$a_status) !== false) && (stripos($stat_filter,$this->getConf('status_special')) === false)) continue;
                     $y=$y+1;
-                    $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" onMouseover="this.bgColor=\'#DDDDDD\'" onMouseout="this.bgColor=\'#FFFFFF\'">'.
+                    
+                    if($rowEven==="it_roweven") $rowEven="it_rowodd";
+                    else $rowEven="it_roweven";
+                    
+                    $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.
                                                       '<td'.$style.$this->_get_one_value($issue,'id').'</td>';
                     foreach ($configs as $config)
                     {
@@ -751,7 +762,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         if ($config == 'status')
                         {
                             if ($noStatIMG === false) {                    
-                                $status_img = $imgBASE . implode('', explode(' ',strtolower($isval))).'.gif';
+                                $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
                                 $reduced_issues .='<td align="center"> <img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"></td>';
                             }
                             else { $reduced_issues .= '<td'.$style.$isval; }
@@ -760,7 +771,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         elseif ($config == 'severity')
                         {
                             if ($noSevIMG === false) {                    
-                                $severity_img = $imgBASE . implode('', explode(' ',strtolower($isval))).'.gif';
+                                $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
                                 $reduced_issues .='<td align="center"> <img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"></td>';
                             }
                             else { $reduced_issues .= '<td'.$style.$isval.'</td>'; }
@@ -897,10 +908,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         else {$comments = array();}
 
         $a_severity = $issue[$issue_id]['severity'];                  
-        $severity_img = $imgBASE . implode('', explode(' ',strtolower($a_severity))).'.gif';
+        $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_severity))).'.gif';
         $severity_img =' <img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"> ';
         $a_status = $issue[$issue_id]['status'];
-        $status_img = $imgBASE . implode('', explode(' ',strtolower($a_status))).'.gif';
+        $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_status))).'.gif';
         $status_img =' <img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"> ';
         $a_product = $issue[$issue_id]['product'];
 
@@ -1697,7 +1708,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 */                            
     function _emailForRes($project,$issue)
     {       if($this->getConf('userinfo_email') ===0) return;
-            $subject = sprintf($this->getLang('issue_resolved_subject'),$issue['id'], $project);            
+            $subject = sprintf($this->getLang('issue_resolved_subject'),$issue['id'], $project);
+            $subject = mb_encode_mimeheader($subject, "UTF-8", "Q" );            
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
             global $ID;
             $body = $this->getLang('issuemod_head').chr(10).chr(10).
@@ -1710,7 +1722,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
 
-//            $body = utf8_encode($body);
+            $body = html_entity_decode($body);
             $from=$this->getConf('email_address') ;
 
             $user_mail = pageinfo();
@@ -1728,9 +1740,16 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 */                            
     function _emailForMod($project,$issue,$comment,$reason)
     {       if($this->getConf('userinfo_email') ===0) return;
-            if($reason ==='new') { $subject = sprintf($this->getLang('cmnt_new_subject'),$issue['id'], $project). "\r\n"; }
-            elseif($reason =='delete') { $subject = sprintf($this->getLang('cmnt_del_subject'),$issue['id'], $project). "\r\n"; }
-            else {$subject = sprintf($this->getLang('cmnt_mod_subject'),$issue['id'], $project). "\r\n";}            
+            if($reason ==='new') { 
+              $subject = sprintf($this->getLang('cmnt_new_subject'),$issue['id'], $project). "\r\n"; 
+              $subject = mb_encode_mimeheader($subject, "UTF-8", "Q" );}
+            elseif($reason =='delete') { 
+              $subject = sprintf($this->getLang('cmnt_del_subject'),$issue['id'], $project). "\r\n"; 
+              $subject = mb_encode_mimeheader($subject, "UTF-8", "Q" );}
+            else {
+              $subject = sprintf($this->getLang('cmnt_mod_subject'),$issue['id'], $project). "\r\n";
+              $subject = mb_encode_mimeheader($subject, "UTF-8", "Q" );}            
+            
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
             
             if($reason =='delete') {
@@ -1740,7 +1759,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
               $body2 = $this->getLang('issuemod_intro').chr(10).chr(13);
               $body3 = $this->getLang('issuemod_cmntauthor').$comment['author'].chr(10).
                        $this->getLang('issuemod_date').date($this->getConf('d_format'),strtotime($comment['timestamp'])).chr(10).
-                       $this->getLang('issuemod_cmnt').$this->xs_format($comment['comment']).chr(10).chr(10); 
+                       $this->getLang('issuemod_cmnt').chr(10).$this->xs_format($comment['comment']).chr(10).chr(10); 
             }
             
             $body = $this->getLang('issuemod_head').chr(10).chr(10).
@@ -1756,7 +1775,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end'). "\r\n";
 
-//            $body = utf8_encode($body);
+            $body = html_entity_decode($body);
             
             $from=$this->getConf('email_address'). "\r\n";
             
@@ -1775,7 +1794,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 */                            
     function _emailForDscr($project,$issue)
     {       if($this->getConf('userinfo_email') ===0) return;
-            $subject = sprintf($this->getLang('issuedescrmod_subject'),$issue['id'], $project). "\r\n";            
+            $subject = sprintf($this->getLang('issuedescrmod_subject'),$issue['id'], $project). "\r\n";
+            $subject = mb_encode_mimeheader($subject, "UTF-8", "Q" );            
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
             global $ID;
             
@@ -1793,7 +1813,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end'). "\r\n";
 
-//            $body = utf8_encode($body);
+            $body = html_entity_decode($body);
             $from=$this->getConf('email_address'). "\r\n";
             
             $user_mail = pageinfo();
@@ -2010,5 +2030,15 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
           fwrite($fh, serialize($mods));
           fclose($fh);
     }
+/******************************************************************************/
+/* replace special characters in file names like German "Umlaute"
+*/
+  function img_name_encode($f_name) {
+      $umlaute = explode(',',$this->getLang('umlaute'));
+      $replace = explode(',',$this->getLang('conv_umlaute'));
+      if((count($umlaute)>1) && (count($replace)>1)) $f_name = preg_replace($umlaute, $replace, $f_name);
+      $f_name = strtolower($f_name);
+      return $f_name;
+  }
 /******************************************************************************/
 }

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * German language file for IssueTracker
  *
@@ -155,16 +155,18 @@ $lang['issueassigned_intro']	= 'Ihnen wurde folgendes Ticket zugewiesen:';
 */
 $lang['lbl_search']				= 'Suche nach:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 $lang['btn_search']				= 'Start';
-$lang['btn_search_title']		= 'Suche';
+$lang['btn_search_title']	= 'Suche';
 $lang['search_hl1']				= '<h1>Suche</h1>';
 $lang['search_txt1']			= "Unten sind die Ergebnisse Ihrer Suche gelistet. Bitte bedenken Sie, dass die Suche keine Suchausdrücke auflösen kann.";
 $lang['search_hl2']				= '<h2>Ergebnisse</h2>';
 $lang['search_Issue']			= 'Ticket';
-$lang['search_Comment']			= 'Kommentar';
+$lang['search_Comment']		= 'Kommentar';
 $lang['search_Type']			= 'Typ';
 $lang['search_ID']				= 'ID';
-$lang['search_Subject']			= 'Inhalt';
+$lang['search_Subject']		= 'Inhalt';
 
 /******************************************************************************/
 $lang['table_kit_OK']			= 'OK';
-$lang['table_kit_Cancel']		= ' Abbrechen';
+$lang['table_kit_Cancel']	= ' Abbrechen';
+$lang['umlaute']	       	= 'ä,ö,ü,Ä,Ö,Ü,ß';
+$lang['conv_umlaute']		  = 'ae,oe,ue,Ae,Oe,Ue,ss';

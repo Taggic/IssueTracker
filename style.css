@@ -347,4 +347,20 @@ table.itd_tr_standard {
   margin: 12px 12px 12px 3px;
   float:left;
   vertical-align:text-top;
+}
+
+.it_rowodd {
+  background-color:   #E8E9FF;
+}
+
+.it_roweven {
+  background-color:   #FFFFD0;
+}
+
+.it_rowodd:hover, .it_roweven:hover {
+  background-color:   #DDDDDD !important;
+}
+
+.resize-handle-active {
+  cursor: w-resize;
 } 

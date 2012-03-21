@@ -24,7 +24,8 @@
             if ($conf['lang']=='') $conf['lang']=='en'; 
             include 'lang/'.$conf['lang'].'/lang.php';
             
-            $subject= utf8_encode (sprintf($lang['issuemod_subject'], $issue['id'], $project));
+            $subject = sprintf($lang['issuemod_subject'], $issue['id'], $project);
+            $subject = mb_encode_mimeheader($subject, "UTF-8", "Q" );
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
 
             $body = $lang['issuemod_head'].chr(10).chr(10).
@@ -40,6 +41,7 @@
                     $lang['issuemod_see'].DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $lang['issuemod_br'].chr(10).$lang['issuemod_end'];
             
+            $body = html_entity_decode($body);
             $from = $conf['plugin']['issuetracker']['email_address'];
             $to   = $issue['user_mail'];
             $cc   = $issue['add_user_mail'];
@@ -61,7 +63,8 @@
             include 'lang/'.$conf['lang'].'/lang.php';
             
             
-            $subject= utf8_encode ($project.sprintf($lang['issueassigned_subject'],$issue['id']));
+            $subject = $project.sprintf($lang['issueassigned_subject'],$issue['id']);
+            $subject = mb_encode_mimeheader($subject, "UTF-8", "Q" );
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
 
             $body = $lang['issueassigned_head'].chr(10).chr(10).
@@ -75,7 +78,8 @@
                     $lang['issuenew_descr'].$issue['description'].chr(10).
                     $lang['issuemod_see'].DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $lang['issuemod_br'].chr(10).$lang['issuemod_end'];
-                        
+            
+            $body = html_entity_decode($body);            
             $from = $conf['plugin']['issuetracker']['email_address'];
             $to   = $value;
 
