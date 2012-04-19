@@ -246,7 +246,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $productfilter=$data['product'];
         foreach ($issues as $issue)
         {
-            if (($productfilter=='ALL') || (stristr($productfilter,$this->_get_one_value($issue,'product'))!= false))
+            if ((strcasecmp($productfilter,'ALL')===0) || (stristr($productfilter,$this->_get_one_value($issue,'product'))!= false))
             {
                 $status = trim($this->_get_one_value($issue,'status'));
                 if (($status != '') && (stripos($this->getConf('status_special'),$status)===false))
@@ -261,7 +261,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         {
             //http://www.fristercons.de/fcon/doku.php?id=issuetracker:issuelist&do=showcaselink&showid=19&project=fcon_project
             // $ID.'&do=issuelist_filter&itl_sev_filter='.$value[1]
-            $rendered_count .= '<tr><td><a href="'.DOKU_URL.'doku.php?id='.$ID.'&do=issuelist_filterlink'.'&itl_start='.$start.'&itl_step='.$step.'&itl_next='.$next_start.'&itl_stat_filter='.$value[1].'&itl_sev_filter='.$data['severity'].'&itl_prod_filter='.$data['product'].'&itl_project='.$data['project'].'" >'.$value[1].'</a>&nbsp;</td><td>&nbsp;'.$value[0].'</td></tr>';
+            $rendered_count .= '<tr><td><a href="'.DOKU_URL.'doku.php?id='.$ID.'&do=issuelist_filterlink'.'&itl_start='.$start.'&itl_step='.$step.'&itl_next='.$next_start.'&itl_stat_filter='.$value[1].'&itl_sev_filter='.$data['severity'].'&itl__prod_filter='.$data['product'].'&itl_project='.$data['project'].'" >'.$value[1].'</a>&nbsp;</td><td>&nbsp;'.$value[0].'</td></tr>';
         }
         $rendered_count .= '</table></div>';
         return $rendered_count;
@@ -539,8 +539,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $head = NL.$reduced_header.NL;
             $body = '<tbody>'.$reduced_issues.'</tbody>'.NL.'</table>'.NL.'</div>'.NL;
         }
-
-
+// -----------------------------------------------------------------------------
+// Control render        
         if (strtolower($data['controls'])==='on') {
           $li_count = $this->_count_render($issues,$start,$step,$next_start,$data);
         $ret = '<div>'.NL.
@@ -570,7 +570,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                '   <td align ="left" valign="top" width="15%">'.NL.
                '     <p class="it__cir_projectlabel">'.$this->getLang('lbl_scroll').' <br />'.NL.
                                                       $this->getLang('lbl_filtersev').' <br />'.NL.
-                                                      $this->getLang('lbl_filterstat').' </p>'.NL.
+                                                      $this->getLang('lbl_filterstat').' <br />'.NL.
+                                                      $this->getLang('lbl_filterprod').' </p>'.NL.
                '   </td>'.NL.
                '   <td align ="left" valign="top" width="25%">'.NL.
                '    <form name="myForm" action="" method="post">'.NL.
@@ -578,12 +579,12 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                '       <input type="hidden" name="itl_step" id="itl_step" value="'.$step.'"/>'.NL.
                '       <input type="hidden" name="itl_next" id="itl_next" value="'.$next_start.'"/>'.NL.
                '       <input type="hidden" name="itl_project" id="itl_project" value="'.$project.'"/>'.NL.
-               '       <input type="hidden" class="itl__prod_filter" name="itl__prod_filter" id="itl__prod_filter" value="'.$data['product'].'"/>'.NL.
                '       <input class="itl__buttons" type="button" name="showprevious" value="'.$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>'.NL.
-               '       <input class="itl__step_input"      name="itl_step" id="itl_step" type="text" value="'.$step.'"/>'.NL.
+               '       <input class="itl__step_input"  name="itl_step" id="itl_step" type="text" value="'.$step.'"/>'.NL.
                '       <input class="itl__buttons" type="button" name="shownext" value="'.$this->getLang('btn_next').'" title="'.$this->getLang('btn_next_title').'" onClick="changeAction(2)"/><br />'.NL.
-               '       <input class="itl__sev_filter"      name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br />'.NL.                         
-               '       <input class="itl__stat_filter"     name="itl_stat_filter" id="itl_stat_filter" type="text" value="'.$stat_filter.'"/>'.NL.
+               '       <input class="itl__sev_filter"  name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br />'.NL.                         
+               '       <input class="itl__stat_filter" name="itl_stat_filter" id="itl_stat_filter" type="text" value="'.$stat_filter.'"/>'.NL.
+               '       <input class="itl__prod_filter" name="itl__prod_filter" id="itl__prod_filter" type="text" value="'.$data['product'].'"/>'.NL.
                '       <input class="itl__buttons" type="button" name="go" value="'.$this->getLang('btn_go').'" title="'.$this->getLang('btn_go').'" onClick="changeAction(3)"/><br />'.NL.
                '    </form>'.NL.                      
                '   </td>'.NL.

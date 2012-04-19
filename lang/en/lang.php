@@ -22,6 +22,7 @@ $lang['lbl_issueqty']       = 'Quantity of %s Issues:&nbsp;';
 $lang['lbl_scroll']         = 'Scroll issue List: &nbsp;&nbsp;&nbsp;';
 $lang['lbl_filtersev']      = 'Filter Severity:&nbsp;';
 $lang['lbl_filterstat']     = 'Filter Status:&nbsp;';
+$lang['lbl_filterprod']     = 'Filter Product:&nbsp;';
 $lang['btn_go']             = 'Go';
 
 $lang['btn_previuos']       = '<<<';

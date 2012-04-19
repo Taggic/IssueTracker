@@ -76,9 +76,10 @@
               $is_txt        = '<b>&raquo;</b> '.$this->getLang('search_Issue');
               $found_issues .= '<tr style="background: lightgrey;" ><td>'.$is_txt.'</td><td><a href="'.$link.'" title="'.$item['id'].'">'.$item['id'].'</a></td><td>'.$issues[$item['id']]['title'].'</td></tr>'.NL;
               foreach($comments as $comment) {
+                  $text_snip = $this->xs_format($comment['comment']);
                   if(stripos($comment['comment'],$needle)!==false) {
                       $h_txt         = '<span class="search_hit">'.$item['match'].'</span>';
-                      $text_snip     = str_ireplace($item['match'],$h_txt,$comment['comment']);                      
+                      $text_snip     = str_ireplace($item['match'],$h_txt,$text_snip);                      
 
                       $found_issues .= '<tr><td>'.$this->getLang('search_Comment').'</td>
                                             <td><a href="'.$link.'#a'.$comment['id'].'" title="'.$comment['id'].'">'.$comment['id'].'</a></td>

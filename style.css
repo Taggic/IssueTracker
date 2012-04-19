@@ -63,9 +63,13 @@ div.it__cir_form {
 }
 
 /* ----- Issue List Elements ------- */
-.it__cir_projectlabel, .itl__showid_input, .itl__showid_button, .itl__step_input, div.itl__table, div.issuetracker_div, itl_sev_filter, .itl__buttons, .itl__sev_filter, .itl__stat_filter, .itd__tables_tr div, .itl__search_button  { 
+.it__cir_projectlabel, .itl__showid_input, .itl__showid_button, .itl__step_input, div.itl__table, div.issuetracker_div, itl_sev_filter, .itl__buttons, .itl__sev_filter, .itl__stat_filter, .itd__tables_tr div, .itl__search_button, .itl__prod_filter  { 
 	font-size:              0.85em;
   padding:     0 0.85em 0 0.85em;
+}
+
+.itl__step_input, .itl__sev_filter, .itl__stat_filter, .itl__prod_filter, .itl__buttons {
+  margin: 0.1em 0 0.1em 0;
 }
 
 .it__searchlabel {
