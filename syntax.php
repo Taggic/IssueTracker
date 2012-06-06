@@ -315,8 +315,10 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $x_umail_select .= "['',''],";
             $authAD_selector = "TableKit.Editable.selectInput('assigned',{}, [".$x_umail_select."]);";
         }
+        //hack if DOKU_BASE is not properly set
+        if(strlen(DOKU_BASE) < strlen(DOKU_URL)) $BASE = DOKU_URL."lib/plugins/issuetracker/";
+        else $BASE = DOKU_BASE."lib/plugins/issuetracker/";
 
-        $BASE = DOKU_BASE."lib/plugins/issuetracker/";
         return    "<script type=\"text/javascript\" src=\"".$BASE."prototype.js\"></script><script type=\"text/javascript\" src=\"".$BASE."fabtabulous.js\"></script>
         <script type=\"text/javascript\" src=\"".$BASE."tablekit.js\"></script>
         <script type=\"text/javascript\">

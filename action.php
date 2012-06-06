@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2012-04-17',
+         'date'   => '2012-06-06',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -592,7 +592,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $authAD_selector = "TableKit.Editable.selectInput('assigned',{}, [".$x_umail_select."]);";
         }
 
-        $BASE = DOKU_BASE."lib/plugins/issuetracker/";
+        //hack if DOKU_BASE is not properly set
+        if(strlen(DOKU_BASE) < strlen(DOKU_URL)) $BASE = DOKU_URL."lib/plugins/issuetracker/";
+        else $BASE = DOKU_BASE."lib/plugins/issuetracker/";
+
         return    "<script type=\"text/javascript\" src=\"".$BASE."prototype.js\"></script><script type=\"text/javascript\" src=\"".$BASE."fabtabulous.js\"></script>
         <script type=\"text/javascript\" src=\"".$BASE."tablekit.js\"></script>
         <script type=\"text/javascript\">
@@ -620,14 +623,14 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     function _table_render($project,$step,$start,$next_start,$stat_filter,$sev_filter,$productfilter)
     {
         global $ID;
-        $imgBASE       = DOKU_BASE."lib/plugins/issuetracker/images/";
-        $style         = ' style="text-align:left; white-space:pre-wrap;">';
-        $user_grp      = pageinfo();
-        $noStatIMG     = $this->getConf('noStatIMG');
-        $noSevIMG      = $this->getConf('noSevIMG');
-        $stat_filter   = strtoupper($stat_filter);
-        $sev_filter    = strtoupper($sev_filter);
-        $productfilter = strtoupper($productfilter);
+        $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
+        $style =' style="text-align:left; white-space:pre-wrap;">';
+        $user_grp = pageinfo();
+        $noStatIMG = $this->getConf('noStatIMG');
+        $noSevIMG = $this->getConf('noSevIMG');
+        $stat_filter=strtoupper($stat_filter);
+        $sev_filter=strtoupper($sev_filter);
+        $productfilter==strtoupper($productfilter);
         
         // get issues file contents
         $pfile = metaFN($project, '.issues'); 
@@ -682,10 +685,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         
             for ($i=$next_start-1;$i>=0;$i=$i-1)
             {   // check start and end of rows to be displayed
-                    $issue      = $issues[$i];                    
-                    $a_status   = strtoupper($this->_get_one_value($issue,'status'));
+                    $issue = $issues[$i];                    
+                    $a_status = strtoupper($this->_get_one_value($issue,'status'));
                     $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
-                    $a_product  = strtoupper($this->_get_one_value($issue,'product'));
+                    $a_product = strtoupper($this->_get_one_value($issue,'product'));
                     
                 if ((($stat_filter=='ALL') || (stristr($stat_filter,$a_status)!= false)) && (($sev_filter=='ALL') || (stristr($sev_filter,$a_severity)!= false)) && ((strcasecmp($productfilter,'ALL')===0) || (stristr($productfilter,$a_product)!= false)))
                 {   
@@ -736,7 +739,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         else       
         {   
             //Build table header according settings
-            $configs        = explode(',', $this->getConf('shwtbl_usr')) ;
+            $configs = explode(',', $this->getConf('shwtbl_usr')) ;
             $reduced_header ='';
             $reduced_header = "<div class='itl__table'><table id='".$dynatable_id."' class='sortable resizable inline' width='100%'>".NL.
                     "<thead><tr>".NL."<th class='sortfirstdesc' id='id'>".$this->getLang('th_id')."</th>".NL;
@@ -752,10 +755,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $reduced_issues='';
             for ($i=$next_start-1;$i>=0;$i=$i-1)
             {   // check start and end of rows to be displayed
-                    $issue      = $issues[$i];                    
-                    $a_status   = strtoupper($this->_get_one_value($issue,'status'));
+                    $issue = $issues[$i];                    
+                    $a_status = strtoupper($this->_get_one_value($issue,'status'));
                     $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
-                    $a_product  = strtoupper($this->_get_one_value($issue,'product'));
+                    $a_product = strtoupper($this->_get_one_value($issue,'product'));
 
                 if ((($stat_filter=='ALL') || (stristr($stat_filter,$a_status)!= false)) && (($sev_filter=='ALL') || (stristr($sev_filter,$a_severity)!= false)) && ((strcasecmp($productfilter,'ALL')===0) || (stristr($productfilter,$a_product)!= false)))
                 {   
@@ -850,9 +853,9 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                '<tr class="itd__tables_tr">'.NL.
                '   <td align ="left" valign="top" width="15%">'.NL.
                '     <p class="it__cir_projectlabel">'.$this->getLang('lbl_scroll').' <br />'.NL.
-                                                       $this->getLang('lbl_filtersev').' <br />'.NL.
-                                                       $this->getLang('lbl_filterstat').' <br />'.NL.
-                                                       $this->getLang('lbl_filterprod').' </p>'.NL.
+                                                      $this->getLang('lbl_filtersev').' <br />'.NL.
+                                                      $this->getLang('lbl_filterstat').' <br />'.NL.
+                                                      $this->getLang('lbl_filterprod').' </p>'.NL.
                '   </td>'.NL.
                '   <td align ="left" valign="top" width="20%">'.NL.
                '    <form name="myForm" action="" method="post">'.NL.
@@ -888,7 +891,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                '   </td>'.NL.
                '</tr>'.NL.'</tbody>'.NL.'</table>'.NL.'</div>'.NL;
 
-         $usr     = '<span style="display:none;" id="currentuser">'.$user_grp['userinfo']['name'].'</span>' ; // to log issue mods
+         $usr  = '<span style="display:none;" id="currentuser">'.$user_grp['userinfo']['name'].'</span>' ; // to log issue mods
          $a_lang  = '<span style="display:none;" name="table_kit_OK" id="table_kit_OK">'.$this->getLang('table_kit_OK').'</span>'; // for tablekit.js
          $a_lang .= '<span style="display:none;" name="table_kit_Cancel" id="table_kit_Cancel">'.$this->getLang('table_kit_Cancel').'</span>'; // for tablekit.js
 
@@ -923,52 +926,50 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         if (@file_exists($cfile)) {$comments  = unserialize(@file_get_contents($cfile));}
         else {$comments = array();}
 
-        $a_severity   = $issue[$issue_id]['severity'];                  
+        $a_severity = $issue[$issue_id]['severity'];                  
         $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_severity))).'.gif';
         $severity_img =' <img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"> ';
-        $a_status     = $issue[$issue_id]['status'];
-        $status_img   = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_status))).'.gif';
-        $status_img   =' <img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"> ';
-        $a_product    = $issue[$issue_id]['product'];
+        $a_status = $issue[$issue_id]['status'];
+        $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_status))).'.gif';
+        $status_img =' <img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"> ';
+        $a_product = $issue[$issue_id]['product'];
 
         //---------------------------------------------------------------------------------------------------------------------
         // do not show personal contact details if issue details not viewed by admin/assignee nor the original reporter itself
         //---------------------------------------------------------------------------------------------------------------------
         $user_mail = pageinfo();  //to get mail address of reporter
-//        print_r($user_mail);
-//        reset($user_mail);
         if($this->getConf('auth_ad_overflow') == false) {
-            $filter['grps'] =$this->getConf('assign');
-            $target         = $auth->retrieveUsers(0,0,$filter);
-            $target2        = $this->array_implode($target);
-            $target2        = implode($target2);
+            $filter['grps']=$this->getConf('assign');
+            $target = $auth->retrieveUsers(0,0,$filter);
+            $target2 = $this->array_implode($target);
+            $target2 = implode($target2);
         
             if((($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or 
                  (strpos($target2,$user_mail['userinfo']['mail']) != false)) && 
                 ($this->getConf('shw_mail_addr')===1))
-            {   $__assigened      = $issue[$issue_id]['assigned'];
-                $__assigenedaddr  = $issue[$issue_id]['assigned'];
-                $__reportedby     = $issue[$issue_id]['user_mail'];
+            {   $__assigened  = $issue[$issue_id]['assigned'];
+                $__assigenedaddr = $issue[$issue_id]['assigned'];
+                $__reportedby = $issue[$issue_id]['user_mail'];
                 $__reportedbyaddr = $issue[$issue_id]['user_mail'];
-                $mail_allowed     = true;
+                $mail_allowed = true;
             }
             else 
             {   foreach($target as $_assignee)
                   { if($_assignee['mail'] === $issue[$issue_id]['assigned'])
-                    {   $__assigened      = $_assignee['name'];
-                        $__assigenedaddr  = $_assignee['mail'];
-                        $mail_allowed     = true;
+                    {   $__assigened = $_assignee['name'];
+                        $__assigenedaddr = $_assignee['mail'];
+                        $mail_allowed = true;
                         break;
                     }
                   }
-                $__reportedby     = $issue[$issue_id]['user_name'];
+                $__reportedby = $issue[$issue_id]['user_name'];
                 $__reportedbyaddr = $issue[$issue_id]['user_mail'];
             }
         }
         else {  // auth_ad_overflow = true
-                $__reportedby     = $issue[$issue_id]['user_name'];
+                $__reportedby = $issue[$issue_id]['user_name'];
                 $__reportedbyaddr = $issue[$issue_id]['user_mail'];
-                $mail_allowed     = true;
+                $mail_allowed = true;
         }
                    
 // scripts for xsEditor -------------------------------------------------------
@@ -1173,8 +1174,8 @@ $issue_edit_head .= '<td class="itd__col4"></td>
 ------------------------------------------------------------------------------*/
             $modfile = metaFN($project.'_'.$issue[$issue_id]['id'], '.mod-log');
             if (@file_exists($modfile)) {  
-              $pstring          = sprintf("showid=%s&amp;project=%s", urlencode($issue[$issue_id]['id']), urlencode($project));
-              $modlog_link      = '<a href="doku.php?id='.$ID.'&do=showmodlog&'.$pstring.'" title="'.$this->getLang('th_showmodlog').'">'.$this->getLang('th_showmodlog').'</a>';
+              $pstring = sprintf("showid=%s&amp;project=%s", urlencode($issue[$issue_id]['id']), urlencode($project));
+              $modlog_link = '<a href="doku.php?id='.$ID.'&do=showmodlog&'.$pstring.'" title="'.$this->getLang('th_showmodlog').'">'.$this->getLang('th_showmodlog').'</a>';
               $issue_edit_head .= '<tr><td class="itd__modlog_link" colspan="6">['.$modlog_link.']</td></tr>'.NL;                    
               $issue_edit_head .= '</tbody></table>'.NL;
             }
@@ -1208,9 +1209,9 @@ $issue_client_details = '<table class="itd__tables" id="tbl_'.$anker_id.'"><tbod
 if(($user_mail['userinfo']['mail'] !== false))
 {         $blink2_id = 'statanker2_'.$alink_id;
           $anker2_id = 'anker2_'.$alink_id;
-          $tmp       = explode(',', $issue[$issue_id]['add_user_mail']);
-          $follower  = 0;
-$issue_addcontacts  .='     <td class="itd_tables_tdc3">'.NL;
+          $tmp = explode(',', $issue[$issue_id]['add_user_mail']);
+          $follower = 0;
+$issue_addcontacts .='      <td class="itd_tables_tdc3">'.NL;
                             foreach($tmp as $email) {
                               //show only own mail address
                               if((strlen($email)>2) && (stripos($user_mail['userinfo']['mail'],$email)!==false)) {
@@ -1370,7 +1371,7 @@ $issue_attachments = '<table class="itd__tables"><tbody>
                   $alink_id++;
                   $blink_id = 'statanker_'.$alink_id;
                   $anker_id = 'anker_'.$alink_id;
-                  $cell_ID  = 'img_tab_open_reporterdtls'.$blink_id;                              
+                  $cell_ID = 'img_tab_open_reporterdtls'.$blink_id;                              
 $issue_attachments .= '<tbody style="display : none;" id="'.$blink_id.'">
                         <tr><td colspan=2>'.NL.
                         '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
@@ -1429,7 +1430,7 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
               if ($comments!=false) {              
                   foreach ($comments as $a_comment)
                   {
-                        $x_id      = $this->_get_one_value($a_comment,'id');
+                        $x_id = $this->_get_one_value($a_comment,'id');
                         $x_comment = $this->_get_one_value($a_comment,'comment');
                         $x_comment = $this->convertlabel($x_comment);
                         
@@ -1564,10 +1565,10 @@ $issue_comments_log .= '<input  type="hidden" class="showid__option" name="showi
         $cur_date = date('Y-m-d G:i:s');
         if(strlen($user_mail['userinfo']['mail']) == 0) {$u_mail_check ='unknown';}
         else {$u_mail_check = $user_mail['userinfo']['mail'];}
-        $user_check         = $this->getConf('registered_users');
-        $u_name             = $user_mail['userinfo']['name'];
+        $user_check = $this->getConf('registered_users');
+        $u_name = $user_mail['userinfo']['name'];
         //2011-12-02: bwenz code proposal (Issue 11)
-        $x_resolution       = $this->convertlabel($issue[$issue_id]['resolution']);
+        $x_resolution = $this->convertlabel($issue[$issue_id]['resolution']);
 //        if(!$x_resolution) { $x_resolution = "&nbsp;"; }
                         
         $_cFlag = false;             
@@ -1795,7 +1796,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 
             $body = html_entity_decode($body);
             
-            $from = $this->getConf('email_address'). "\r\n";
+            $from=$this->getConf('email_address'). "\r\n";
             
             $user_mail = pageinfo();
             if($user_mail['userinfo']['mail']===$issue['user_mail']) $to=$issue['assigned'];
@@ -1832,14 +1833,14 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end'). "\r\n";
 
             $body = html_entity_decode($body);
-            $from = $this->getConf('email_address'). "\r\n";
+            $from=$this->getConf('email_address'). "\r\n";
             
             $user_mail = pageinfo();
             if($user_mail['userinfo']['mail']===$issue['user_mail']) $to=$issue['assigned']. "\r\n";
             elseif($user_mail['userinfo']['mail']===$issue['assigned']) $to=$issue['user_mail']. "\r\n";
             else $to=$issue['user_mail'].', '.$issue['assigned']. "\r\n";
             
-            $cc = $issue['add_user_mail']. "\r\n";
+            $cc=$issue['add_user_mail']. "\r\n";
             $headers = "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
             mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers, $params=null);
             
@@ -1937,10 +1938,10 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
         $x_comment = preg_replace('/\[blu\]/i', '<span style="color:blue;">', $x_comment);
         $x_comment = preg_replace('/\[\/blu\]/i', '</span>', $x_comment);    
 
-        $urlsuch[] = "/([^]_a-z0-9-=\"'\/])((https?|ftp):\/\/|www\.)([^ \r\n\(\)\^\$!`\"'\|\[\]\{\}<>]*)/si";
-        $urlsuch[] = "/^((https?|ftp):\/\/|www\.)([^ \r\n\(\)\^\$!`\"'\|\[\]\{\}<>]*)/si";
-        $urlreplace[] ="\\1[link]\\2\\4[/link]";
-        $urlreplace[] ="[link]\\1\\3[/link]";
+        $urlsuch[]="/([^]_a-z0-9-=\"'\/])((https?|ftp):\/\/|www\.)([^ \r\n\(\)\^\$!`\"'\|\[\]\{\}<>]*)/si";
+        $urlsuch[]="/^((https?|ftp):\/\/|www\.)([^ \r\n\(\)\^\$!`\"'\|\[\]\{\}<>]*)/si";
+        $urlreplace[]="\\1[link]\\2\\4[/link]";
+        $urlreplace[]="[link]\\1\\3[/link]";
         $x_comment = preg_replace($urlsuch, $urlreplace, $x_comment);   
         $x_comment = preg_replace("/\[link\]www.(.*?)\[\/link\]/si", "<a target=\"_blank\" href=\"http://www.\\1\">www.\\1</a>", $x_comment); 
         $x_comment = preg_replace("/\[link=www.(.*?)\](.*?)\[\/link\]/si", "<a target=\"_blank\" href=\"http://www.\\1\">\\2</a>", $x_comment); 

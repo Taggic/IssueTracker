@@ -169,5 +169,5 @@ $lang['search_Subject']		= 'Inhalt';
 /******************************************************************************/
 $lang['table_kit_OK']			= 'OK';
 $lang['table_kit_Cancel']	= ' Abbrechen';
-$lang['umlaute']	       	= 'ä,ö,ü,Ä,Ö,Ü,ß';
+$lang['umlaute']	       	= '/ä/,/ö/,/ü/,/Ä/,/Ö/,/Ü/,/ß/';
 $lang['conv_umlaute']		  = 'ae,oe,ue,Ae,Oe,Ue,ss';
