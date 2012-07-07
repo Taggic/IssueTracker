@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2012-06-06',
+         'date'   => '2012-07-07',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -1351,75 +1351,81 @@ $issue_initial_description .=  '<input  type="hidden" class="showid__option" nam
 $issue_initial_description .= '</tbody></table>';
 /* END mod for edit description by ticket owner ----------------------------------*/
 
-$issue_attachments = '<table class="itd__tables"><tbody>
-                      <tr>
-                        <td colspan="2" class="itd_tables_tdh">'.$this->getLang('lbl_symptlinks').'</td>
-                      </tr>
-                      <tr  class="itd__tables_tr">
-                        <td colspan="2" style="padding-left:0.45em;">1. <a href="'.$issue[$issue_id]['attachment1'].'"><img border="0" alt="symptoms 1" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment1'].'" href="'.$issue[$issue_id]['attachment1'].'">'.$issue[$issue_id]['attachment1'].'</a></td>
-                      </tr>'.NL.
-                     '<tr  class="itd__tables_tr">
-                        <td colspan="2" style="padding-left:0.45em;">2. <a href="'.$issue[$issue_id]['attachment2'].'"><img border="0" alt="symptoms 2" style="margin-right:0.5em" vspace=1em align=absMiddle src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment2'].'" href="'.$issue[$issue_id]['attachment2'].'">'.$issue[$issue_id]['attachment2'].'</a></td>
-                      </tr>'.NL.
-                     '<tr  class="itd__tables_tr">
-                        <td colspan="2" style="padding-left:0.45em;">3. <a href="'.$issue[$issue_id]['attachment3'].'"><img border="0" alt="symptoms 3" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment3'].'" href="'.$issue[$issue_id]['attachment3'].'">'.$issue[$issue_id]['attachment3'].'</a></td>
-                      </tr>'.NL;
-/* mod for edit symptom links by ticket owner and admin/assignee ---------------*/
-// check if current user is author of the comment and offer an edit button
-            if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) || (strpos($target2,$user_mail['userinfo']['mail']) != false))
-            {     // add hidden edit toolbar and textarea
-                  $alink_id++;
-                  $blink_id = 'statanker_'.$alink_id;
-                  $anker_id = 'anker_'.$alink_id;
-                  $cell_ID = 'img_tab_open_reporterdtls'.$blink_id;                              
-$issue_attachments .= '<tbody style="display : none;" id="'.$blink_id.'">
-                        <tr><td colspan=2>'.NL.
-                        '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
-$issue_attachments .= formSecurityToken(false). 
-                     '<input type="hidden" name="project" value="'.$project.'" />'.NL.
-                     '<input type="hidden" name="comment_issue_ID" value="'.$issue[$issue_id]['id'].'" />'.NL.        
-                     '<input type="hidden" name="mod_symptomlinks" value="1"/>'.NL;        
-                                         
-                                if ($this->getConf('use_captcha')==1) 
-                                {   $helper = null;
-                        		        if(@is_dir(DOKU_PLUGIN.'captcha'))
-                        			         $helper = plugin_load('helper','captcha');
-                        			         
-                        		        if(!is_null($helper) && $helper->isEnabled())
-                        			      {  $issue_attachments .= '<p>'.$helper->getHTML().'</p>'; }
-                                }                   //Check config if hidden
-                  if(strpos($this->getConf('ltdReport'),'Symptom link 1')!==false){
-                      $issue_attachments .= ' <input type="hidden" class="it__cir_linput" name="attachment1" value="'.$issue[$issue_id]['attachment1'].'"/>'.NL;
-                  } 
-                  else {
-                      $issue_attachments .= '<span style="margin-left:4em; float:left;">1.</span>
-                                   <span><input class="it__cir_linput" name="attachment1" value="'.$issue[$issue_id]['attachment1'].'"/></span><br />'.NL;
-                  }             
-                  if(strpos($this->getConf('ltdReport'),'Symptom link 2')!==false){
-                      $issue_attachments .= ' <input type="hidden" class="it__cir_linput" name="attachment2" value="'.$issue[$issue_id]['attachment2'].'"/>'.NL;
-                  } 
-                  else {
-                      $issue_attachments .= '<span style="margin-left:4em; float:left;">2.</span>
-                                   <span><input class="it__cir_linput" name="attachment2" value="'.$issue[$issue_id]['attachment2'].'"/></span><br />'.NL;
-                  }             
-                  if(strpos($this->getConf('ltdReport'),'Symptom link 3')!==false){
-                      $issue_attachments .= ' <input type="hidden" class="it__cir_linput" name="attachment3" value="'.$issue[$issue_id]['attachment3'].'"/>'.NL;
-                  } 
-                  else {
-                      $issue_attachments .= '<span style="margin-left:4em; float:left;">3.</span>
-                                   <span><input class="it__cir_linput" name="attachment3" value="'.$issue[$issue_id]['attachment3'].'"/></span><br/>'.NL;
-                  } 
-$issue_attachments .= '<input  type="hidden" class="showid__option" name="showid" id="showid" size="10" value="'.$this->parameter.'"/>'.
-                               '<input  type="submit" class="button" id="btnmod_description" name="btnmod_description" style="float:right;" value="'.$this->getLang('btn_mod').'" title="'.$this->getLang('btn_mod_title').'");/>'.
-                               '</form>'.NL.'</td></tr></tbody><tr>'.NL.'
-                            <td colspan="3" class="img_tab_open_comment" id="'.$cell_ID.'">'.NL.'
-                                <div class="lnk_tab_open_comment" id="'.$cell_ID.'">
-                                  <a id="'.$anker_id.'" onClick="tab_open(\''.$blink_id.'\',\''.$cell_ID.'\')">'.$this->getLang('descr_tab_mod').'</a>
-                                </div>'.NL.'
-                            </td>
-                            </tr>'.NL.'</table>';
-            }
-$issue_attachments .='</tbody></table>'.NL;
+if(strpos($this->getConf('ltdReport'),'Symptom link 1')===false){
+  $issue_attachments = '<table class="itd__tables"><tbody>
+                        <tr>
+                          <td colspan="2" class="itd_tables_tdh">'.$this->getLang('lbl_symptlinks').'</td>
+                        </tr>
+                        <tr  class="itd__tables_tr">
+                          <td colspan="2" style="padding-left:0.45em;">1. <a href="'.$issue[$issue_id]['attachment1'].'"><img border="0" alt="symptoms 1" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment1'].'" href="'.$issue[$issue_id]['attachment1'].'">'.$issue[$issue_id]['attachment1'].'</a></td>
+                        </tr>'.NL;
+  if(strpos($this->getConf('ltdReport'),'Symptom link 2')===false){
+    $issue_attachments .= '<tr  class="itd__tables_tr">
+                            <td colspan="2" style="padding-left:0.45em;">2. <a href="'.$issue[$issue_id]['attachment2'].'"><img border="0" alt="symptoms 2" style="margin-right:0.5em" vspace=1em align=absMiddle src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment2'].'" href="'.$issue[$issue_id]['attachment2'].'">'.$issue[$issue_id]['attachment2'].'</a></td>
+                          </tr>'.NL;
+  }
+  if(strpos($this->getConf('ltdReport'),'Symptom link 3')===false){
+    $issue_attachments .= '<tr  class="itd__tables_tr">
+                            <td colspan="2" style="padding-left:0.45em;">3. <a href="'.$issue[$issue_id]['attachment3'].'"><img border="0" alt="symptoms 3" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment3'].'" href="'.$issue[$issue_id]['attachment3'].'">'.$issue[$issue_id]['attachment3'].'</a></td>
+                          </tr>'.NL;
+  }
+  /* mod for edit symptom links by ticket owner and admin/assignee ---------------*/
+  // check if current user is author of the comment and offer an edit button
+              if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) || (strpos($target2,$user_mail['userinfo']['mail']) != false))
+              {     // add hidden edit toolbar and textarea
+                    $alink_id++;
+                    $blink_id = 'statanker_'.$alink_id;
+                    $anker_id = 'anker_'.$alink_id;
+                    $cell_ID = 'img_tab_open_reporterdtls'.$blink_id;                              
+  $issue_attachments .= '<tbody style="display : none;" id="'.$blink_id.'">
+                          <tr><td colspan=2>'.NL.
+                          '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
+  $issue_attachments .= formSecurityToken(false). 
+                       '<input type="hidden" name="project" value="'.$project.'" />'.NL.
+                       '<input type="hidden" name="comment_issue_ID" value="'.$issue[$issue_id]['id'].'" />'.NL.        
+                       '<input type="hidden" name="mod_symptomlinks" value="1"/>'.NL;        
+                                           
+                                  if ($this->getConf('use_captcha')==1) 
+                                  {   $helper = null;
+                          		        if(@is_dir(DOKU_PLUGIN.'captcha'))
+                          			         $helper = plugin_load('helper','captcha');
+                          			         
+                          		        if(!is_null($helper) && $helper->isEnabled())
+                          			      {  $issue_attachments .= '<p>'.$helper->getHTML().'</p>'; }
+                                  }                   //Check config if hidden
+                    if(strpos($this->getConf('ltdReport'),'Symptom link 1')!==false){
+                        $issue_attachments .= ' <input type="hidden" class="it__cir_linput" name="attachment1" value="'.$issue[$issue_id]['attachment1'].'"/>'.NL;
+                    } 
+                    else {
+                        $issue_attachments .= '<span style="margin-left:4em; float:left;">1.</span>
+                                     <span><input class="it__cir_linput" name="attachment1" value="'.$issue[$issue_id]['attachment1'].'"/></span><br />'.NL;
+                    }             
+                    if(strpos($this->getConf('ltdReport'),'Symptom link 2')!==false){
+                        $issue_attachments .= ' <input type="hidden" class="it__cir_linput" name="attachment2" value="'.$issue[$issue_id]['attachment2'].'"/>'.NL;
+                    } 
+                    else {
+                        $issue_attachments .= '<span style="margin-left:4em; float:left;">2.</span>
+                                     <span><input class="it__cir_linput" name="attachment2" value="'.$issue[$issue_id]['attachment2'].'"/></span><br />'.NL;
+                    }             
+                    if(strpos($this->getConf('ltdReport'),'Symptom link 3')!==false){
+                        $issue_attachments .= ' <input type="hidden" class="it__cir_linput" name="attachment3" value="'.$issue[$issue_id]['attachment3'].'"/>'.NL;
+                    } 
+                    else {
+                        $issue_attachments .= '<span style="margin-left:4em; float:left;">3.</span>
+                                     <span><input class="it__cir_linput" name="attachment3" value="'.$issue[$issue_id]['attachment3'].'"/></span><br/>'.NL;
+                    } 
+  $issue_attachments .= '<input  type="hidden" class="showid__option" name="showid" id="showid" size="10" value="'.$this->parameter.'"/>'.
+                                 '<input  type="submit" class="button" id="btnmod_description" name="btnmod_description" style="float:right;" value="'.$this->getLang('btn_mod').'" title="'.$this->getLang('btn_mod_title').'");/>'.
+                                 '</form>'.NL.'</td></tr></tbody><tr>'.NL.'
+                              <td colspan="3" class="img_tab_open_comment" id="'.$cell_ID.'">'.NL.'
+                                  <div class="lnk_tab_open_comment" id="'.$cell_ID.'">
+                                    <a id="'.$anker_id.'" onClick="tab_open(\''.$blink_id.'\',\''.$cell_ID.'\')">'.$this->getLang('descr_tab_mod').'</a>
+                                  </div>'.NL.'
+                              </td>
+                              </tr>'.NL.'</table>';
+              }
+  $issue_attachments .='</tbody></table>'.NL;
+}
 /* END mod for edit description by ticket owner ----------------------------------*/  
           
 $issue_comments_log ='<table class="itd__tables"><tbody>

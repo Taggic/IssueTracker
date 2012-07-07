@@ -137,7 +137,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $Generated_Table = '';
             $Generated_Scripts = '';
             $Generated_Report = '';
-            
+
             if (stristr($data['display'],'FORM')!= false) 
             {
                 //If it is a user report add it to the db-file
@@ -234,6 +234,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 
             // Render            
             $renderer->doc .= $Generated_Header.$Generated_Table.$Generated_Scripts.$Generated_Report;
+
         }
     }
 
@@ -811,7 +812,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                       	}
                     }
                    </script>'.
-                   '<form class="issuetracker__form" name="issuetracker__form" method="post" onsubmit="return chkFormular(this)"'.'" accept-charset="'.$lang['encoding'].'"><p>';
+                   '<form class="issuetracker__form" name="issuetracker__form" method="post" onsubmit="return chkFormular(this)"'.'" accept-charset="'.$lang['encoding'].' enctype="multipart/form-data" ><p>';
             $ret .= formSecurityToken(false).
             '<input type="hidden" name="do" value="show" />'.
             '<input type="hidden" name="id" value="'.$ID.'" />'.
@@ -1013,7 +1014,7 @@ $ret .= '<script>
           }
          </script>';                      
 // mod for editor ---------------------------------------------------------------------
-
+  global $_FILES;
   $ret .= $this->it_edit_toolbar('description');
 
           $ret .= '<textarea class="it__cir_linput" id="description" name="description" cols="109" rows="7">'.$_REQUEST['description'].'</textarea></td>
@@ -1040,7 +1041,8 @@ $ret .= '<script>
                   else {
                       $ret .= '<tr><td>'.$this->getLang('th_sympt').'3</td>
                                    <td><input class="it__cir_linput" name="attachment3" value="'.$_REQUEST['attachment3'].'"/></td></tr>';
-                  }             
+                  }
+                               
         $ret .= '</table><p><input type="hidden" name="modified" type="text" value="'.$cur_date.'"/>'.
                 '<input type="hidden" name="assigned" type="text" value="" />';
     
@@ -1329,6 +1331,6 @@ address format and the domain exists.
       $f_name = strtolower($f_name);
       return $f_name;
   }
-/******************************************************************************/
+/******************************************************************************/ 
 }
 ?>
