@@ -187,9 +187,12 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                     {                                
                                         //save issue-file
                                           $xvalue = io_saveFile($pfile,serialize($issues));
-                                          $this->_log_mods($data['project'], $issues[$issue_id], $issues[$issue_id]['user_name'], 'status', $issues[$issue_id]['status']);
-//                                        echo "\$xvalue = ".$xvalue;
-                                          $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_reporttrue').$issue_id.'</div>';
+                                          $this->_log_mods($data['project'], $issues[$issue_id], $issues[$issue_id]['user_name'], 'status', '', $issues[$issue_id]['status']);
+                                          
+                                          $pstring = sprintf("showid=%s&project=%s", urlencode($issues[$issue_id]['id']), urlencode($project));
+                                          $tmp_link = '<a href="'.DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" >'.$issue_id.'</a>';
+                                          
+                                          $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_reporttrue').$tmp_link.'</div>';
                                           $this->_emailForNewIssue($data['project'],$issues[$issue_id]);
                                           $_REQUEST['description'] = '';
                                     }
@@ -279,6 +282,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         foreach ($status as $x_status)
         {
             $s_counter = $s_counter + 1;
+            $x_status = trim($x_status);
             $STR_STATUS = $STR_STATUS . "case '".$x_status."':  val = ".$s_counter."; break;";
             $pattern = $pattern . "|" .  $x_status;
             $x_status_select = $x_status_select . "['".$x_status."','".$x_status."'],";
@@ -288,6 +292,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $products = explode(',', $this->getConf('products')) ;
         foreach ($products as $x_products)
         {
+            $x_products = trim($x_products);
             $x_products_select = $x_products_select . "['".$x_products."','".$x_products."'],";
         } 
         
@@ -295,6 +300,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $severity = explode(',', $this->getConf('severity')) ;
         foreach ($severity as $x_severity)
         {
+            $x_severity = trim($x_severity);
             $x_severity_select = $x_severity_select . "['".$x_severity."','".$x_severity."'],";
         } 
         
@@ -420,14 +426,14 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     if ($noStatIMG === false) {                    
                         $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_status))).'.gif';
 //                                if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
-                        $status_img =' align="center"> <img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/></td>'.NL;
+                        $status_img =' align="center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/></td>'.NL;
                     }                    
                     else { $status_img = $style.$a_status; }
                     // check if severity image or text to be displayed                                            
                     if ($noSevIMG === false) {                    
                         $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_severity))).'.gif';
 //                                if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
-                        $severity_img =' align="center"> <img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/></td>'.NL;
+                        $severity_img =' align="center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/></td>'.NL;
                     }
                     else { $severity_img = $style.$a_severity; }
                     
@@ -500,7 +506,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                         {
                             if ($noStatIMG === false) {                    
                                 $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
-                                $reduced_issues .='<td align="center"> <img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/></td>'.NL;
+                                $reduced_issues .='<td align="center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/></td>'.NL;
                             }
                             else { $reduced_issues .= '<td'.$style.$isval.'</td>'.NL; }
                         }                                            
@@ -508,7 +514,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                         {
                             if ($noSevIMG === false) {                    
                                 $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
-                                $reduced_issues .='<td align="center"> <img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/></td>'.NL;
+                                $reduced_issues .='<td align="center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/></td>'.NL;
                             }
                             else { $reduced_issues .= '<td'.$style.$isval.'</td>'.NL; }
                         }
@@ -632,11 +638,10 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     function _emailForNewIssue($project,$issue)
     {
         if ($this->getConf('send_email')==1)
-        {
+        {   global $ID;
             $subject=sprintf($this->getLang('issuenew_subject'),$issue['severity'], $project, $issue['product'],$issue['version']);
             $subject= mb_encode_mimeheader($subject, "UTF-8", "Q" );
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
-            global $ID;
 
             $body = $this->getLang('issuenew_head').chr(10).chr(10).
                     $this->getLang('issuenew_intro').chr(10).
@@ -647,10 +652,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     $this->getLang('issuemod_creator').$issue['user_name'].chr(10).chr(10).
                     $this->getLang('issuemod_title').$issue['title'].chr(10).
                     $this->getLang('issuenew_descr').$this->xs_format($issue['description']).chr(10).chr(10).
-                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$this->getLang('issuemod_end');
 
             $body = html_entity_decode($body);
+//            echo $subject.'<br />'.$body.'<br /><br />';
             $from=$this->getConf('email_address') ;
             $to=$from;
             mail_send($to, $subject, $body, $from, $cc='', $bcc='', $headers=null, $params=null);
@@ -662,11 +668,10 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 */                            
     function _emailForResolution($project,$issue)
     {  if ($this->getConf('userinfo_email')==1)
-        {
+        {   global $ID;
             $subject = sprintf($this->getLang('issue_resolved_subject'),$issue['id'], $project);            
             $subject= mb_encode_mimeheader($subject, "UTF-8", "Q" );
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
-            global $ID;
             
             $body = $this->getLang('issuemod_head').chr(10).chr(10).
                     $this->getLang('issue_resolved_intro').chr(10).chr(13).
@@ -675,10 +680,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     $this->getLang('issuemod_product').$issue['product'].chr(10).
                     $this->getLang('issuemod_version').$issue['version'].chr(10).chr(10).
                     $this->getLang('issue_resolved_text').$this->xs_format($issue['resolution']).chr(10).chr(10).
-                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
 
             $body = html_entity_decode($body);
+//            echo $subject.'<br />'.$body.'<br /><br />';
             $from=$this->getConf('email_address') ;
             $to=$issue['user_mail'];
             $cc=$issue['add_user_mail'];
@@ -691,11 +697,10 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     function _emailForIssueMod($project,$issue,$comment)
     {
         if ($this->getConf('userinfo_email')==1)
-        {
+        {   global $ID;
             $subject = sprintf($this->getLang('issuemod_subject'),$issue['id'], $project);
             $subject= mb_encode_mimeheader($subject, "UTF-8", "Q" );            
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
-            global $ID;
             
             $body = $this->getLang('issuemod_head').chr(10).chr(10).
                     $this->getLang('issuemod_intro').chr(10).chr(13).
@@ -709,10 +714,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     $this->getLang('issuemod_cmntauthor').$comment['author'].chr(10).
                     $this->getLang('issuemod_date').date($this->getConf('d_format'),strtotime($comment['timestamp'])).chr(10).chr(10).
                     $this->getLang('issuemod_cmnt').chr(10).$this->xs_format($comment['comment']).chr(10).chr(10).
-                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
 
             $body = html_entity_decode($body);
+//            echo $subject.'<br />'.$body.'<br /><br />';
             $from=$this->getConf('email_address') ;
             $to=$issue['user_mail'];
             $cc=$issue['add_user_mail'];
@@ -749,6 +755,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $STR_PRODUCTS = "";
             foreach ($products as $_products)
             {
+                $x_products = trim($x_products);
                 //if product is preselected by syntax
                 if(strtoupper ($_products) == strtoupper ($data['product'])) { $option_param = '<option value="'.$_products.'" selected >'; }
                 else { $option_param = '<option value="'.$_products.'" >'; }
@@ -763,6 +770,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $severity = explode(',', $this->getConf('severity')) ;
             foreach ($severity as $_severity)
             {
+                $_severity = trim($_severity);
                 $STR_SEVERITY = $STR_SEVERITY . '<option value="'.$_severity.'" >'.$_severity."</option>'     ";
             }
             
@@ -1314,6 +1322,7 @@ address format and the domain exists.
           $mods[$mod_id]['timestamp'] = date ('Y-m-d G:i:s');
           $mods[$mod_id]['user'] = $usr;
           $mods[$mod_id]['field'] = $column;
+          $mods[$mod_id]['old_value'] = $old_value;
           $mods[$mod_id]['new_value'] = $new_value;
           
           // Save issues file contents
@@ -1332,5 +1341,43 @@ address format and the domain exists.
       return $f_name;
   }
 /******************************************************************************/ 
+  function mediaman() {
+      global $DEL, $NS, $IMG, $AUTH, $JUMPTO, $REV, $lang, $fullscreen, $conf;
+      $fullscreen = false;
+//      require_once  DOKU_INC.'lib/exe/mediamanager.php';
+  
+      if ($_REQUEST['image']) $image = cleanID($_REQUEST['image']);
+      if (isset($IMG)) $image = $IMG;
+      if (isset($JUMPTO)) $image = $JUMPTO;
+      if (isset($REV) && !$JUMPTO) $rev = $REV;
+  
+      $temp_out  = '<div id="mediamanager__page">'.NL;
+      $temp_out .= '<h1>'.$lang['btn_media'].'</h1>'.NL;
+      html_msgarea();
+  
+      $temp_out .= '<div class="panel namespaces">'.NL;
+      $temp_out .= '<h2>'.$lang['namespaces'].'</h2>'.NL;
+      $temp_out .= '<div class="panelHeader">';
+      $temp_out .= $lang['media_namespaces'];
+      $temp_out .= '</div>'.NL;
+  
+      $temp_out .= '<div class="panelContent" id="media__tree">'.NL;
+      media_nstree($NS);
+      $temp_out .= '</div>'.NL;
+      $temp_out .= '</div>'.NL;
+  
+      $temp_out .= '<div class="panel filelist">'.NL;
+      tpl_mediaFileList();
+      $temp_out .= '</div>'.NL;
+  
+      $temp_out .= '<div class="panel file">'.NL;
+      $temp_out .= '<h2 class="a11y">'.$lang['media_file'].'</h2>'.NL;
+      tpl_mediaFileDetails($image, $rev);
+      $temp_out .= '</div>'.NL;
+  
+      $temp_out .= '</div>'.NL;
+      return $temp_out;
+  }
+
 }
 ?>

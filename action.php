@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2012-07-07',
+         'date'   => '2012-07-20',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -55,61 +55,61 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 */
      function _handle_act(&$event, $param) {
          if (($event->data === 'showcase') || ($event->data === 'store_resolution')){
-             $this->parameter = $_POST['showid'];
-             $this->project   = $_POST['project'];         
+             $this->parameter  = $_POST['showid'];
+             $this->project    = $_POST['project'];         
          }
          elseif ($event->data === 'showcaselink') {
-            $this->parameter  = $_GET['showid'];
-            $this->project    = $_GET['project'];
+            $this->parameter   = $_GET['showid'];
+            $this->project     = $_GET['project'];
          }
          elseif($event->data === 'btn_add_contact') {
-             $this->project     = $_POST['project'];
-             $this->issue_ID    = $_POST['issue_ID'];
-             $this->add_contact = $_POST['add_contact'];
+            $this->project     = $_POST['project'];
+            $this->issue_ID    = $_POST['issue_ID'];
+            $this->add_contact = $_POST['add_contact'];
          }
          elseif ($event->data === 'it_search') {
-            $this->parameter  = $_POST['it_str_search'];
-            $this->project    = $_POST['project'];
+            $this->parameter   = $_POST['it_str_search'];
+            $this->project     = $_POST['project'];
          }
          elseif ($event->data === 'issuelist_next') {
-            $this->itl_start  = $_POST['itl_start'];
-            $this->itl_step   = $_POST['itl_step'];
-            $this->itl_next   = $_POST['itl_next'];
-            $this->itl_pjct   = $_POST['itl_project'];
-            $this->itl_stat   = $_POST['itl_stat_filter'];
-            $this->itl_sev    = $_POST['itl_sev_filter'];
-            $this->itl_prod   = $_POST['itl__prod_filter'];
+            $this->itl_start   = $_POST['itl_start'];
+            $this->itl_step    = $_POST['itl_step'];
+            $this->itl_next    = $_POST['itl_next'];
+            $this->itl_pjct    = $_POST['itl_project'];
+            $this->itl_stat    = $_POST['itl_stat_filter'];
+            $this->itl_sev     = $_POST['itl_sev_filter'];
+            $this->itl_prod    = $_POST['itl__prod_filter'];
          }
          elseif ($event->data === 'issuelist_previous') {
-            $this->itl_start  = $_POST['itl_start'];
-            $this->itl_step   = $_POST['itl_step'];
-            $this->itl_next   = $_POST['itl_next'];
-            $this->itl_pjct   = $_POST['itl_project'];
-            $this->itl_stat   = $_POST['itl_stat_filter'];
-            $this->itl_sev    = $_POST['itl_sev_filter'];
-            $this->itl_prod   = $_POST['itl__prod_filter'];
+            $this->itl_start   = $_POST['itl_start'];
+            $this->itl_step    = $_POST['itl_step'];
+            $this->itl_next    = $_POST['itl_next'];
+            $this->itl_pjct    = $_POST['itl_project'];
+            $this->itl_stat    = $_POST['itl_stat_filter'];
+            $this->itl_sev     = $_POST['itl_sev_filter'];
+            $this->itl_prod    = $_POST['itl__prod_filter'];
          }
          elseif ($event->data === 'issuelist_filter') {
-            $this->itl_start = $_POST['itl_start'];
-            $this->itl_step = $_POST['itl_step'];
-            $this->itl_next = $_POST['itl_next'];
-            $this->itl_pjct = $_POST['itl_project'];
-            $this->itl_stat = $_POST['itl_stat_filter'];
-            $this->itl_sev = $_POST['itl_sev_filter'];
-            $this->itl_prod = $_POST['itl__prod_filter'];
+            $this->itl_start   = $_POST['itl_start'];
+            $this->itl_step    = $_POST['itl_step'];
+            $this->itl_next    = $_POST['itl_next'];
+            $this->itl_pjct    = $_POST['itl_project'];
+            $this->itl_stat    = $_POST['itl_stat_filter'];
+            $this->itl_sev     = $_POST['itl_sev_filter'];
+            $this->itl_prod    = $_POST['itl__prod_filter'];
          }
          elseif ($event->data === 'issuelist_filterlink') {
-            $this->itl_start = $_GET['itl_start'];
-            $this->itl_step = $_GET['itl_step'];
-            $this->itl_next = $_GET['itl_next'];
-            $this->itl_pjct = $_GET['itl_project'];
-            $this->itl_stat = $_GET['itl_stat_filter'];
-            $this->itl_sev = $_GET['itl_sev_filter'];
-            $this->itl_prod = $_GET['itl__prod_filter'];
+            $this->itl_start   = $_GET['itl_start'];
+            $this->itl_step    = $_GET['itl_step'];
+            $this->itl_next    = $_GET['itl_next'];
+            $this->itl_pjct    = $_GET['itl_project'];
+            $this->itl_stat    = $_GET['itl_stat_filter'];
+            $this->itl_sev     = $_GET['itl_sev_filter'];
+            $this->itl_prod    = $_GET['itl__prod_filter'];
          }
          elseif ($event->data === 'showmodlog') {
-            $this->parameter = $_GET['showid'];
-            $this->project = $_GET['project'];
+            $this->parameter   = $_GET['showid'];
+            $this->project     = $_GET['project'];
          }
          else return;
          
@@ -155,8 +155,9 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     //        if ($mode == 'xhtml'){            
                  $renderer->info['cache'] = false;         
                  $issue_id = $this->parameter;
-                 $project = $this->project;
-    
+                 $project  = $this->project;
+                 $user_grp = pageinfo();        
+                 $usr      = $user_grp['userinfo']['name'] ;  //to log issue mods
                  // get issues file contents
                  $pfile = metaFN($project, '.issues');   
                  if (@file_exists($pfile))
@@ -166,7 +167,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                       echo '<div class="it__negative_feedback">'.sprintf($this->getLang('msg_pfilemissing'), $project) . '</div><br />';
                    }	                              
                  
-                 $Generated_Header = '';
+                 $Generated_Header  = '';
                  $Generated_Message = '';
                  //If comment to be deleted
                  if ($_REQUEST['del_cmnt']==='TRUE') {
@@ -271,7 +272,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                  }
                  elseif (isset($_REQUEST['mod_description']))
                  {  
-                                        // check if captcha is to be used by issue tracker in general
+                    // check if captcha is to be used by issue tracker in general
                     if ($this->getConf('use_captcha') === 0) { $captcha_ok = 1;}
                     else { $captcha_ok = ($this->_captcha_ok());}
                     
@@ -289,10 +290,12 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                               }
 
                               if ($cFlag === true)
-                              {   $issues[$issue_id]['description'] = htmlspecialchars(stripslashes($_REQUEST['description_mod']));
+                              {   $old_value = $issues[$issue_id]['description'];
+                                  $issues[$issue_id]['description'] = htmlspecialchars(stripslashes($_REQUEST['description_mod']));
                                   //save issue-file
                                   $xvalue = io_saveFile($pfile,serialize($issues));
                                   if($this->getConf('mail_modify__description') ===1) $this->_emailForDscr($_REQUEST['project'], $issues[$issue_id]);
+                                  $this->_log_mods($project, $issues[$issue_id], $usr, 'description mod', $old_value, $issues[$issue_id]['description']);
                                   $Generated_Message = '<div class="it__positive_feedback">'.$this->getLang('msg_descrmodtrue').$issue_id.'</div>';
                               }
                               else { msg("Issue with ID: $issue_id not found.",-1); }
@@ -318,6 +321,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                 //save issue-file
                                 $xvalue = io_saveFile($pfile,serialize($issues));
                                 if($xvalue!==false) { msg(sprintf($this->getLang('msg_addFollower_true'),$issue_id).$a1,1);}
+                                $this->_log_mods($project, $issues[$issue_id], $usr, 'follower added', '', $a1);
                             }
                             // delete mail address from followers
                             elseif((strlen($a1)>0) && (stripos($issues[$issue_id]['add_user_mail'],$a1) !== false)) {
@@ -329,6 +333,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                 $issues[$issue_id]['add_user_mail'] = $ret_mails;
                                 $xvalue = io_saveFile($pfile,serialize($issues));
                                 if($xvalue!==false) { msg(sprintf($this->getLang('msg_rmvFollower_true'),$issue_id).$a1,1);}
+                                $this->_log_mods($project, $issues[$issue_id], $usr, 'follower deleted', $a1, '');
                             }
                             if($xvalue===false) { msg(sprintf($this->getLang('msg_addFollower_failed'),$issue_id).$a1,-1); }
                         }
@@ -353,12 +358,15 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                               }
 
                               if ($cFlag === true)
-                              {   $issues[$issue_id]['attachment1'] = htmlspecialchars(stripslashes($_REQUEST['attachment1']));
+                              {   $old_value = $issues[$issue_id]['attachment1'].'<br />'.$issues[$issue_id]['attachment2'].'<br />'.$issues[$issue_id]['attachment3'];
+                                  $issues[$issue_id]['attachment1'] = htmlspecialchars(stripslashes($_REQUEST['attachment1']));
                                   $issues[$issue_id]['attachment2'] = htmlspecialchars(stripslashes($_REQUEST['attachment2']));
                                   $issues[$issue_id]['attachment3'] = htmlspecialchars(stripslashes($_REQUEST['attachment3']));
                                   //save issue-file
                                   $xvalue = io_saveFile($pfile,serialize($issues));
 //                                  if($this->getConf('mail_modify__description') ===1) $this->_emailForDscr($_REQUEST['project'], $issues[$issue_id]);
+                                  $new_value = $issues[$issue_id]['attachment1'].'<br />'.$issues[$issue_id]['attachment2'].'<br />'.$issues[$issue_id]['attachment3'];
+                                  $this->_log_mods($project, $issues[$issue_id], $usr, 'symptom links', $old_value, $new_value);
                                   $Generated_Message = '<div class="it__positive_feedback">'.$this->getLang('msg_slinkmodtrue').$issue_id.'</div>';
                               }
                               else { msg("Issue with ID: $issue_id not found.",-1); }
@@ -394,20 +402,20 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                   }
 
                               if ($cFlag === true)
-                              {   $issues[$issue_id]['resolution'] = htmlspecialchars(stripslashes($_REQUEST['x_resolution']));
-                                  
-                                  $issues[$issue_id]['status'] = $this->getLang('issue_resolved_status');
-                                  $xuser = $issues[$issue_id]['user_mail'];
-                                  $xdescription = $issues[$issue_id]['description'];
+                              {   $old_value                       = $issues[$issue_id]['resolution'];
+                                  $issues[$issue_id]['resolution'] = htmlspecialchars(stripslashes($_REQUEST['x_resolution']));
+                                  $issues[$issue_id]['status']     = $this->getLang('issue_resolved_status');
+                                  $xuser                           = $issues[$issue_id]['user_mail'];
+                                  $xdescription                    = $issues[$issue_id]['description'];
 
                                   //save issue-file
-                                  $xvalue = io_saveFile($pfile,serialize($issues));
-                                  $anker_id = 'resolved_'. uniqid((double)microtime()*1000000,1);                                   
+                                  $xvalue                          = io_saveFile($pfile,serialize($issues));
+                                  $anker_id                        = 'resolved_'. uniqid((double)microtime()*1000000,1);                                   
                                   if($this->getConf('mail_modify_resolution') ===1) $this->_emailForRes($_REQUEST['project'], $issues[$_REQUEST['comment_issue_ID']]);
-                                  $Generated_Message = '<div class="it__positive_feedback"><a href="#'.$anker_id.'"></a>'.$this->getLang('msg_resolution_true').$issue_id.'</div>';
+                                  $Generated_Message               = '<div class="it__positive_feedback"><a href="#'.$anker_id.'"></a>'.$this->getLang('msg_resolution_true').$issue_id.'</div>';
                                   msg($this->getLang('msg_resolution_true').$issue_id.'.',1);
-                                  $usr = $_POST['usr'];                                                                    
-                                  $this->_log_mods($project, $issues[$issue_id], $usr, 'resolution', $issues[$issue_id]['resolution']);
+                                  $usr                             = $_POST['usr'];                                                                    
+                                  $this->_log_mods($project, $issues[$issue_id], $usr, 'resolution', $old_value, $issues[$issue_id]['resolution']);
                               }
                               else { msg("Issue with ID: $issue_id not found.",-1); }
                                 
@@ -499,18 +507,18 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 
             $Generated_Table  .= '<h1>'.$this->getLang('h_modlog').$issue_id.'</h1>';
             $Generated_Table  .= '<div class="dokuwiki"><table class="inline tbl_showmodlog">'.NL;
-            $Generated_Table  .= '<tr><th>Date</th><th>User</th><th>Field</th><th>new Value</th></tr>'.NL;
+            $Generated_Table  .= '<tr><th>Date</th><th>User</th><th>Field</th><th>old Value</th><th>new Value</th></tr>'.NL;
 
             foreach($mods as $mod) {          
                 
                 if($rowEven==="it_roweven") $rowEven="it_rowodd";
                 else $rowEven="it_roweven";
-//                echo 'rowEven: '.$rowEven.'<br />';
                         
                 $Generated_Table  .= '<tr class="'.$rowEven.'" >'.NL;
                 $Generated_Table  .= '  <td>'.date($this->getConf('d_format'),strtotime($this->_get_one_value($mod,'timestamp'))).'</td>'.NL;
                 $Generated_Table  .= '  <td>'.$this->_get_one_value($mod,'user').'</td>'.NL;
                 $Generated_Table  .= '  <td>'.$this->_get_one_value($mod,'field').'</td>'.NL;
+                $Generated_Table  .= '  <td>'.$this->_get_one_value($mod,'old_value').'</td>'.NL;
                 
                 $__assigened       = $this->_get_one_value($mod,'new_value');
                 $__assigened       = $this->xs_format($__assigened);
@@ -555,6 +563,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         foreach ($status as $x_status)
         {
             $s_counter = $s_counter + 1;
+            $x_status = trim($x_status);
             $STR_STATUS = $STR_STATUS . "case '".$x_status."':  val = ".$s_counter."; break;";
             $pattern = $pattern . "|" .  $x_status;
             $x_status_select = $x_status_select . "['".$x_status."','".$x_status."'],";
@@ -564,6 +573,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         $products = explode(',', $this->getConf('products')) ;
         foreach ($products as $x_products)
         {
+            $x_products = trim($x_products);
             $x_products_select = $x_products_select . "['".$x_products."','".$x_products."'],";
         } 
         
@@ -571,6 +581,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         $severity = explode(',', $this->getConf('severity')) ;
         foreach ($severity as $x_severity)
         {
+            $x_severity = trim($x_severity);
             $x_severity_select = $x_severity_select . "['".$x_severity."','".$x_severity."'],";
         } 
         
@@ -623,17 +634,15 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     function _table_render($project,$step,$start,$next_start,$stat_filter,$sev_filter,$productfilter)
     {
         global $ID;
-        $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
-        $style =' style="text-align:left; white-space:pre-wrap;">';
-        $user_grp = pageinfo();
-        $noStatIMG = $this->getConf('noStatIMG');
-        $noSevIMG = $this->getConf('noSevIMG');
-        $stat_filter=strtoupper($stat_filter);
-        $sev_filter=strtoupper($sev_filter);
-        $productfilter==strtoupper($productfilter);
-        
-        // get issues file contents
-        $pfile = metaFN($project, '.issues'); 
+        $imgBASE       = DOKU_BASE."lib/plugins/issuetracker/images/";
+        $style         = ' style="text-align:left; white-space:pre-wrap;">';
+        $user_grp      = pageinfo();
+        $noStatIMG     = $this->getConf('noStatIMG');
+        $noSevIMG      = $this->getConf('noSevIMG');
+        $stat_filter   = strtoupper($stat_filter);
+        $sev_filter    = strtoupper($sev_filter);
+        $productfilter = strtoupper($productfilter);
+        $pfile         = metaFN($project, '.issues'); // get issues file contents
 
         if (@file_exists($pfile))
         	{$issues  = unserialize(@file_get_contents($pfile));}
@@ -699,7 +708,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     if ($noStatIMG === false) {                    
                         $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_status))).'.gif';
 //                        if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
-                        $status_img =' align="center"> <img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16">';
+                        $status_img =' align="center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16">';
                     }                    
                     else { $status_img = $style.$a_status; }
                     // check if severity image or text to be displayed                                            
@@ -707,7 +716,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_severity))).'.gif';
 
 //                        if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
-                        $severity_img =' align="center"> <img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16">';
+                        $severity_img =' align="center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16">';
                     }
                     else { $severity_img = $style.$a_severity; }
                     
@@ -779,7 +788,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         {
                             if ($noStatIMG === false) {                    
                                 $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
-                                $reduced_issues .='<td align="center"> <img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"></td>';
+                                $reduced_issues .='<td align="center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"></td>';
                             }
                             else { $reduced_issues .= '<td'.$style.$isval; }
                         }                                            
@@ -788,7 +797,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         {
                             if ($noSevIMG === false) {                    
                                 $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
-                                $reduced_issues .='<td align="center"> <img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"></td>';
+                                $reduced_issues .='<td align="center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"></td>';
                             }
                             else { $reduced_issues .= '<td'.$style.$isval.'</td>'; }
                         }
@@ -1744,10 +1753,12 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                     $this->getLang('issuemod_product').$issue['product'].chr(10).
                     $this->getLang('issuemod_version').$issue['version'].chr(10).chr(10).
                     $this->getLang('issue_resolved_text').$this->xs_format($issue['resolution']).chr(10).chr(10).
-                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
 
             $body = html_entity_decode($body);
+//            echo $subject.'<br />'.$body.'<br /><br />';
+
             $from=$this->getConf('email_address') ;
 
             $user_mail = pageinfo();
@@ -1765,6 +1776,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 */                            
     function _emailForMod($project,$issue,$comment,$reason)
     {       if($this->getConf('userinfo_email') ===0) return;
+            global $ID;
             if($reason ==='new') { 
               $subject = sprintf($this->getLang('cmnt_new_subject'),$issue['id'], $project). "\r\n"; 
               $subject = mb_encode_mimeheader($subject, "UTF-8", "Q" );}
@@ -1797,8 +1809,10 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                     $this->getLang('issuemod_creator').$issue['user_name'].chr(10).
                     $this->getLang('issuemod_title').$issue['title'].chr(10).
                     $body3.
-                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end'). "\r\n";
+
+//            echo $subject.'<br />'.$body.'<br /><br />';
 
             $body = html_entity_decode($body);
             
@@ -1819,6 +1833,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 */                            
     function _emailForDscr($project,$issue)
     {       if($this->getConf('userinfo_email') ===0) return;
+            global $ID;
             $subject = sprintf($this->getLang('issuedescrmod_subject'),$issue['id'], $project). "\r\n";
             $subject = mb_encode_mimeheader($subject, "UTF-8", "Q" );            
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
@@ -1835,8 +1850,10 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                     $this->getLang('issuemod_title').$issue['title'].chr(10).
                     $this->getLang('issuemod_date').date($this->getConf('d_format'),strtotime($comment['timestamp'])).chr(10).chr(10).
                     $this->getLang('th_description').chr(10).$issue['description'].chr(10).chr(10).
-                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end'). "\r\n";
+
+//            echo $subject.'<br />'.$body.'<br /><br />';
 
             $body = html_entity_decode($body);
             $from=$this->getConf('email_address'). "\r\n";
@@ -2019,14 +2036,14 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
              if ($cFlag === false) {
              // promt error message that issue with this ID does not exist
               $Generated_Header = '<div class="it__negative_feedback">'.$this->getLang('msg_issuemissing').$issue_id.'.</div><br />';
-              echo $Generated_Header;
+//              echo $Generated_Header;
               return;
              }
           }
         else
         	{   // promt error message that issue with ID does not exist
               $Generated_Header = '<div class="it__negative_feedback">'.sprintf($this->getLang('msg_pfilemissing'),$pfile).'</div><br />';
-              echo $Generated_Header;
+//              echo $Generated_Header;
               return;
           }
     }
@@ -2034,7 +2051,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 /* log issue modificaions
  * who changed what and when per issue
 */                                          
-    function _log_mods($project, $issue, $usr, $column, $new_value)
+    function _log_mods($project, $issue, $usr, $column, $old_value, $new_value)
     {     global $conf;
           // get mod-log file contents
           $modfile = metaFN($project.'_'.$issue['id'], '.mod-log');
@@ -2046,8 +2063,9 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
           $mod_id = count($mods);
           if($new_value=='') $new_value = $this->getLang('mod_valempty');
           $mods[$mod_id]['timestamp'] = $cur_date;
-          $mods[$mod_id]['user'] = $usr;
-          $mods[$mod_id]['field'] = $column;
+          $mods[$mod_id]['user']      = $usr;
+          $mods[$mod_id]['field']     = $column;
+          $mods[$mod_id]['old_value'] = $old_value;
           $mods[$mod_id]['new_value'] = $new_value;
           
           // Save issues file contents

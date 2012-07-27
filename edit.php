@@ -1,8 +1,10 @@
 <?php
 
   require_once(realpath(dirname(__FILE__)).'/../../../inc/init.php');
+  if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../../').'/');
   if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
   require_once(DOKU_PLUGIN.'syntax.php');  
+
   
 // POST Sent by the edited array
 //    * &row=n: The row index of the edited cell
@@ -19,17 +21,18 @@
     {     global $conf;
 //        if ($conf['plugin']['issuetracker']['userinfo_email']==1)
         {   global $ID;
-        
-            // Include the language file  
-            if ($conf['lang']=='') $conf['lang']=='en'; 
-            include 'lang/'.$conf['lang'].'/lang.php';
+            global $lang;
             
-            $subject = sprintf($lang['issuemod_subject'], $issue['id'], $project);
+            //issuemod_subject = 'Issue #%s on %s: %s';
+            $subject = sprintf($lang['issuemod_subject'], $issue['id'], $project, $lang['th_'.$column]);
             $subject = mb_encode_mimeheader($subject, "UTF-8", "Q" );
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
+            //issuemod_changes = The issue changed on %s from %s to %s.
+            $changes = sprintf($lang['issuemod_changes'],$lang['th_'.$column], $old_value, $new_value);
 
             $body = $lang['issuemod_head'].chr(10).chr(10).
                     $lang['issuemod_intro'].chr(10).
+                    $changes.chr(10).chr(10).
                     $lang['issuemod_issueid'].$issue['id'].chr(10).
                     $lang['issuemod_product'].$issue['product'].chr(10).
                     $lang['issuemod_version'].$issue['version'].chr(10).
@@ -38,10 +41,11 @@
                     $lang['issuemod_creator'].$issue['user_name'].chr(10).
                     $lang['issuemod_title'].$issue['title'].chr(10).
                     $lang['issuenew_descr'].$issue['description'].chr(10).
-                    $lang['issuemod_see'].DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+                    $lang['issuemod_see'].DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $lang['issuemod_br'].chr(10).$lang['issuemod_end'];
             
             $body = html_entity_decode($body);
+//            echo 'Subject = '.$subject.'<br /><br />Body = '.$body.'<br /><br />';
             $from = $conf['plugin']['issuetracker']['email_address'];
             $to   = $issue['user_mail'];
             $cc   = $issue['add_user_mail'];
@@ -56,13 +60,9 @@
     function _emailToAssigneeMod($project,$issue,$value)
     {       
             global $ID;
+            global $lang;
             global $conf;
         
-            // Include the language file
-            if ($conf['lang']=='') $conf['lang']=='en'; 
-            include 'lang/'.$conf['lang'].'/lang.php';
-            
-            
             $subject = $project.sprintf($lang['issueassigned_subject'],$issue['id']);
             $subject = mb_encode_mimeheader($subject, "UTF-8", "Q" );
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
@@ -76,23 +76,22 @@
                     $lang['issuemod_creator'].$issue['user_name'].chr(10).
                     $lang['issuemod_title'].$issue['title'].chr(10).
                     $lang['issuenew_descr'].$issue['description'].chr(10).
-                    $lang['issuemod_see'].DOKU_URL.'doku.php?&do=showcaselink&'.$pstring.chr(10).chr(10).
+                    $lang['issuemod_see'].DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $lang['issuemod_br'].chr(10).$lang['issuemod_end'];
             
-            $body = html_entity_decode($body);            
+            $body = html_entity_decode($body);                        
+//            echo 'Subject = '.$subject.'<br /><br />Body = '.$body.'<br /><br />';
             $from = $conf['plugin']['issuetracker']['email_address'];
             $to   = $value;
 
             $headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
             mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers, $params=null);
-
-
     }
 /******************************************************************************/
 /* log issue modificaions
  * who changed what and when per issue
 */                                          
-    function _log_mods($project, $issue, $usr, $column, $new_value)
+    function _log_mods($project, $issue, $usr, $column, $old_value, $new_value)
     {     global $conf;
           // get mod-log file contents
           $modfile = metaFN($project.'_'.$issue['id'], '.mod-log');
@@ -107,6 +106,7 @@
           $mods[$mod_id]['timestamp']   = $cur_date;
           $mods[$mod_id]['user']        = $usr;
           $mods[$mod_id]['field']       = $column;
+          $mods[$mod_id]['old_value']   = $old_value;
           $mods[$mod_id]['new_value']   = $new_value;
           
           // Save issues file contents
@@ -130,13 +130,18 @@
     }
 /******************************************************************************/
     global $ID;
+    global $lang;
     global $conf;
 
-            // Include the language file
-            if ($conf['lang']=='') $conf['lang']=='en'; 
-            include 'lang/'.$conf['lang'].'/lang.php';
+    // Include the language file
+    if ($conf['lang']=='') $conf['lang']=='en'; 
+    if ($conf['lang']!=='') {
+        $path = DOKU_PLUGIN.'issuetracker/lang/';
+        // don't include once, in case several plugin components require the same language file
+        @include($path.'en/lang.php');
+        if ($conf['lang'] != 'en') @include($path.$conf['lang'].'/lang.php');
+    }
 
-        
     $exploded = explode(' ',htmlspecialchars(stripslashes($_POST['id'])));
     $project = $exploded[0];
     $id_issue = intval($exploded[1]);
@@ -161,9 +166,10 @@
     else
     _emailForIssueMod($project, $issues[$id_issue], $issues[$id_issue][$field], $field, $value);
     
+    $old_value = $issues[$id_issue][$field];
     $issues[$id_issue][$field] = $value;
     $issues[$id_issue]['modified'] = $cur_date;
-    _log_mods($project, $issues[$id_issue], $usr, $field, $value);
+    _log_mods($project, $issues[$id_issue], $usr, $field, $old_value, $value);
    
     if(($field == 'resolution') && ($value !== false)) {
       $issues[$id_issue]['status'] = $lang['issue_resolved_status'];
@@ -192,5 +198,5 @@
     fclose($fh);
 //    echo $_POST['value'];
     echo $value;    
-
 ?>
+
