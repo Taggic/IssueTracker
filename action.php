@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2012-07-20',
+         'date'   => '2012-09-20',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -187,7 +187,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                              // store comments to file
                              $xvalue = io_saveFile($comments_file,serialize($comments));
                              if($this->getConf('mail_modify_comment') ===1) $this->_emailForMod($_REQUEST['project'],$issues[$_REQUEST['comment_issue_ID']], $comments[$comment_id],'delete');
-                             $Generated_Header = '<div class="it__positive_feedback">'.sprintf($this->getLang('msg_commentdeltrue'),$comment_id).'</div><br />';
+                             msg($this->getLang('msg_commentdeltrue').$issue_id.'.',1);
+//                             $Generated_Header = '<div class="it__positive_feedback">'.sprintf($this->getLang('msg_commentdeltrue'),$comment_id).'</div><br />';
                           }
                       }
                  }
@@ -220,7 +221,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                    foreach ($comments as $value)
                                        {  if ($value['id'] >= $comment_id) { $comment_id=$value['id'] + 1; } 
                                           if ($_REQUEST['comment'] === $value['comment']) 
-                                          {   $Generated_Header = '<div class="it__negative_feedback">'.$this->getLang('msg_commentfalse').'</div><br />';
+                                          {   msg($this->getLang('msg_commentfalse').'.',-1);
+//                                              $Generated_Header = '<div class="it__negative_feedback">'.$this->getLang('msg_commentfalse').'</div><br />';
                                               $checkFlag=true; 
                                           }
                                        }
@@ -228,18 +230,20 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                    if (($checkFlag === false) && (isset($_REQUEST['comment_id'])))
                                    { $comment_id = htmlspecialchars(stripslashes($_REQUEST['comment_id']));
                                      if ($_REQUEST['comment_mod'] === $comments[$comment_id]['comment']) 
-                                        {   $Generated_Header = '<div class="it__negative_feedback">'.$this->getLang('msg_commentmodfalse').$comment_id.'</div><br />';
+                                        {   msg($this->getLang('msg_commentfalse').$comment_id.'.',-1);
+//                                            $Generated_Header = '<div class="it__negative_feedback">'.$this->getLang('msg_commentmodfalse').$comment_id.'</div><br />';
                                             $checkFlag=true; 
                                         }
                                      else
                                      {  $cur_date = date('Y-m-d G:i:s');
                                         $comments[$comment_id]['mod_timestamp'] = $cur_date;
                                         $comments[$comment_id]['comment'] = htmlspecialchars(stripslashes($_REQUEST['comment_mod']));
-                                        $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_commentmodtrue').$comment_id.'.</div><br />';
+//                                        $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_commentmodtrue').$comment_id.'.</div><br />';
                                         //Create comments file
                                         $xvalue = io_saveFile($comments_file,serialize($comments));
-                                        if($this->getConf('mail_modify_comment') ===1) $this->_emailForMod($_REQUEST['project'],$issues[$_REQUEST['comment_issue_ID']], $comments[$comment_id], 'modify');
-                                        $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_commenttrue').$comment_id.'.</div><br />';
+                                        if(($this->getConf('mail_modify_comment') ===1) && ($_REQUEST['minor_mod']!=="true")) $this->_emailForMod($_REQUEST['project'],$issues[$_REQUEST['comment_issue_ID']], $comments[$comment_id], 'modify');
+                                        msg($this->getLang('msg_commenttrue').$comment_id.'.',1);
+//                                        $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_commenttrue').$comment_id.'.</div><br />';
                                       }
                                    }
                                    //If comment to be added
@@ -254,7 +258,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                        //Create comments file
                                        $xvalue = io_saveFile($comments_file,serialize($comments)); 
                                        if($this->getConf('mail_add_comment') ===1) $this->_emailForMod($_REQUEST['project'],$issues[$_REQUEST['comment_issue_ID']], $comments[$comment_id], 'new');
-                                       $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_commenttrue').$comment_id.'.</div><br />';
+                                       msg($this->getLang('msg_commenttrue').$comment_id.'.',1);
+//                                       $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_commenttrue').$comment_id.'.</div><br />';
                                     }
                                     // update issues modification date
                                     if ($checkFlag === false)
@@ -294,9 +299,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                   $issues[$issue_id]['description'] = htmlspecialchars(stripslashes($_REQUEST['description_mod']));
                                   //save issue-file
                                   $xvalue = io_saveFile($pfile,serialize($issues));
-                                  if($this->getConf('mail_modify__description') ===1) $this->_emailForDscr($_REQUEST['project'], $issues[$issue_id]);
+                                  if(($this->getConf('mail_modify__description') ===1) && ($_REQUEST['minor_mod']!=="true")) $this->_emailForDscr($_REQUEST['project'], $issues[$issue_id]);
                                   $this->_log_mods($project, $issues[$issue_id], $usr, 'description mod', $old_value, $issues[$issue_id]['description']);
-                                  $Generated_Message = '<div class="it__positive_feedback">'.$this->getLang('msg_descrmodtrue').$issue_id.'</div>';
+                                  msg($this->getLang('msg_descrmodtrue').$issue_id.'.',1);
+                      //            $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_descrmodtrue').$issue_id.'</div>';
                               }
                               else { msg("Issue with ID: $issue_id not found.",-1); }
                         }
@@ -367,7 +373,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 //                                  if($this->getConf('mail_modify__description') ===1) $this->_emailForDscr($_REQUEST['project'], $issues[$issue_id]);
                                   $new_value = $issues[$issue_id]['attachment1'].'<br />'.$issues[$issue_id]['attachment2'].'<br />'.$issues[$issue_id]['attachment3'];
                                   $this->_log_mods($project, $issues[$issue_id], $usr, 'symptom links', $old_value, $new_value);
-                                  $Generated_Message = '<div class="it__positive_feedback">'.$this->getLang('msg_slinkmodtrue').$issue_id.'</div>';
+                                  msg($this->getLang('msg_slinkmodtrue').$issue_id.'.',1);
+                       //           $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_slinkmodtrue').$issue_id.'</div>';
                               }
                               else { msg("Issue with ID: $issue_id not found.",-1); }
                         }
@@ -412,7 +419,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                   $xvalue                          = io_saveFile($pfile,serialize($issues));
                                   $anker_id                        = 'resolved_'. uniqid((double)microtime()*1000000,1);                                   
                                   if($this->getConf('mail_modify_resolution') ===1) $this->_emailForRes($_REQUEST['project'], $issues[$_REQUEST['comment_issue_ID']]);
-                                  $Generated_Message               = '<div class="it__positive_feedback"><a href="#'.$anker_id.'"></a>'.$this->getLang('msg_resolution_true').$issue_id.'</div>';
+//                                  $Generated_Message               = '<div class="it__positive_feedback"><a href="#'.$anker_id.'"></a>'.$this->getLang('msg_resolution_true').$issue_id.'</div>';
                                   msg($this->getLang('msg_resolution_true').$issue_id.'.',1);
                                   $usr                             = $_POST['usr'];                                                                    
                                   $this->_log_mods($project, $issues[$issue_id], $usr, 'resolution', $old_value, $issues[$issue_id]['resolution']);
@@ -983,7 +990,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                    
 // scripts for xsEditor -------------------------------------------------------
 $issue_edit_head .= '<span>
-         <script>
+         <script type="text/javascript">
           function doHLine(tag1,obj)
           {
           textarea = document.getElementById(obj);
@@ -1092,7 +1099,7 @@ $issue_edit_head .= '<span>
           </script></span>'.NL;
           
 $issue_edit_head .= '<span>
-         <script>
+         <script type="text/javascript">
              function tab_open(blink_id, cell_ID) 
               {   if (document.getElementById(blink_id).style.display == "block")
                   {   document.getElementById(blink_id).style.display = "none";
@@ -1309,8 +1316,7 @@ $issue_initial_description = '<table class="itd__tables"><tbody>
                                   <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_initdescr').'</td>
                                 </tr>
                                 <tr class="itd__tables_tr">
-                                  <td width="1%"></td>
-                                  <td>'.$this->xs_format($x_comment).'</td>
+                                  <td class="itd_comment_tr" colSpan="2" style="padding-left:0.45em;">'.$this->xs_format($x_comment).'</td>
                                 </tr>';
                              
 /* mod for edit description by ticket owner and admin/assignee ---------------*/
@@ -1347,7 +1353,10 @@ $issue_initial_description = '<table class="itd__tables"><tbody>
                                 $cell_ID = 'img_tab_open_comment'.$blink_id;
 
 $issue_initial_description .=  '<input  type="hidden" class="showid__option" name="showid" id="showid" size="10" value="'.$this->parameter.'"/>'.
-                               '<input  type="submit" class="button" id="btnmod_description" name="btnmod_description" value="'.$this->getLang('btn_mod').'" title="'.$this->getLang('btn_mod_title').'");/>'.
+                               '<fieldset class="minor_mod">'.
+                               '<span style="float:left;" title="'.$this->getLang('minor_mod_cbx_title').'"><input type="checkbox" name="minor_mod" value="true" />&nbsp;&nbsp;'.$this->getLang('minor_mod').'</span>'.
+                               '<input style="float:right;" type="submit" class="button" id="btnmod_description" name="btnmod_description" value="'.$this->getLang('btn_mod').'" title="'.$this->getLang('btn_mod_title').'");/>'.
+                               '</fieldset>'.
                                '</form>'.NL.'</td>'.NL.'</tr>'.NL.
                                '<tr>'.NL.'
                                    <td colspan="2" class="img_tab_open_comment" id="'.$cell_ID.'">'.NL.'
@@ -1555,8 +1564,11 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
                     $cell_ID = 'img_tab_open_comment'.$blink_id;
                     // check if only registered users are allowed to modify comments
                     // ¦ perm — the user's permissions related to the current page ($ID)
-$issue_comments_log .= '<input  type="hidden" class="showid__option" name="showid" id="showid" type="text" size="10" value="'.$this->parameter.'"/>'.
-                       '<input  type="submit" class="button" id="btnmod_description" name="btnmod_description"  value="'.$this->getLang('btn_mod').'" title="'.$this->getLang('btn_mod_title').'");/>'.
+$issue_comments_log .= '<input  type="hidden" class="showid__option" name="showid" id="showid" size="10" value="'.$this->parameter.'"/>'.
+                       '<fieldset class="minor_mod">'.
+                               '<span style="float:left;"  title="'.$this->getLang('minor_mod_cbx_title').'"><input type="checkbox" name="minor_mod" value="true" />&nbsp;&nbsp;'.$this->getLang('minor_mod').'</span>'.
+                               '<input style="float:right;" type="submit" class="button" id="btnmod_description" name="btnmod_description"  value="'.$this->getLang('btn_mod').'" title="'.$this->getLang('btn_mod_title').'");/>'.
+                       '</fieldset>'.
                        '</form>'.NL.'</td>'.NL.'</tr>'.NL.
                        '<tr>'.NL.'
                            <td colspan="2" class="img_tab_open_comment" id="'.$cell_ID.'">'.NL.'
@@ -1587,10 +1599,11 @@ $issue_comments_log .= '<input  type="hidden" class="showid__option" name="showi
 //        if(!$x_resolution) { $x_resolution = "&nbsp;"; }
                         
         $_cFlag = false;             
-        if($user_check == false)
-            { $_cFlag = true; } 
+        if($user_check == 0) {
+            if ($user_mail['perm'] >= 1) 
+            { $_cFlag = true; } } 
             
-        elseif ($user_check == true) {
+        elseif ($user_check == 1) {
             if ($user_mail['perm'] > 1) 
             { $_cFlag = true; } }
 
@@ -1629,7 +1642,7 @@ $issue_add_comment .= formSecurityToken(false).
                       $cell_ID = 'img_tab_open_comment'.$blink_id;
                       // check if only registered users are allowed to add comments
                       // ¦ perm — the user's permissions related to the current page ($ID)
-                      $issue_add_comment .= '<input  type="hidden" class="showid__option" name="showid" id="showid" type="text" size="10" value="'.$this->parameter.'"/>'.NL.
+                      $issue_add_comment .= '<input  type="hidden" class="showid__option" name="showid" id="showid" size="10" value="'.$this->parameter.'"/>'.NL.
                                             '<input class="button" id="showcase" type="submit" name="showcase" value="'.$this->getLang('btn_add').'" title="'.$this->getLang('btn_add_title').'");/>'.NL.
                                             '</form>'.NL.'</td>'.NL.'</tr>'.NL.
                                             '<tr>'.NL.'
@@ -1649,8 +1662,7 @@ $issue_edit_resolution ='<table class="itd__tables">
                             <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('th_resolution').'</td>
                         </tr>';
 $issue_edit_resolution .= '<tr class="itd__tables_tr">
-                            <td width="1%"></td>
-                            <td>'.$this->xs_format($x_resolution).'</td>
+                            <td class="itd_comment_tr" colSpan="2" style="padding-left:0.45em;">'.$this->xs_format($x_resolution).'</td>
                           </tr>
                           <tr><td colSpan="2" style="display : none;" id="'.$blink_id.'">';
 
@@ -1688,7 +1700,7 @@ $issue_edit_resolution .= "<textarea id='x_resolution' name='x_resolution' type=
                       
                       $cell_ID = 'img_tab_open_comment'.$blink_id;
 
-$issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="showid" id="showid" type="text" size="10" value="'.$this->parameter.'"/>'.
+$issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="showid" id="showid" size="10" value="'.$this->parameter.'"/>'.
                       '<input class="button" id="store_resolution" type="submit" name="store_resolution" value="'.$this->getLang('btn_add').'" title="'.$this->getLang('btn_add_title').'");/>'.
                       '</form>'.NL.'</td>'.NL.'</tr>'.NL.
                       '<tr>'.NL.'
@@ -1707,8 +1719,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                                         <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('th_resolution').'</td>
                                     </tr>';
             $issue_edit_resolution .= '<tr class="itd__tables_tr">
-                                        <td width="1%"></td>
-                                        <td>'.$this->xs_format($x_resolution).'</td>
+                                        <td colSpan="2" style="padding-left:0.45em;">'.$this->xs_format($x_resolution).'</td>
                                       </tr></table>'.NL;
 
             $wmsg = $this->getLang('lbl_lessPermission'); 
@@ -1719,9 +1730,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                                      <tr>
                                         <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('th_resolution').'</td>
                                     </tr>';
-            $issue_edit_resolution .= '<tr class="itd__tables_tr">
-                                        <td width="1%"></td>
-                                        <td>'.$this->xs_format($x_resolution).'</td>
+            $issue_edit_resolution .= '<tr>
+                                        <td class="itd_comment_tr">'.$this->xs_format($x_resolution).'</td>
                                       </tr></table>'.NL;
 
             $wmsg = $this->getLang('lbl_please').'<a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">'.$this->getLang('lbl_signin'); 
@@ -1738,10 +1748,18 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
     }
 
 /******************************************************************************/
+/******************************************************************************/
 /* send an e-mail to user due to issue resolution
 */                            
     function _emailForRes($project,$issue)
     {       if($this->getConf('userinfo_email') ===0) return;
+
+            if ($this->getConf('mail_templates')==1) {
+                // load user html mail template
+                $sFilename = DOKU_PLUGIN.'issuetracker/mailtemplate/issue_resolved_mail.html';
+                $bodyhtml = file_get_contents($sFilename);
+            }
+
             $subject = sprintf($this->getLang('issue_resolved_subject'),$issue['id'], $project);
             $subject = mb_encode_mimeheader($subject, "UTF-8", "Q" );            
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
@@ -1757,19 +1775,19 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
 
             $body = html_entity_decode($body);
-//            echo $subject.'<br />'.$body.'<br /><br />';
 
+            if ($this->getConf('mail_templates')==1) $bodyhtml = $this->replace_bodyhtml($bodyhtml, $pstring, $project, $issue, NULL);
+            
             $from=$this->getConf('email_address') ;
 
             $user_mail = pageinfo();
             if($user_mail['userinfo']['mail']===$issue['user_mail']) $to=$issue['assigned'];
             elseif($user_mail['userinfo']['mail']===$issue['assigned']) $to=$issue['user_mail'];
             else $to=$issue['user_mail'].', '.$issue['assigned'];
-            
+  
             $cc=$issue['add_user_mail'];
             $headers = "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
-            mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers, $params=null);
-
+            $this->mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
     }
 /******************************************************************************/
 /* send an e-mail to user due to issue modificaion
@@ -1777,6 +1795,12 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
     function _emailForMod($project,$issue,$comment,$reason)
     {       if($this->getConf('userinfo_email') ===0) return;
             global $ID;
+            
+            if ($this->getConf('mail_templates')==1) {
+                // load user html mail template
+                $sFilename = DOKU_PLUGIN.'issuetracker/mailtemplate/cmnt_mod_mail.html';
+                $bodyhtml = file_get_contents($sFilename);
+            }
             if($reason ==='new') { 
               $subject = sprintf($this->getLang('cmnt_new_subject'),$issue['id'], $project). "\r\n"; 
               $subject = mb_encode_mimeheader($subject, "UTF-8", "Q" );}
@@ -1790,10 +1814,12 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
             
             if($reason =='delete') {
-              $body2 = $this->getLang('cmt_del_intro').chr(10).chr(13);
+              $body2     = $this->getLang('cmt_del_intro').chr(10).chr(13);
+              $bodyhtml = str_ireplace("%%bodyhtml2%%",$this->getLang('cmt_del_intro'),$bodyhtml);
             }
             else {
               $body2 = $this->getLang('issuemod_intro').chr(10).chr(13);
+              $bodyhtml = str_ireplace("%%bodyhtml2%%",$this->getLang('issuemod_intro'),$bodyhtml); 
               $body3 = $this->getLang('issuemod_cmntauthor').$comment['author'].chr(10).
                        $this->getLang('issuemod_date').date($this->getConf('d_format'),strtotime($comment['timestamp'])).chr(10).
                        $this->getLang('issuemod_cmnt').chr(10).$this->xs_format($comment['comment']).chr(10).chr(10); 
@@ -1801,21 +1827,21 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
             
             $body = $this->getLang('issuemod_head').chr(10).chr(10).
                     $body2.
+                    $this->getLang('issuemod_title').$issue['title'].chr(10).
                     $this->getLang('issuemod_issueid').$issue['id'].chr(10).
-                    $this->getLang('issuemod_status').$issue['status'].chr(10).
                     $this->getLang('issuemod_product').$issue['product'].chr(10).
                     $this->getLang('issuemod_version').$issue['version'].chr(10).
                     $this->getLang('issuemod_severity').$issue['severity'].chr(10).
+                    $this->getLang('issuemod_status').$issue['status'].chr(10).
                     $this->getLang('issuemod_creator').$issue['user_name'].chr(10).
-                    $this->getLang('issuemod_title').$issue['title'].chr(10).
                     $body3.
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end'). "\r\n";
 
-//            echo $subject.'<br />'.$body.'<br /><br />';
-
             $body = html_entity_decode($body);
-            
+
+            if ($this->getConf('mail_templates')==1) $bodyhtml = $this->replace_bodyhtml($bodyhtml, $pstring, $project, $issue, $comment);
+                        
             $from=$this->getConf('email_address'). "\r\n";
             
             $user_mail = pageinfo();
@@ -1825,7 +1851,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
             
             $cc=$issue['add_user_mail'];
             $headers = "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
-            mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers, $params=null);
+            $this->mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
 
     }
 /******************************************************************************/
@@ -1834,6 +1860,12 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
     function _emailForDscr($project,$issue)
     {       if($this->getConf('userinfo_email') ===0) return;
             global $ID;
+
+            if ($this->getConf('mail_templates')==1) {
+                // load user html mail template
+                $sFilename = DOKU_PLUGIN.'issuetracker/mailtemplate/issue_descr_mail.html';
+                $bodyhtml = file_get_contents($sFilename);
+            }
             $subject = sprintf($this->getLang('issuedescrmod_subject'),$issue['id'], $project). "\r\n";
             $subject = mb_encode_mimeheader($subject, "UTF-8", "Q" );            
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
@@ -1841,20 +1873,20 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
             
             $body = $this->getLang('issuemod_head').chr(10).chr(10).
                     $this->getLang('issuemod_intro').chr(10).chr(13).
+                    $this->getLang('issuemod_title').$issue['title'].chr(10).
                     $this->getLang('issuemod_issueid').$issue['id'].chr(10).
-                    $this->getLang('issuemod_status').$issue['status'].chr(10).
                     $this->getLang('issuemod_product').$issue['product'].chr(10).
                     $this->getLang('issuemod_version').$issue['version'].chr(10).
                     $this->getLang('issuemod_severity').$issue['severity'].chr(10).
+                    $this->getLang('issuemod_status').$issue['status'].chr(10).
                     $this->getLang('issuemod_creator').$issue['user_name'].chr(10).chr(10).
-                    $this->getLang('issuemod_title').$issue['title'].chr(10).
                     $this->getLang('issuemod_date').date($this->getConf('d_format'),strtotime($comment['timestamp'])).chr(10).chr(10).
                     $this->getLang('th_description').chr(10).$issue['description'].chr(10).chr(10).
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end'). "\r\n";
-
-//            echo $subject.'<br />'.$body.'<br /><br />';
-
+            
+            if ($this->getConf('mail_templates')==1) $bodyhtml = $this->replace_bodyhtml($bodyhtml, $pstring, $project, $issue, $comment);
+            
             $body = html_entity_decode($body);
             $from=$this->getConf('email_address'). "\r\n";
             
@@ -1862,12 +1894,123 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
             if($user_mail['userinfo']['mail']===$issue['user_mail']) $to=$issue['assigned']. "\r\n";
             elseif($user_mail['userinfo']['mail']===$issue['assigned']) $to=$issue['user_mail']. "\r\n";
             else $to=$issue['user_mail'].', '.$issue['assigned']. "\r\n";
-            
+
             $cc=$issue['add_user_mail']. "\r\n";
             $headers = "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
-            mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers, $params=null);
-            
+            $this->mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
+    }
+/******************************************************************************/
+    /***********************************
+     * HTML Mail functions
+     *
+     * Sends HTML-formatted mail
+     * By Lin Junjie (mail [dot] junjie [at] gmail [dot] com)
+     *
+     ***********************************/
+    function mail_send_html($to, $subject, $body, $bodyhtml, $from='', $cc='', $bcc='', $header='', $params=null){
+      if(defined('MAILHEADER_ASCIIONLY')){
+        $subject = utf8_deaccent($subject);
+        $subject = utf8_strip($subject);
+      }
+      if(!defined('MAILHEADER_EOL')) define('MAILHEADER_EOL',"\n");
+      if(!utf8_isASCII($subject)) {
+        $subject = '=?UTF-8?Q?'.mail_quotedprintable_encode($subject,0).'?=';
+        // Spaces must be encoded according to rfc2047. Use the "_" shorthand
+        $subject = preg_replace('/ /', '_', $subject);
+      }
+     
+      $header  = '';
+     
+      $usenames = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') ? false : true;
+     
+      $random_hash = md5(date('r', time())); // added
+     
+      $to = mail_encode_address($to,'',$usenames);
+      $header .= mail_encode_address($from,'From');
+      $header .= mail_encode_address($cc,'Cc');
+      $header .= mail_encode_address($bcc,'Bcc');
+      $header .= 'MIME-Version: 1.0'.MAILHEADER_EOL;
+      $header .= "Content-Type: multipart/alternative; boundary=PHP-alt-".$random_hash.MAILHEADER_EOL;
+      $header  = trim($header);
+     
 
+      $body = mail_quotedprintable_encode($body);
+      $bodyhtml = mail_quotedprintable_encode($bodyhtml);
+
+      $message =	"--PHP-alt-".$random_hash."\r\n".
+    				"Content-Type: text/plain; charset=UTF-8"."\n".
+    				"Content-Transfer-Encoding: quoted-printable"."\n\n".
+    				$body."\n\n".
+    				"--PHP-alt-".$random_hash."\r\n".
+    				"Content-Type: text/html; charset=UTF-8"."\n".
+    				"Content-Transfer-Encoding: quoted-printable"."\n\n".
+    				$bodyhtml."\n".
+    				"--PHP-alt-".$random_hash."--";
+     
+      if($params == null){
+        return @mail($to,$subject,$message,$header);
+      }else{
+        return @mail($to,$subject,$message,$header,$params);
+      }
+    }
+
+/******************************************************************************/
+    function replace_bodyhtml($bodyhtml, $pstring, $project, $issue, $comment) {
+        global $ID;
+        $bodyhtml = str_ireplace("%%_SEE%%",DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring,$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_head%%",$this->getLang('issuemod_head'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_issueid%%",$this->getLang('issuemod_issueid'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%ID%%",$issue['id'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_title%%",$this->getLang('issuemod_title'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%TITEL%%",$issue['title'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_status%%",$this->getLang('issuemod_status'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%STATUS%%",$issue['status'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%th_project%%",$this->getLang('th_project'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%PROJECT%%",$project,$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_product%%",$this->getLang('issuemod_product'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%PRODUCT%%",$issue['product'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_version%%",$this->getLang('issuemod_version'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%VERSION%%",$issue['version'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_severity%%",$this->getLang('issuemod_severity'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%SEVERITY%%",$issue['severity'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_creator%%",$this->getLang('issuemod_creator'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%CREATOR%%",$issue['user_name'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%th_assigned%%",$this->getLang('th_assigned'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%ASSIGNED%%",$issue['assigned'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%th_created%%",$this->getLang('th_created'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%CREATED%%",$issue['created'],$bodyhtml);
+
+
+        $bodyhtml = str_ireplace("%%issue_resolved_intro%%",$this->getLang('issue_resolved_intro'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%issue_resolved_text%%",$this->getLang('issue_resolved_text'),$bodyhtml);
+        $frmt_res = str_ireplace(chr(10),"<br />",$issue['resolution']);
+        $bodyhtml = str_ireplace("%%RESOLUTION%%",$this->xs_format($frmt_res),$bodyhtml);
+        $bodyhtml = str_ireplace("%%TIMESTAMP%%",date($this->getConf('d_format')),$bodyhtml);
+        
+        $user_grp = pageinfo();        
+        $usr      = $user_grp['userinfo']['name'] ; 
+        $bodyhtml = str_ireplace("%%RESOLVER%%",$usr,$bodyhtml);
+        $bodyhtml = str_ireplace("%%MOD_BY%%",$usr,$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuedescrmod_subject%%",sprintf($this->getLang('issuedescrmod_subject'),$issue['id'], $project),$bodyhtml);
+        $bodyhtml = str_ireplace("%%th_description%%",$this->getLang('th_description'),$bodyhtml);
+        $frmt_descr = str_ireplace(chr(10),"<br />",$issue['description']);
+        $bodyhtml = str_ireplace("%%DESCRIPTION%%",$this->xs_format($frmt_descr),$bodyhtml);
+        
+                        
+        if($comment) {
+            $bodyhtml = str_ireplace("%%lbl_cmts_wlog%%",$this->getLang('lbl_cmts_wlog'),$bodyhtml);
+            $bodyhtml = str_ireplace("%%CMNT_ID%%",$comment['id'],$bodyhtml);
+            $bodyhtml = str_ireplace("%%CMNT_AUTHOR%%",$comment['author'],$bodyhtml);
+            $bodyhtml = str_ireplace("%%CMNT_TIMESTAMP%%",date($this->getConf('d_format'),strtotime($comment['timestamp'])),$bodyhtml);
+            $frmt_cmnt = str_ireplace(chr(10),"<br />",$comment['comment']);
+            $bodyhtml = str_ireplace("%%COMMENT%%",$this->xs_format($frmt_cmnt),$bodyhtml);
+        }
+        $bodyhtml = str_ireplace("%%issuemod_br%%",$this->getLang('issuemod_br'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_end%%",$this->getLang('issuemod_end'),$bodyhtml);
+        
+//        echo $bodyhtml;
+        
+        return $bodyhtml;
     }
 /******************************************************************************/
 /* pic-up a single value
@@ -1998,24 +2141,24 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
     function it_edit_toolbar($type) {
         $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
         $it_edit_tb  = '<div class="it_edittoolbar">'.NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','$type')\">".NL;
-        $it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/ordered.png\" name=\"btnList\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/unordered.png\" name=\"btnList\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','$type')\">".NL; 
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/img.png\" name=\"btn_img\" title=\"Image - max width 850px\" onClick=\"doAddTags('[img]','[/img]','$type')\">".NL;
-      	$it_edit_tb .= "<a href=\"http://www.imageshack.us/\" target=\"_blank\"><<img class=\"xseditor_button\" src=\"".$imgBASE."/imageshack.png\" name=\"btn_ishack\" title=\"ImageShack upload (ext TaC !)\">></a>".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','$type')\">".NL;
+        $it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."ordered.png\" name=\"btn_o_List\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."unordered.png\" name=\"btn_u_List\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','$type')\">".NL; 
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."img.png\" name=\"btn_img\" title=\"Image - max width 850px\" onClick=\"doAddTags('[img]','[/img]','$type')\">".NL;
+      	$it_edit_tb .= "<a href=\"http://www.imageshack.us/\" target=\"_blank\"><<img class=\"xseditor_button\" src=\"".$imgBASE."imageshack.png\" name=\"btn_ishack\" title=\"ImageShack upload (ext TaC !)\">></a>".NL;
         $it_edit_tb .= "<br></div>".NL; 
         return $it_edit_tb;                     
     }

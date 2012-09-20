@@ -18,11 +18,15 @@ Intro
  visible information (column wise) displayed to the users, which not necessarily
  of interest by them.
  
- Members of configured 'assign'groups are able to edit the entries of the issue
+ Members of configured 'assign' groups are able to edit the entries of the issue
  list and see the complete set of details. The issue list is sortable on all 
  columns. The email addresses of this group members are automatically loaded
  into the lists select box to be easily set as issue related contact.
  
+ Please read the complete and most recent plugin description at:
+ http://www.fristercons.de/fcon/doku.php?id=issuetracker:descr
+ 
+
 Syntax
 ------- 
  Simply place the following syntax into the page markup of 2 different pages: 
@@ -141,8 +145,9 @@ Examples/Usage
 
 4. General Info 
 ----------------
- There are multiple files created. First there is a project fle containing all 
+ There are multiple files created. First there is a project file containing all 
  issue information except comments. Each issue will have a related comments file
- where the communication is stored to. All files are stored to data/meta 
- directory with file extension ”.issue” or ”.cmnts”.
+ where the communication is stored to. Additionally a status log file will 
+ provide an overview when the status changed and by whom. All files are stored 
+ to data/meta directory with file extension ”.issue” or ”.cmnts”.
  

@@ -11,7 +11,7 @@ $lang['msg_reporttrue']   = 'Ticket wurde gespeichert #';
 $lang['wmsg1']     = 'Bitte geben Sie eine gültige E-Mail Adresse ein!';
 $lang['wmsg2']     = 'Bitte geben Sie eine gültige Produkt-Version ein!';
 $lang['wmsg3']     = 'Bitte geben Sie einen beschreibenden Text ein!';
-$lang['wmsg4']     = '&nbsp;Bitte erst <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">einloggen</a> um ein Ticket zu speichern!';
+$lang['wmsg4']     = '&nbsp;Bitte erst <a href="?do=login&amp" class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">einloggen</a> um ein Ticket zu speichern!';
 $lang['wmsg5']     = 'Der Titel/Betreff ist nicht aussagekräftig!';
 $lang['btn_reportsave']   = 'Absenden';
 // further settings see 'th_...' options at Issue List controls section below 
@@ -98,6 +98,8 @@ $lang['cmt_tab_open']        = 'Kommentar hinzuf&uuml;gen';
 $lang['cmt_tab_mod']         = 'Kommentar &auml;ndern';
 $lang['rsl_tab_open']        = 'L&ouml;sung hinzuf&uuml;gen/&auml;ndern';
 $lang['dtls_usr_hidden']     = 'Benutzerdaten ausgeblendet';
+$lang['minor_mod']           = 'kleine &Auml;nderung';
+$lang['minor_mod_cbx_title'] = 'keine eMails bei kleinen  &Auml;nderungen';
 /******************************************************************************/
 /* send an e-mail to user due to issue modificaion
 /* _emailForIssueMod
@@ -148,10 +150,10 @@ $lang['issuenew_descr']      = 'Beschreibung:  ';
 /* deviations from before for send an e-mail to assignee
 /* _emailForNewIssue
 */
-$lang['issueassigned_subject'] = ' - Wiki IssueTracker - Ticket %s wurde Ihnen zugewiesen';
-$lang['issueassigned_head']  = 'Hallo!';
-$lang['issueassigned_intro'] = 'Ihnen wurde folgendes Ticket zugewiesen:';
-
+$lang['issueassigned_subject']  = ' - Wiki IssueTracker - Ticket %s wurde Ihnen zugewiesen';
+$lang['issueassigned_head']     = 'Hallo!';
+$lang['issueassigned_intro']    = 'Ihnen wurde folgendes Ticket zugewiesen:';
+$lang['it__none']               = '--';
 /******************************************************************************/
 /* following text is related to search feature                                
 */

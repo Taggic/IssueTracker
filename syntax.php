@@ -426,20 +426,20 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     if ($noStatIMG === false) {                    
                         $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_status))).'.gif';
 //                                if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
-                        $status_img =' align="center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/></td>'.NL;
+                        $status_img =' align="center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/>'.NL;
                     }                    
                     else { $status_img = $style.$a_status; }
                     // check if severity image or text to be displayed                                            
                     if ($noSevIMG === false) {                    
                         $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_severity))).'.gif';
 //                                if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
-                        $severity_img =' align="center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/></td>'.NL;
+                        $severity_img =' align="center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/>'.NL;
                     }
                     else { $severity_img = $style.$a_severity; }
                     
                     // build parameter for $_GET method
                         $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
-                        $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a></td>'.NL;
+                        $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a>'.NL;
 
                         if($rowEven==="it_roweven") $rowEven="it_rowodd";
                         else $rowEven="it_roweven";                    
@@ -639,91 +639,148 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     {
         if ($this->getConf('send_email')==1)
         {   global $ID;
+            
+            if ($this->getConf('mail_templates')==1) {
+              // load user html mail template
+              $sFilename = DOKU_PLUGIN.'issuetracker/mailtemplate/new_issue_mail.html';
+              $bodyhtml = file_get_contents($sFilename);
+            }
             $subject=sprintf($this->getLang('issuenew_subject'),$issue['severity'], $project, $issue['product'],$issue['version']);
             $subject= mb_encode_mimeheader($subject, "UTF-8", "Q" );
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
 
             $body = $this->getLang('issuenew_head').chr(10).chr(10).
                     $this->getLang('issuenew_intro').chr(10).
+                    $this->getLang('issuemod_title').$issue['title'].chr(10).
                     $this->getLang('issuemod_issueid').$issue['id'].chr(10).
                     $this->getLang('issuemod_product').$issue['product'].chr(10).
                     $this->getLang('issuemod_version').$issue['version'].chr(10).
                     $this->getLang('issuemod_severity').$issue['severity'].chr(10).
+                    $this->getLang('issuemod_status').$issue['status'].chr(10).
                     $this->getLang('issuemod_creator').$issue['user_name'].chr(10).chr(10).
-                    $this->getLang('issuemod_title').$issue['title'].chr(10).
                     $this->getLang('issuenew_descr').$this->xs_format($issue['description']).chr(10).chr(10).
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$this->getLang('issuemod_end');
 
             $body = html_entity_decode($body);
-//            echo $subject.'<br />'.$body.'<br /><br />';
+            if ($this->getConf('mail_templates')==1) $bodyhtml = $this->replace_bodyhtml($bodyhtml, $pstring, $project, $issue, $comment);
             $from=$this->getConf('email_address') ;
             $to=$from;
-            mail_send($to, $subject, $body, $from, $cc='', $bcc='', $headers=null, $params=null);
+            $cc=$issue['add_user_mail'];
+            $headers = "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
+            $this->mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
         }     
     }
 
 /******************************************************************************/
-/* send an e-mail to user due to issue resolution
-*/                            
-    function _emailForResolution($project,$issue)
-    {  if ($this->getConf('userinfo_email')==1)
-        {   global $ID;
-            $subject = sprintf($this->getLang('issue_resolved_subject'),$issue['id'], $project);            
-            $subject= mb_encode_mimeheader($subject, "UTF-8", "Q" );
-            $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
-            
-            $body = $this->getLang('issuemod_head').chr(10).chr(10).
-                    $this->getLang('issue_resolved_intro').chr(10).chr(13).
-                    $this->getLang('issuemod_issueid').$issue['id'].chr(10).
-                    $this->getLang('issuemod_status').$issue['status'].chr(10).
-                    $this->getLang('issuemod_product').$issue['product'].chr(10).
-                    $this->getLang('issuemod_version').$issue['version'].chr(10).chr(10).
-                    $this->getLang('issue_resolved_text').$this->xs_format($issue['resolution']).chr(10).chr(10).
-                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
-                    $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
+    /***********************************
+     * HTML Mail functions
+     *
+     * Sends HTML-formatted mail
+     * By Lin Junjie (mail [dot] junjie [at] gmail [dot] com)
+     *
+     ***********************************/
+    function mail_send_html($to, $subject, $body, $bodyhtml, $from='', $cc='', $bcc='', $header='', $params=null){
+      if(defined('MAILHEADER_ASCIIONLY')){
+        $subject = utf8_deaccent($subject);
+        $subject = utf8_strip($subject);
+      }
+      if(!defined('MAILHEADER_EOL')) define('MAILHEADER_EOL',"\n");
+      if(!utf8_isASCII($subject)) {
+        $subject = '=?UTF-8?Q?'.mail_quotedprintable_encode($subject,0).'?=';
+        // Spaces must be encoded according to rfc2047. Use the "_" shorthand
+        $subject = preg_replace('/ /', '_', $subject);
+      }
+     
+      $header  = '';
+     
+      $usenames = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') ? false : true;
+     
+      $random_hash = md5(date('r', time())); // added
+     
+      $to = mail_encode_address($to,'',$usenames);
+      $header .= mail_encode_address($from,'From');
+      $header .= mail_encode_address($cc,'Cc');
+      $header .= mail_encode_address($bcc,'Bcc');
+      $header .= 'MIME-Version: 1.0'.MAILHEADER_EOL;
+      $header .= "Content-Type: multipart/alternative; boundary=PHP-alt-".$random_hash.MAILHEADER_EOL;
+      $header  = trim($header);
+     
 
-            $body = html_entity_decode($body);
-//            echo $subject.'<br />'.$body.'<br /><br />';
-            $from=$this->getConf('email_address') ;
-            $to=$issue['user_mail'];
-            $cc=$issue['add_user_mail'];
-            mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
-        }
+      $body = mail_quotedprintable_encode($body);
+      $bodyhtml = mail_quotedprintable_encode($bodyhtml);
+
+      $message =	"--PHP-alt-".$random_hash."\r\n".
+    				"Content-Type: text/plain; charset=UTF-8"."\n".
+    				"Content-Transfer-Encoding: quoted-printable"."\n\n".
+    				$body."\n\n".
+    				"--PHP-alt-".$random_hash."\r\n".
+    				"Content-Type: text/html; charset=UTF-8"."\n".
+    				"Content-Transfer-Encoding: quoted-printable"."\n\n".
+    				$bodyhtml."\n".
+    				"--PHP-alt-".$random_hash."--";
+     
+      if($params == null){
+        return @mail($to,$subject,$message,$header);
+      }else{
+        return @mail($to,$subject,$message,$header,$params);
+      }
     }
 /******************************************************************************/
-/* send an e-mail to user due to issue modificaion
-*/
-    function _emailForIssueMod($project,$issue,$comment)
-    {
-        if ($this->getConf('userinfo_email')==1)
-        {   global $ID;
-            $subject = sprintf($this->getLang('issuemod_subject'),$issue['id'], $project);
-            $subject= mb_encode_mimeheader($subject, "UTF-8", "Q" );            
-            $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
-            
-            $body = $this->getLang('issuemod_head').chr(10).chr(10).
-                    $this->getLang('issuemod_intro').chr(10).chr(13).
-                    $this->getLang('issuemod_issueid').$issue['id'].chr(10).
-                    $this->getLang('issuemod_status').$issue['status'].chr(10).
-                    $this->getLang('issuemod_product').$issue['product'].chr(10).
-                    $this->getLang('issuemod_version').$issue['version'].chr(10).
-                    $this->getLang('issuemod_severity').$issue['severity'].chr(10).
-                    $this->getLang('issuemod_creator').$issue['user_name'].chr(10).chr(10).
-                    $this->getLang('issuemod_title').$issue['title'].chr(10).
-                    $this->getLang('issuemod_cmntauthor').$comment['author'].chr(10).
-                    $this->getLang('issuemod_date').date($this->getConf('d_format'),strtotime($comment['timestamp'])).chr(10).chr(10).
-                    $this->getLang('issuemod_cmnt').chr(10).$this->xs_format($comment['comment']).chr(10).chr(10).
-                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
-                    $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end');
+    function replace_bodyhtml($bodyhtml, $pstring, $project, $issue, $comment) {
+        global $ID;
+        $bodyhtml = str_ireplace("%%_SEE%%",DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring,$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_head%%",$this->getLang('issuemod_head'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_issueid%%",$this->getLang('issuemod_issueid'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%ID%%",$issue['id'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_title%%",$this->getLang('issuemod_title'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%TITEL%%",$issue['title'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_status%%",$this->getLang('issuemod_status'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%STATUS%%",$issue['status'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%th_project%%",$this->getLang('th_project'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%PROJECT%%",$project,$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_product%%",$this->getLang('issuemod_product'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%PRODUCT%%",$issue['product'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_version%%",$this->getLang('issuemod_version'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%VERSION%%",$issue['version'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_severity%%",$this->getLang('issuemod_severity'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%SEVERITY%%",$issue['severity'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_creator%%",$this->getLang('issuemod_creator'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%CREATOR%%",$issue['user_name'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%th_assigned%%",$this->getLang('th_assigned'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%ASSIGNED%%",$issue['assigned'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%th_created%%",$this->getLang('th_created'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%CREATED%%",$issue['created'],$bodyhtml);
 
-            $body = html_entity_decode($body);
-//            echo $subject.'<br />'.$body.'<br /><br />';
-            $from=$this->getConf('email_address') ;
-            $to=$issue['user_mail'];
-            $cc=$issue['add_user_mail'];
-            mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
+
+        $bodyhtml = str_ireplace("%%issue_resolved_intro%%",$this->getLang('issue_resolved_intro'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%issue_resolved_text%%",$this->getLang('issue_resolved_text'),$bodyhtml);
+        $frmt_res = str_ireplace(chr(10),"<br />",$issue['resolution']);
+        $bodyhtml = str_ireplace("%%RESOLUTION%%",$this->xs_format($frmt_res),$bodyhtml);
+        $bodyhtml = str_ireplace("%%TIMESTAMP%%",date($this->getConf('d_format')),$bodyhtml);
+        
+        $user_grp = pageinfo();        
+        $usr      = $user_grp['userinfo']['name'] ; 
+        $bodyhtml = str_ireplace("%%RESOLVER%%",$usr,$bodyhtml);
+        $bodyhtml = str_ireplace("%%MOD_BY%%",$usr,$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuedescrmod_subject%%",sprintf($this->getLang('issuedescrmod_subject'),$issue['id'], $project),$bodyhtml);
+        $bodyhtml = str_ireplace("%%th_description%%",$this->getLang('th_description'),$bodyhtml);
+        $frmt_descr = str_ireplace(chr(10),"<br />",$issue['description']);
+        $bodyhtml = str_ireplace("%%DESCRIPTION%%",$this->xs_format($frmt_descr),$bodyhtml);
+        
+                        
+        if($comment) {
+            $bodyhtml = str_ireplace("%%lbl_cmts_wlog%%",$this->getLang('lbl_cmts_wlog'),$bodyhtml);
+            $bodyhtml = str_ireplace("%%CMNT_ID%%",$comment['id'],$bodyhtml);
+            $bodyhtml = str_ireplace("%%CMNT_AUTHOR%%",$comment['author'],$bodyhtml);
+            $bodyhtml = str_ireplace("%%CMNT_TIMESTAMP%%",date($this->getConf('d_format'),strtotime($comment['timestamp'])),$bodyhtml);
+            $frmt_cmnt = str_ireplace(chr(10),"<br />",$comment['comment']);
+            $bodyhtml = str_ireplace("%%COMMENT%%",$this->xs_format($frmt_cmnt),$bodyhtml);
         }
+        $bodyhtml = str_ireplace("%%issuemod_br%%",$this->getLang('issuemod_br'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_end%%",$this->getLang('issuemod_end'),$bodyhtml);
+        
+        return $bodyhtml;
     }
 /******************************************************************************/
 /*  Report an Issue 
@@ -739,11 +796,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $cur_date = date('Y-m-d G:i:s');
         $user_check = $this->getConf('registered_users');
 
-        $_cFlag = false;             
-        if($user_check == false) {
-            if ($user_mail['perm'] > 1) 
+        $_cFlag = false;
+        if($user_check == 0) {
+            if ($user_mail['perm'] >= 1) 
             { $_cFlag = true; } }             
-        elseif ($user_check == true) {
+        elseif ($user_check == 1) {
             if ($user_mail['perm'] > 1) 
             { $_cFlag = true; } }
 
@@ -760,7 +817,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 if(strtoupper ($_products) == strtoupper ($data['product'])) { $option_param = '<option value="'.$_products.'" selected >'; }
                 else { $option_param = '<option value="'.$_products.'" >'; }
                 
-                $STR_PRODUCTS = $STR_PRODUCTS . $option_param .$_products."</option>'     ";
+                $STR_PRODUCTS = $STR_PRODUCTS . $option_param .$_products."</option>".NL;
             }
             
             /*--------------------------------------------------------------------*/
@@ -771,7 +828,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             foreach ($severity as $_severity)
             {
                 $_severity = trim($_severity);
-                $STR_SEVERITY = $STR_SEVERITY . '<option value="'.$_severity.'" >'.$_severity."</option>'     ";
+                $STR_SEVERITY = $STR_SEVERITY . '<option value="'.$_severity.'" >'.$_severity."</option>".NL;
             }
             
             // a file to store the comments regarding an issue going for and back
@@ -779,7 +836,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             /*--------------------------------------------------------------------*/
             // create the report template and check input on client site
             /*--------------------------------------------------------------------*/
-            $ret = '<div class="it__cir_form"><script>
+            $ret = '<div class="it__cir_form"><script type="text/javascript">
                    // JavaScript Document
                     function chkFormular (frm) {
                         if (frm.product.value == "") {
@@ -819,22 +876,22 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                           return false;
                       	}
                     }
-                   </script>'.
-                   '<form class="issuetracker__form" name="issuetracker__form" method="post" onsubmit="return chkFormular(this)"'.'" accept-charset="'.$lang['encoding'].' enctype="multipart/form-data" ><p>';
+                   </script>'.NL.
+                   '<form class="issuetracker__form" name="issuetracker__form" method="post" onsubmit="return chkFormular(this)" accept-charset="'.$lang['encoding'].'" enctype="multipart/form-data" ><p>'.NL;
             $ret .= formSecurityToken(false).
-            '<input type="hidden" name="do" value="show" />'.
-            '<input type="hidden" name="id" value="'.$ID.'" />'.
-            '<input type="hidden" name="created" type="text" value="'.$cur_date.'"/>'.
-            '<input type="hidden" name="comments" type="text" value="'.$comments_file.'"/>'.
+            '<input type="hidden" name="do" value="show" />'.NL.
+            '<input type="hidden" name="id" value="'.$ID.'" />'.NL.
+            '<input type="hidden" name="created" value="'.$cur_date.'"/>'.NL.
+            '<input type="hidden" name="comments" value="'.$comments_file.'"/></p>'.NL.
             '<table>
               <tr>
                 <td>'.$this->getLang('th_project').'</td>
                 <td><label class="it__cir_projectlabel">'.$project.'</label></td>
-              </tr>'.
+              </tr>'.NL.
              '<tr>
                 <td>'.$this->getLang('th_product').'</td>
                 <td><select class="element select small it__cir_select" name="product">'.$STR_PRODUCTS.'</select></td>
-              </tr>'.
+              </tr>'.NL.
              '<tr>';
                    //Check config if hidden
                   if(strpos($this->getConf('ltdReport'),'Version')!==false){
@@ -845,16 +902,16 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                       $ret .= ' <td>'.$this->getLang('th_version').'</td>
                                 <td><input class="it__cir_input" name="version" value="'.$STR_VERSIONS.'"/></td>';
                   }             
-        $ret .= '</tr>'.
-             '<tr><td colspan=2>&nbsp;</td></tr>'.
+        $ret .= '</tr>'.NL.
+             '<tr><td colspan=2>&nbsp;</td></tr>'.NL.
              '<tr>
                 <td>'.$this->getLang('th_username').'</td>
                 <td><input class="it__cir_input" name="user_name" value="'.$user_mail['userinfo']['name'].'"/></td>
-              </tr>'.
+              </tr>'.NL.
              '<tr>
                 <td>'.$this->getLang('th_usermail').'</td>
                 <td><input class="it__cir_input" name="user_mail" value="'.$user_mail['userinfo']['mail'].'"/></td>
-              </tr>'.
+              </tr>'.NL.
              '<tr>';
                   //Check config if hidden
                   if(strpos($this->getConf('ltdReport'),'User phone')!==false){
@@ -864,7 +921,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                       $ret .= ' <td>'.$this->getLang('th_userphone').'</td>
                                 <td><input class="it__cir_input" name="user_phone" value="'.$user_phone['userinfo']['phone'].'"/></td>';
                   }             
-              $ret .= '</tr>'.
+              $ret .= '</tr>'.NL.
              '<tr>';
                    //Check config if hidden
                   if(strpos($this->getConf('ltdReport'),'Add contact')!==false){
@@ -874,8 +931,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                       $ret .= ' <td>'.$this->getLang('th_reporteradcontact').'</td>
                                 <td><input class="it__cir_input" name="add_user_mail" value="'.$_REQUEST['add_user_mail'].'"/></td>';
                   }             
-        $ret .= '</tr>'.
-            '<tr><td colspan=2>&nbsp;</td></tr>'.
+        $ret .= '</tr>'.NL.
+            '<tr><td colspan=2>&nbsp;</td></tr>'.NL.
             '<tr>';
                    //Check config if hidden
                   if(strpos($this->getConf('ltdReport'),'Severity')!==false){
@@ -887,17 +944,17 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                       $ret .= ' <td>'.$this->getLang('th_severity').'</td>
                                 <td><select class="element select small it__cir_select" name="severity">'.$STR_SEVERITY.'</select></td>';
                   }             
-        $ret .= '</tr>'.
+        $ret .= '</tr>'.NL.
             '<tr>
                 <td>'.$this->getLang('th_title').'</td>
-                <td><input class="it__cir_linput" name="title" value="'.$_REQUEST['title'].'"/></input></td>
-             </tr>'.
+                <td><input class="it__cir_linput" name="title" value="'.$_REQUEST['title'].'"/></td>
+             </tr>'.NL.
             '<tr>
                 <td>'.$this->getLang('th_description').'</td>
-                <td>';
+                <td>'.NL;
 
 // mod for editor ---------------------------------------------------------------------
-$ret .= '<script>
+$ret .= '<script type="text/javascript">
           function doHLine(tag1,obj)
           { textarea = document.getElementById(obj);
           	if (document.selection) 
@@ -1034,25 +1091,25 @@ $ret .= '<script>
                   } 
                   else {
                       $ret .= '<tr><td>'.$this->getLang('th_sympt').'1</td>
-                                   <td><input class="it__cir_linput" name="attachment1" value="'.$_REQUEST['attachment1'].'"/></td></tr>';
+                                   <td><input type="text" class="it__cir_linput" name="attachment1" value="'.$_REQUEST['attachment1'].'"/></td></tr>';
                   }             
                   if(strpos($this->getConf('ltdReport'),'Symptom link 2')!==false){
                       $ret .= ' <input type="hidden" class="it__cir_linput" name="attachment2" value="'.$_REQUEST['attachment2'].'"/>';
                   } 
                   else {
                       $ret .= '<tr><td>'.$this->getLang('th_sympt').'2</td>
-                                   <td><input class="it__cir_linput" name="attachment2" value="'.$_REQUEST['attachment2'].'"/></td></tr>';
+                                   <td><input type="text" class="it__cir_linput" name="attachment2" value="'.$_REQUEST['attachment2'].'"/></td></tr>';
                   }             
                   if(strpos($this->getConf('ltdReport'),'Symptom link 3')!==false){
                       $ret .= ' <input type="hidden" class="it__cir_linput" name="attachment3" value="'.$_REQUEST['attachment3'].'"/>';
                   } 
                   else {
                       $ret .= '<tr><td>'.$this->getLang('th_sympt').'3</td>
-                                   <td><input class="it__cir_linput" name="attachment3" value="'.$_REQUEST['attachment3'].'"/></td></tr>';
+                                   <td><input type="text" class="it__cir_linput" name="attachment3" value="'.$_REQUEST['attachment3'].'"/></td></tr>';
                   }
                                
-        $ret .= '</table><p><input type="hidden" name="modified" type="text" value="'.$cur_date.'"/>'.
-                '<input type="hidden" name="assigned" type="text" value="" />';
+        $ret .= '</table><p><input type="hidden" name="modified" value="'.$cur_date.'"/>'.NL.
+                '<input type="hidden" name="assigned" value="" />'.NL;
     
             if ($this->getConf('use_captcha')==1) 
             {        
@@ -1066,8 +1123,8 @@ $ret .= '<script>
       			    }
             }
          //<input name="do[save]" type="submit" value="Save" class="button" id="edbtn__save" accesskey="s" tabindex="4" title="Save [S]" />
-            $ret .= '<p><input name="submit" type="submit" value="'.$this->getLang('btn_reportsave').'" class="button" id="edbtn__save" title="'.$this->getLang('btn_reportsave').'"/>'.
-            '</p></form></div>';
+            $ret .= '</p><p><input name="submit" type="submit" value="'.$this->getLang('btn_reportsave').'" class="button" id="edbtn__save" title="'.$this->getLang('btn_reportsave').'"/>'.
+            '</p></form></div>'.NL;
         }
         // the user maybe registered within group "all" but the registered flag is turned on
         // eigther the user has to be moved into group "user" or the flag to be switched off
@@ -1283,24 +1340,24 @@ address format and the domain exists.
     function it_edit_toolbar($type) {
         $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
         $it_edit_tb  = '<div class="itr_edittoolbar">'.NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','$type')\">".NL;
-        $it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/ordered.png\" name=\"btnList\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/unordered.png\" name=\"btnList\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','$type')\">".NL; 
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','$type')\">".NL;
-      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."/img.png\" name=\"btn_img\" title=\"Image - max width 850px\" onClick=\"doAddTags('[img]','[/img]','$type')\">".NL;
-      	$it_edit_tb .= "<a href=\"http://www.imageshack.us/\" target=\"_blank\"><<img class=\"xseditor_button\" src=\"".$imgBASE."/imageshack.png\" name=\"btn_ishack\" title=\"ImageShack upload (ext TaC !)\">></a>".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','$type')\">".NL;
+        $it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."italic.png\" name=\"btnItalic\" title=\"Italic\" onClick=\"doAddTags('[i]','[/i]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."underline.png\" name=\"btnUnderline\" title=\"Underline\" onClick=\"doAddTags('[u]','[/u]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."strikethrough.png\" name=\"btnStrike\" title=\"Strike through\" onClick=\"doAddTags('[s]','[/s]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."subscript.png\" name=\"btnSubscript\" title=\"Subscript\" onClick=\"doAddTags('[sub]','[/sub]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."superscript.png\" name=\"btnSuperscript\" title=\"Superscript\" onClick=\"doAddTags('[sup]','[/sup]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."hr.png\" name=\"btnLine\" title=\"hLine\" onClick=\"doHLine('[hr]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."ordered.png\" name=\"btn_o_List\" title=\"Ordered List\" onClick=\"doList('[ol]','[/ol]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."unordered.png\" name=\"btn_u_List\" title=\"Unordered List\" onClick=\"doList('[ul]','[/ul]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."quote.png\" name=\"btnQuote\" title=\"Quote\" onClick=\"doAddTags('[blockquote]','[/blockquote]','$type')\">".NL; 
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."code.png\" name=\"btnCode\" title=\"Code\" onClick=\"doAddTags('[code]','[/code]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."pen_red.png\" name=\"btnRed\" title=\"Red\" onClick=\"doAddTags('[red]','[/red]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."pen_green.png\" name=\"btnGreen\" title=\"Green\" onClick=\"doAddTags('[grn]','[/grn]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."pen_blue.png\" name=\"btnBlue\" title=\"Blue\" onClick=\"doAddTags('[blu]','[/blu]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."bg_yellow.png\" name=\"btn_bgYellow\" title=\"bgYellow\" onClick=\"doAddTags('[bgy]','[/bgy]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."link.png\" name=\"btn_link\" title=\"Link\" onClick=\"doAddTags('[link]','[/link]','$type')\">".NL;
+      	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."img.png\" name=\"btn_img\" title=\"Image - max width 850px\" onClick=\"doAddTags('[img]','[/img]','$type')\">".NL;
+      	$it_edit_tb .= "<a href=\"http://www.imageshack.us/\" target=\"_blank\"><<img class=\"xseditor_button\" src=\"".$imgBASE."imageshack.png\" name=\"btn_ishack\" title=\"ImageShack upload (ext TaC !)\">></a>".NL;
         $it_edit_tb .= "<br></div>".NL; 
         return $it_edit_tb;                     
     }

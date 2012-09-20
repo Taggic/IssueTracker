@@ -5,9 +5,10 @@
 
 $conf['d_format']          = 'Y-m-d G:i:s';
 $conf['send_email']        = 0;                                                                  // Send email off by default 
+$conf['mail_templates']    = 0;                                                                  // Send html email off by default
 $conf['email_address']     = 'email@yourdomain.com';                                             // Who will be informed about new issues ?
-$conf['registered_users']  = true;                                                               // only registered users with edit permission on issue tracker page are allowed to create reports and add comments
-$conf['auth_ad_overflow']  = false;
+$conf['registered_users']  = 1;                                                               // only registered users with edit permission on issue tracker page are allowed to create reports and add comments
+$conf['auth_ad_overflow']  = 0;
 $conf['userinfo_email']              = 1;                                                        // Global mail switch 
 $conf['mail_add_comment']            = 1;
 $conf['mail_modify_comment']         = 1;

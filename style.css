@@ -32,7 +32,7 @@
 	background-color: #f0f0f0;
 }
 
-/* ----- Report Elemnts ------------ */
+/* ----- Report Elements ------------ */
 div.it__cir_form {
 }
 .it__cir_projectlabel {
@@ -44,7 +44,6 @@ div.it__cir_form {
 	float:                    left;
 	padding-left:           0.45em;
 	margin-left:               2em;
-	type:                   "text";
 	width:                    15em;
 	border:      1px solid #CED2DB;
 	border-radius:             3px;
@@ -145,7 +144,6 @@ TABLE.itl__t1 {
   width:                   100%;
   background-color:     #f0f0f0;
   border:     1px solid #CED2DB;
-  rules:                 groups;
 }
             
 /* ----- Issue Detail Elements ----- */
@@ -157,10 +155,10 @@ TABLE.itd__title {
 	border-spacing:           0px;
 }
 table.itd__title TR TD {
-	vertical-align:         center;
+	vertical-align:         middle;
 }
 table.itd__title TR TD P {
-	vertical-align:         center;
+	vertical-align:         middle;
 	border-width:              1px;
 	border-color:          #9999FF;
 	border-style:           outset;
@@ -207,7 +205,7 @@ table.itd_tr_standard {
 	font-weight:              bold;
 	white-space:            nowrap;
 	text-align:               left;
-	vertical-align:         center;
+	vertical-align:         middle;
   padding-left:             12px;
 	border-radius:             3px;
 }
@@ -285,6 +283,13 @@ table.itd_tr_standard {
 }
 .xseditor_button:hover {
   background-color:      #E0E0E0;
+}
+
+fieldset.minor_mod {
+  border: 0 !important;
+  width:15em !important;
+  height:1.5em !important;
+  margin-bottom:-2em !important;
 }
 
 .cmt_mod_exclamation {

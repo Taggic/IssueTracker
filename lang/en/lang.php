@@ -11,7 +11,7 @@ $lang['msg_reporttrue'] = 'Your report has been successfully stored as issue #';
 $lang['wmsg1'] = 'Please enter valid eMail address, preferrably your own, for clarifications and/or feedback regarding your reported issue.';
 $lang['wmsg2'] = 'Please enter a valid product version to relate this issue properly.';
 $lang['wmsg3'] = 'Please provide a better description of your issue.';
-$lang['wmsg4'] = '&nbsp;Please <a href="?do=login&amp class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">Sign in</a> if you want to report an issue.';
+$lang['wmsg4'] = '&nbsp;Please <a href="?do=login&amp" class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">Sign in</a> if you want to report an issue.';
 $lang['wmsg5'] = 'Please provide a descriptive issue title.';
 $lang['btn_reportsave'] = 'Submit';
 // further settings see 'th_...' options at Issue List controls section below 
@@ -98,6 +98,8 @@ $lang['cmt_tab_open']           = 'add Comment';
 $lang['cmt_tab_mod']            = 'modify Comment';
 $lang['rsl_tab_open']           = 'add / modify Resolution';
 $lang['dtls_usr_hidden']        = 'user details hidden';
+$lang['minor_mod']              = 'Minor change';
+$lang['minor_mod_cbx_title']    = 'prevent sending eMails upon cosmetic changes';
 /******************************************************************************/
 /* send an e-mail to user due to issue modificaion
 /* _emailForIssueMod
@@ -108,7 +110,7 @@ $lang['cmnt_del_subject']       = 'Issue #%s on %s: comment deleted';   // $issu
 $lang['cmt_del_intro']          = 'A comment was deleted.';
 $lang['issuemod_subject']       = 'Issue #%s on %s: %s'; //$issue['id'], $project, $column
 $lang['issuemod_head']          = 'Dear user,';
-$lang['issuemod_intro']         = 'Your reported issue got a new comment.';
+$lang['issuemod_intro']         = 'Your reported issue was modified.';
 $lang['issuemod_issueid']       = 'ID:     ';
 $lang['issuemod_status']        = 'Status:   ';
 $lang['issuemod_product']       = 'Product:   ';
@@ -150,7 +152,7 @@ $lang['issuenew_descr']         = 'Description:  ';
 $lang['issueassigned_subject']  = ' issue %s assigned to you';
 $lang['issueassigned_head']     = 'Hi,';
 $lang['issueassigned_intro']    = 'you are assigned to following Issue:';
-
+$lang['it__none']               = '--';
 /******************************************************************************/
 /* following text is related to search feature                                
 */

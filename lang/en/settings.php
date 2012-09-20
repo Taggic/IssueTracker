@@ -9,10 +9,11 @@
 // for the configuration manager
 $lang['d_format']         = 'Y-m-d G:i:s';
 $lang['send_email']       = 'Inform by mail about new issues ?'; 
+$lang['mail_templates']       = 'Use of html email templates ?';
 $lang['email_address']    = 'Who is to be informed ?';
 $lang['registered_users'] = 'Only registered users with edit permission on issue <br> tracker page are allowed to create reports and add comments';
 $lang['auth_ad_overflow'] = 'Prevent AUTH:AD overflow';
-$lang['userinfo_email']   = 'Inform user by mail about issue modifications ? (gloabl switch)';
+$lang['userinfo_email']   = 'Inform user by mail about issue modifications ? (global switch)';
 $lang['mail_add_comment']         = 'inform about new comments';
 $lang['mail_modify_comment']      = 'inform about comment modification';
 $lang['mail_add_resolution']      = 'inform about resolution entry';
