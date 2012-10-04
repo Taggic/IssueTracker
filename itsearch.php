@@ -4,6 +4,7 @@
 /*----------------------------------------------------------------------------*/
 //function it_simple_search ($project, &$renderer) {
     global $ID;
+    global $conf;
     $Generated_Header  = '';
     $Generated_Scripts = '';
     $Generated_Report  = '';
@@ -18,7 +19,8 @@
     
 //---------------------------------------------------------------------------------------
 //  1. get issue file content                                                 
-    $pfile = metaFN($project, '.issues');   
+    if($conf['plugin']['issuetracker']['it_data']==false) $pfile = DOKU_INC."data/meta/".$project.'.issues';
+    else $pfile = DOKU_INC. $conf['plugin']['issuetracker']['it_data'].$project.'.issues';   
     if (@file_exists($pfile))
         {  $issues  = unserialize(@file_get_contents($pfile));}
     else
@@ -29,7 +31,8 @@
 //  2. loop through single issues                                             
     foreach($issues as $issue) {
        $issue_string = implode($issue);
-       $comments_file = metaFN($project."_".$issue['id'], '.cmnts');
+       if($conf['plugin']['issuetracker']['it_data']==false) $comments_file = DOKU_INC."data/meta/".$project."_".$issue['id']. '.cmnts';
+       else $comments_file = DOKU_INC. $conf['plugin']['issuetracker']['it_data'].$project."_".$issue['id']. '.cmnts';
        $comments ='';
        if (@file_exists($comments_file))  {  $comments  = @file_get_contents($comments_file);  }
 
@@ -70,7 +73,8 @@
         }
         if($cnt_c_findings > -1) {
           foreach($ref_findings['comment'] as $item) {
-              $comments_file = metaFN($project."_".$item['id'], '.cmnts');
+              if($conf['plugin']['issuetracker']['it_data']==false) $comments_file = DOKU_INC."data/meta/".$project."_".$item['id']. '.cmnts';
+              else $comments_file = DOKU_INC. $conf['plugin']['issuetracker']['it_data'].$project."_".$item['id']. '.cmnts';
               $comments      = unserialize(@file_get_contents($comments_file));
               $link          = 'doku.php?id='.$ID.'&do=showcaselink&showid='.$item['id'].'&project='.$project;
               $is_txt        = '<b>&raquo;</b> '.$this->getLang('search_Issue');

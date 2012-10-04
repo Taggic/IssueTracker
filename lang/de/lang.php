@@ -13,6 +13,11 @@ $lang['wmsg2']     = 'Bitte geben Sie eine gültige Produkt-Version ein!';
 $lang['wmsg3']     = 'Bitte geben Sie einen beschreibenden Text ein!';
 $lang['wmsg4']     = '&nbsp;Bitte erst <a href="?do=login&amp" class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">einloggen</a> um ein Ticket zu speichern!';
 $lang['wmsg5']     = 'Der Titel/Betreff ist nicht aussagekräftig!';
+$lang['wmsg6']     = 'Upload Fehler: Die maximal zul&auml;ssige Dateigr&ouml;sse von %s bytes wurde &uuml;berschritten';
+$lang['wmsg7']     = 'Upload Fehler: Die Dateierweiterung ist unzul&auml;ssig.';
+$lang['wmsg8']     = 'Upload Fehler: Der Mime-Type wird nicht unterst&uuml;tzt.';
+$lang['wmsg9']     = 'Spam Schutz: Ihre IP is f&uuml;r mindestens %s Minuten von weiteren Uploads ausgeschlossen..';
+$lang['lbl_symptomupload'] = 'Indizien hochladen:';
 $lang['btn_reportsave']   = 'Absenden';
 // further settings see 'th_...' options at Issue List controls section below 
 

@@ -8,8 +8,13 @@
  
 // for the configuration manager
 $lang['d_format']         = 'Y-m-d G:i:s';
+$lang['it_data']          = 'IssueTracker root within data folder ("" = meta)';
+$lang['upload']           = 'allow symptom file uploads';
+$lang['max_fsize']        = 'limit file size for uploads in Byte';
+$lang['ip_blocked']       = 'turn on the anti-spam feature';
+$lang['ip_blockd_time']   = 'ip will be blocked for x minutes before another upload can be initiated';
 $lang['send_email']       = 'Inform by mail about new issues ?'; 
-$lang['mail_templates']       = 'Use of html email templates ?';
+$lang['mail_templates']   = 'Use of html email templates ?';
 $lang['email_address']    = 'Who is to be informed ?';
 $lang['registered_users'] = 'Only registered users with edit permission on issue <br> tracker page are allowed to create reports and add comments';
 $lang['auth_ad_overflow'] = 'Prevent AUTH:AD overflow';

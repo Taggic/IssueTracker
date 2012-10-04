@@ -311,7 +311,8 @@
     function _log_mods($project, $issue, $usr, $column, $old_value, $new_value)
     {     global $conf;
           // get mod-log file contents
-          $modfile = metaFN($project.'_'.$issue['id'], '.mod-log');
+          if($conf['plugin']['issuetracker']['it_data']==false) $modfile = DOKU_INC."data/meta/".$project.'_'.$issue['id'].'.mod-log';
+          else $modfile = DOKU_INC. $conf['plugin']['issuetracker']['it_data'].$project.'_'.$issue['id'].'.mod-log';
           if (@file_exists($modfile))
               {$mods  = unserialize(@file_get_contents($modfile));}
           else 
@@ -367,7 +368,8 @@
     
      
     // get issues file contents
-    $pfile = metaFN($project, '.issues');
+    if($conf['plugin']['issuetracker']['it_data']==false) $pfile = DOKU_INC."data/meta/".$project.'.issues';
+    else $pfile = DOKU_INC. $conf['plugin']['issuetracker']['it_data'].$project.'.issues';
     if (@file_exists($pfile))
         {$issues  = unserialize(@file_get_contents($pfile));}
     else 
@@ -380,21 +382,15 @@
       $issues[$id_issue]['status'] = $lang['issue_resolved_status'];
     }
         
-   // do not send notification mail if status set to deleted
-    if($conf['status_special']=='') $conf['status_special']='Deleted';
-    if (($field == 'status') && (stripos($conf['status_special'],$value) !== false)) {
-      // for now do nothing, maybe later implementation
-      // will define further action on issues marked as 'deleted'
-    }
-    else {
-    
       $old_value = $issues[$id_issue][$field];
       $issues[$id_issue][$field] = $value;
       $issues[$id_issue]['modified'] = $cur_date;
       _log_mods($project, $issues[$id_issue], $usr, $field, $old_value, $value);
+   // notification mails as long as status is not deleted
+    if($conf['status_special']=='') $conf['status_special']='Deleted';
+    if (($field == 'status') && (stripos($conf['status_special'],$value) === false)) {
       _emailForIssueMod($project, $issues[$id_issue], $old_value, $field, $value);
     }
-      
         // inform assigned workforce for new issue
     if ($field == 'assigned') {
         $issues[$id_issue]['assigned'] = $value;

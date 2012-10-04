@@ -13,6 +13,11 @@ $lang['wmsg2'] = 'Please enter a valid product version to relate this issue prop
 $lang['wmsg3'] = 'Please provide a better description of your issue.';
 $lang['wmsg4'] = '&nbsp;Please <a href="?do=login&amp" class="action login" accesskey="" rel="nofollow" style="color:blue;text-decoration:underline;" title="Login">Sign in</a> if you want to report an issue.';
 $lang['wmsg5'] = 'Please provide a descriptive issue title.';
+$lang['wmsg6'] = 'Upload Error: The max file-size of %s bytes was exceeded';
+$lang['wmsg7'] = 'Upload Error: The file extension is invalid.';
+$lang['wmsg8'] = 'Upload Error: The Mime-Type of the file is faulty or not supported.';
+$lang['wmsg9'] = 'Spam security: Upload from your IP is blocked for at least another %s minutes.';
+$lang['lbl_symptomupload'] = 'Symptom file upload:';
 $lang['btn_reportsave'] = 'Submit';
 // further settings see 'th_...' options at Issue List controls section below 
 

@@ -8,8 +8,13 @@
  
 // for the configuration manager
 $lang['d_format']			    = 'G:i:s d-m-Y';
+$lang['it_data']          = 'IssueTracker Verzeichnis im Data Ordner (leer = meta)';
+$lang['upload']           = 'Indizien upload erlauben ?';
+$lang['max_fsize']        = 'maximale Dateigr&ouml;sse in Byte';
+$lang['ip_blocked']       = 'Anti-Spam einchlaten';
+$lang['ip_blockd_time']   = 'IP für x Minuten nach Upload blocken';
 $lang['send_email']			  = '&Uuml;ber neue Aufgaben per E-Mail informieren?'; 
-$lang['mail_templates']       = 'HTML eMail templates nutzen?';
+$lang['mail_templates']   = 'HTML eMail templates nutzen?';
 $lang['email_address']		= 'Wer wird informiert?';
 $lang['registered_users']	= 'Nur registrierten Benutzern mit passenden Zugangsrechten ist es erlaubt im Issue Tracker neue Aufgaben und Kommentare anzulegen';
 $lang['auth_ad_overflow'] = 'Kompensierung AUTH:AD Fehler (>1.000 user Objekte)';
@@ -26,7 +31,6 @@ $lang['severity']			    = 'Schweregrade die benutzt werden sollen<br>(kommagetre
 $lang['status']				    = 'Status-Levels die benutzt werden sollen<br>(kommagetrennt, Namen mit passenden Bilddateien)';
 $lang['status_special']   = 'ausgeblendet (gel&ouml;scht), nur Einzelwert zul&auml;ssig !';
 $lang['products']			    = 'Produktnamen die benutzt werden sollen<br>(kommagetrennt)';
-//$lang['versions']			  = 'Erlaubte Versionsnummer der Produktnamen<br>(kommagetrennt, senkrechter Strich "|" als Trennzeichen)';
 $lang['assign']				    = 'Wiki Benutzergruppe denen Tickets zugewiesen werden k&ouml;nnen<br>(senkrechter Strich "|" als Trennzeichen)';
 $lang['noStatIMG']			  = 'Statustext statt Symbole anzeigen';
 $lang['noSevIMG']			    = 'Schweregradtext statt Symbole anzeigen';

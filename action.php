@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2012-09-20',
+         'date'   => '2012-10-04',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -159,7 +159,9 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                  $user_grp = pageinfo();        
                  $usr      = $user_grp['userinfo']['name'] ;  //to log issue mods
                  // get issues file contents
-                 $pfile = metaFN($project, '.issues');   
+                 if($this->getConf('it_data')==false) $pfile = DOKU_INC."data/meta/".$project.'.issues';
+                 else $pfile = DOKU_INC. $this->getConf('it_data').$project.'.issues';
+   
                  if (@file_exists($pfile))
                 	 {  $issues  = unserialize(@file_get_contents($pfile));}
                  else
@@ -177,7 +179,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                      if ($captcha_ok)
                      {    if (checkSecurityToken())
                           {  // get comment file contents
-                             $comments_file = metaFN($project."_".$_REQUEST['comment_issue_ID'], '.cmnts');
+                             if($this->getConf('it_data')==false) $comments_file = DOKU_INC."data/meta/".$project."_".$_REQUEST['comment_issue_ID'].'.cmnts';
+                             else $comments_file = DOKU_INC. $this->getConf('it_data').$project."_".$_REQUEST['comment_issue_ID'].'.cmnts';
                              if (@file_exists($comments_file))  {  $comments  = unserialize(@file_get_contents($comments_file));  }
                              else  {  $txt='Comments file does not exist.';  }
                              // delete fieldset from $comments array
@@ -209,7 +212,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                              {                           
                                 if (checkSecurityToken())
                                 {  // get comment file contents
-                                   $comments_file = metaFN($project."_".$_REQUEST['comment_issue_ID'], '.cmnts');
+                                   if($this->getConf('it_data')==false) $comments_file = DOKU_INC."data/meta/".$project."_".$_REQUEST['comment_issue_ID'].'.cmnts';
+                                   else $comments_file = DOKU_INC. $this->getConf('it_data').$project."_".$_REQUEST['comment_issue_ID'].'.cmnts';
             
                                    if (@file_exists($comments_file))  {  $comments  = unserialize(@file_get_contents($comments_file));  }
                                    else  {  $comments = array();  }
@@ -363,18 +367,24 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                   break;}
                               }
 
-                              if ($cFlag === true)
-                              {   $old_value = $issues[$issue_id]['attachment1'].'<br />'.$issues[$issue_id]['attachment2'].'<br />'.$issues[$issue_id]['attachment3'];
-                                  $issues[$issue_id]['attachment1'] = htmlspecialchars(stripslashes($_REQUEST['attachment1']));
-                                  $issues[$issue_id]['attachment2'] = htmlspecialchars(stripslashes($_REQUEST['attachment2']));
-                                  $issues[$issue_id]['attachment3'] = htmlspecialchars(stripslashes($_REQUEST['attachment3']));
-                                  //save issue-file
-                                  $xvalue = io_saveFile($pfile,serialize($issues));
-//                                  if($this->getConf('mail_modify__description') ===1) $this->_emailForDscr($_REQUEST['project'], $issues[$issue_id]);
-                                  $new_value = $issues[$issue_id]['attachment1'].'<br />'.$issues[$issue_id]['attachment2'].'<br />'.$issues[$issue_id]['attachment3'];
-                                  $this->_log_mods($project, $issues[$issue_id], $usr, 'symptom links', $old_value, $new_value);
-                                  msg($this->getLang('msg_slinkmodtrue').$issue_id.'.',1);
-                       //           $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_slinkmodtrue').$issue_id.'</div>';
+                              if ($cFlag === true) {   
+// *****************************************************************************
+// upload a symptom file
+// *****************************************************************************
+                                    if($this->getConf('upload')!== false) {
+                                      $Generated_Header = $this->_symptom_file_upload($issues,$issue_id);
+                                    }
+                                    else {
+                                          $old_value = $issues[$issue_id]['attachment1'].'<br />'.$issues[$issue_id]['attachment2'].'<br />'.$issues[$issue_id]['attachment3'];
+                                          $issues[$issue_id]['attachment1'] = htmlspecialchars(stripslashes($_REQUEST['attachment1']));
+                                          $issues[$issue_id]['attachment2'] = htmlspecialchars(stripslashes($_REQUEST['attachment2']));
+                                          $issues[$issue_id]['attachment3'] = htmlspecialchars(stripslashes($_REQUEST['attachment3']));
+                                          msg($this->getLang('msg_slinkmodtrue').$issue_id.'.',1);
+                                   }
+                                   //save issue-file
+                                   $xvalue = io_saveFile($pfile,serialize($issues));
+                                   $new_value = $issues[$issue_id]['attachment1'].'<br />'.$issues[$issue_id]['attachment2'].'<br />'.$issues[$issue_id]['attachment3'];
+                                   $this->_log_mods($project, $issues[$issue_id], $usr, 'symptom links', $old_value, $new_value);
                               }
                               else { msg("Issue with ID: $issue_id not found.",-1); }
                         }
@@ -382,8 +392,6 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                  }                 
                  elseif (isset($_REQUEST['add_resolution'])) 
                  {  $renderer->info['cache'] = false;     
-                    // get issues file contents
-//                    $pfile = metaFN($data['project'], '.issues'); 
           
                     if (@file_exists($pfile))
                     	{ $issues  = unserialize(@file_get_contents($pfile)); }
@@ -446,8 +454,9 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                  $a = $this->itl_pjct;
 //                 echo 'Project: '.$a.'<br />';
                  
-                                                   
-                 $pfile = metaFN($a, '.issues');        
+                 // get issues file contents
+                if($this->getConf('it_data')==false) $pfile = DOKU_INC."data/meta/".$a.'.issues';
+                else $pfile = DOKU_INC. $this->getConf('it_data').$a.'.issues';        
                 if (@file_exists($pfile))
                 	{$issues  = unserialize(@file_get_contents($pfile));}
 /*                else
@@ -505,7 +514,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $Generated_Message = '';
 
             // get mod-log file contents
-            $modfile = metaFN($project.'_'.$issue_id, '.mod-log');
+            if($this->getConf('it_data')==false) $modfile = DOKU_INC."data/meta/".$project.'_'.$issue_id.'.mod-log';
+            else $modfile = DOKU_INC. $this->getConf('it_data').$project.'_'.$issue_id.'.mod-log';
             if (@file_exists($modfile))
                 {$mods  = unserialize(@file_get_contents($modfile));}
             else 
@@ -649,7 +659,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         $stat_filter   = strtoupper($stat_filter);
         $sev_filter    = strtoupper($sev_filter);
         $productfilter = strtoupper($productfilter);
-        $pfile         = metaFN($project, '.issues'); // get issues file contents
+        if($this->getConf('it_data')==false) $pfile = DOKU_INC."data/meta/".$project.'.issues';
+        else $pfile = DOKU_INC. $this->getConf('it_data').$project.'.issues';
 
         if (@file_exists($pfile))
         	{$issues  = unserialize(@file_get_contents($pfile));}
@@ -938,7 +949,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         if(!$issue) return false;	          
         
         // get detail information from issue comment file
-        $cfile = metaFN($project."_".$issue_id, '.cmnts');
+        if($this->getConf('it_data')==false) $cfile = DOKU_INC."data/meta/".$project."_".$issue_id.'.cmnts';
+        else $cfile = DOKU_INC. $this->getConf('it_data').$project."_".$issue_id.'.cmnts';
         if (@file_exists($cfile)) {$comments  = unserialize(@file_get_contents($cfile));}
         else {$comments = array();}
 
@@ -1188,7 +1200,8 @@ $issue_edit_head .= '<td class="itd__col4"></td>
 /*------------------------------------------------------------------------------
   #60: to view mod-log
 ------------------------------------------------------------------------------*/
-            $modfile = metaFN($project.'_'.$issue[$issue_id]['id'], '.mod-log');
+            if($this->getConf('it_data')==false) $modfile = DOKU_INC."data/meta/".$project.'_'.$issue[$issue_id]['id'].'.mod-log';
+            else $modfile = DOKU_INC. $this->getConf('it_data').$project.'_'.$issue[$issue_id]['id'].'.mod-log';
             if (@file_exists($modfile)) {  
               $pstring = sprintf("showid=%s&amp;project=%s", urlencode($issue[$issue_id]['id']), urlencode($project));
               $modlog_link = '<a href="doku.php?id='.$ID.'&do=showmodlog&'.$pstring.'" title="'.$this->getLang('th_showmodlog').'">'.$this->getLang('th_showmodlog').'</a>';
@@ -1369,7 +1382,7 @@ $issue_initial_description .=  '<input  type="hidden" class="showid__option" nam
 $issue_initial_description .= '</tbody></table>';
 /* END mod for edit description by ticket owner ----------------------------------*/
 
-if(strpos($this->getConf('ltdReport'),'Symptom link 1')===false){
+if((strpos($this->getConf('ltdReport'),'Symptom link 1')===false) || ($this->getConf('upload')!== false)) {
   $issue_attachments = '<table class="itd__tables"><tbody>
                         <tr>
                           <td colspan="2" class="itd_tables_tdh">'.$this->getLang('lbl_symptlinks').'</td>
@@ -1397,7 +1410,7 @@ if(strpos($this->getConf('ltdReport'),'Symptom link 1')===false){
                     $cell_ID = 'img_tab_open_reporterdtls'.$blink_id;                              
   $issue_attachments .= '<tbody style="display : none;" id="'.$blink_id.'">
                           <tr><td colspan=2>'.NL.
-                          '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
+                          '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'" enctype="multipart/form-data">'.NL;
   $issue_attachments .= formSecurityToken(false). 
                        '<input type="hidden" name="project" value="'.$project.'" />'.NL.
                        '<input type="hidden" name="comment_issue_ID" value="'.$issue[$issue_id]['id'].'" />'.NL.        
@@ -1410,7 +1423,13 @@ if(strpos($this->getConf('ltdReport'),'Symptom link 1')===false){
                           			         
                           		        if(!is_null($helper) && $helper->isEnabled())
                           			      {  $issue_attachments .= '<p>'.$helper->getHTML().'</p>'; }
-                                  }                   //Check config if hidden
+                                  }                   
+                  //Check config if hidden
+                  if($this->getConf('upload')>0) {
+                      $issue_attachments .= '<input class="it__cir_linput" type="hidden" name="MAX_FILE_SIZE" value="'.$this->getConf('max_fsize').'" />'.NL.
+                                            '<span><input class="it__cir_linput" name="uploadedfile" type="file" /></span><br/>'.NL;
+                  }
+                  else {
                     if(strpos($this->getConf('ltdReport'),'Symptom link 1')!==false){
                         $issue_attachments .= ' <input type="hidden" class="it__cir_linput" name="attachment1" value="'.$issue[$issue_id]['attachment1'].'"/>'.NL;
                     } 
@@ -1431,8 +1450,9 @@ if(strpos($this->getConf('ltdReport'),'Symptom link 1')===false){
                     else {
                         $issue_attachments .= '<span style="margin-left:4em; float:left;">3.</span>
                                      <span><input class="it__cir_linput" name="attachment3" value="'.$issue[$issue_id]['attachment3'].'"/></span><br/>'.NL;
-                    } 
-  $issue_attachments .= '<input  type="hidden" class="showid__option" name="showid" id="showid" size="10" value="'.$this->parameter.'"/>'.
+                    }
+                  } 
+  $issue_attachments .= '<input type="hidden" class="showid__option" name="showid" id="showid" size="10" value="'.$this->parameter.'"/>'.
                                  '<input  type="submit" class="button" id="btnmod_description" name="btnmod_description" style="float:right;" value="'.$this->getLang('btn_mod').'" title="'.$this->getLang('btn_mod_title').'");/>'.
                                  '</form>'.NL.'</td></tr></tbody><tr>'.NL.'
                               <td colspan="3" class="img_tab_open_comment" id="'.$cell_ID.'">'.NL.'
@@ -1563,7 +1583,7 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
                     }
                     $cell_ID = 'img_tab_open_comment'.$blink_id;
                     // check if only registered users are allowed to modify comments
-                    // ¦ perm — the user's permissions related to the current page ($ID)
+                    // Â¦ perm â€” the user's permissions related to the current page ($ID)
 $issue_comments_log .= '<input  type="hidden" class="showid__option" name="showid" id="showid" size="10" value="'.$this->parameter.'"/>'.
                        '<fieldset class="minor_mod">'.
                                '<span style="float:left;"  title="'.$this->getLang('minor_mod_cbx_title').'"><input type="checkbox" name="minor_mod" value="true" />&nbsp;&nbsp;'.$this->getLang('minor_mod').'</span>'.
@@ -1641,7 +1661,7 @@ $issue_add_comment .= formSecurityToken(false).
                       }
                       $cell_ID = 'img_tab_open_comment'.$blink_id;
                       // check if only registered users are allowed to add comments
-                      // ¦ perm — the user's permissions related to the current page ($ID)
+                      // Â¦ perm â€” the user's permissions related to the current page ($ID)
                       $issue_add_comment .= '<input  type="hidden" class="showid__option" name="showid" id="showid" size="10" value="'.$this->parameter.'"/>'.NL.
                                             '<input class="button" id="showcase" type="submit" name="showcase" value="'.$this->getLang('btn_add').'" title="'.$this->getLang('btn_add_title').'");/>'.NL.
                                             '</form>'.NL.'</td>'.NL.'</tr>'.NL.
@@ -2164,7 +2184,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
     }
 /******************************************************************************/
     function get_issues_file_contents($project, $issue_id) {
-        $pfile = metaFN($project, '.issues');   
+        if($this->getConf('it_data')==false) $pfile = DOKU_INC."data/meta/".$project.'.issues';
+        else $pfile = DOKU_INC. $this->getConf('it_data').$project.'.issues';   
         if (@file_exists($pfile))
         	{  $issue  = unserialize(@file_get_contents($pfile));
              // check if ID exist
@@ -2197,7 +2218,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
     function _log_mods($project, $issue, $usr, $column, $old_value, $new_value)
     {     global $conf;
           // get mod-log file contents
-          $modfile = metaFN($project.'_'.$issue['id'], '.mod-log');
+          if($this->getConf('it_data')==false) $modfile = DOKU_INC."data/meta/".$project.'_'.$issue_id.'.mod-log';
+          else $modfile = DOKU_INC. $this->getConf('it_data').$project.'_'.$issue_id.'.mod-log';
           if (@file_exists($modfile))
               {$mods  = unserialize(@file_get_contents($modfile));}
           else 
@@ -2428,6 +2450,125 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
           } 
       }
       return $files;
+  }
+/******************************************************************************/ 
+/* upload a file if valid on mime type and file extension
+*/
+  function _symptom_file_upload(&$issues, $issue_id) {
+      if($this->getConf('it_data')==false) $target_path = "data/meta/";
+      else $target_path = $this->getConf('it_data');
+      $ip_block_path = $target_path."ipblock";
+      $target_path .= 'symptoms/';
+      if(!is_dir(DOKU_INC.$target_path)) { mkdir(DOKU_INC.$target_path, 0777); }                                                                                
+
+      // delete existing symptom file
+      if($issues[$issue_id]['attachment1'] !== false) {
+                           // DOKU_URL.$target_path
+        $old_file = str_ireplace(DOKU_URL,DOKU_INC,$issues[$issue_id]['attachment1']);
+        @unlink($old_file);
+        $issues[$issue_id]['attachment1']="";        
+      }
+
+      $valid_file_extensions = array();
+      $valid_mimetypes = array(); 
+      $mimetypes = getMimeTypes();
+
+      foreach($mimetypes as $key => $value) {
+          $valid_file_extensions[] = $key;
+          $valid_mimetypes[] = $value;
+      }
+      if($this->getConf('ip_blocked') == 1){
+          $ip_blocked_sec = $this->getConf('ip_blockd_time')*60;
+           
+          // search folder ipblock
+          $path = openDir(DOKU_INC.$ip_block_path);        
+          while(false !== ($filename = readdir($path))){ 
+              if($filename != "." && $filename != ".."){
+                  // delete aged ipblocks
+                  if(file_exists(DOKU_INC.$ip_block_path.'/'.$filename)) {
+                      $t_check = filemtime(DOKU_INC.$ip_block_path.'/'.$filename)+$ip_blocked_sec;
+                      if($t_check <= time()) { @unlink(DOKU_INC.$ip_block_path.'/'.$filename); }
+                  }
+              }
+          }
+          closedir($path); 
+          
+          $ip_addr = $_SERVER['REMOTE_ADDR'];
+          if($ip_addr == "") {
+            if(getenv(HTTP_X_FORWARDED_FOR)) { $ip_addr = getenv('HTTP_X_FORWARD_FOR'); }
+            else { $ip_addr = getenv('REMOTE_ADDR'); }
+          }
+      
+          if($ip_addr != ""){
+              // check if ip already known
+              if(file_exists(DOKU_INC.$ip_block_path.'/'.$ip_addr)) {
+                  $error_code = 1;
+                  $t_check = intval((filemtime(DOKU_INC.$ip_block_path.'/'.$filename)+$ip_blocked_sec-time())/60); 
+                  msg(sprintf($this->getLang('wmsg9'), $t_check),-1);
+              }
+          } 
+      }
+      if(isset($error_code)){ 
+        $t_check = intval((filemtime(DOKU_INC.$ip_block_path.'/'.$filename)+$ip_blocked_sec-time())/60);
+        $Generated_Header = '<div class="it__negative_feedback">'.sprintf($this->getLang('wmsg9'), $t_check).'</div>';
+        $renderer->doc .= $Generated_Header;
+        return;
+      }      
+
+      // get file extension 
+      $mime_type = $_FILES['uploadedfile']['type'];    
+      $file_extension = strrchr($_FILES['uploadedfile']['name'],'.'); // last occurance of dot to detect extension
+      $file_dot_extension = strtolower($file_extension);   
+      $file_extension = str_replace(".", "", strtolower($file_dot_extension));  
+      $error_flag = 0;
+                     
+      // check validity of file extension
+      if(!in_array($file_extension, $valid_file_extensions)) {
+        $error_flag = 1;
+        $Generated_Header .= '<span>'.$this->getLang('wmsg7').' (File: <b>'.$_FILES['uploadedfile']['name'].'</b>)</span><br>'; 
+      }
+      // check mime type
+      if((!in_array($mime_type, $valid_mimetypes)) && (!in_array("!".$mime_type, $valid_mimetypes)) ) {
+        $error_flag = 1;
+        $Generated_Header .= '<span>'.$this->getLang('wmsg8').' (File: <b>'.$_FILES['uploadedfile']['name'].', Mime-Type: '.$mime_type.'</b>)</span><br>';
+      }
+      // check file-size
+      if($_FILES['uploadedfile']['size'] > ($this->getConf('max_fsize'))){
+          $error_flag = 1;
+          $Generated_Header .= '<span>'.sprintf($this->getLang('wmsg6'), $this->getConf('max_fsize')).' (File: <b>'.$_FILES['uploadedfile']['name'].'</b>)</span><br>';
+      }                
+// -----------------------------------------------------------------------------
+    if($error_flag > 0) { 
+      echo $Generated_Header = '<div class="it__negative_feedback">'.$Generated_Header.'</div>';
+    }                  
+    else {
+      $safe_filename = preg_replace(array("/\s+/", "/[^-\.\w]+/"),array("_", ""),trim(basename( $_FILES['uploadedfile']['name']))); 
+      $target_path = $target_path . $issue_id . '_sympt_' . $safe_filename; 
+      if(move_uploaded_file($_FILES['uploadedfile']['tmp_name'], DOKU_INC.$target_path)) {
+          $issues[$issue_id]['attachment1'] = DOKU_URL.$target_path;
+//                                            msg("The file ".$safe_filename." has been successfully uploaded.",1);
+      } else{
+          msg("There was an error uploading the file, please try again!",-1);
+      }
+// -----------------------------------------------------------------------------
+      // block ip
+      if($this->getConf('ip_blocked') == 1) {
+              $ip_addr=$_SERVER['REMOTE_ADDR']; 
+              if($ip_addr==""){
+                  if(getenv(HTTP_X_FORWARDED_FOR)) { $ip_addr = getenv('HTTP_X_FORWARD_FOR'); }
+                  else { $ip_addr = getenv('REMOTE_ADDR'); }
+              }
+              if(!is_dir(DOKU_INC.$ip_block_path.'ipblock/')) { mkdir(DOKU_INC.$ip_block_path.'/', 0777); }
+              if($ip_addr != ""){
+                  $empty = '.'; 
+                  $iplog = fopen(DOKU_INC.$ip_block_path.'/'.$ip_addr, "w+");
+                  fwrite($iplog, $empty); 
+                  fclose($iplog); 
+              }
+          }            
+    }
+// -----------------------------------------------------------------------------
+    return $Generated_Header;
   }
 /******************************************************************************/
 }
