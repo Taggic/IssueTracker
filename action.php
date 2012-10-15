@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2012-10-04',
+         'date'   => '2012-10-15',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -371,7 +371,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 // *****************************************************************************
 // upload a symptom file
 // *****************************************************************************
-                                    if($this->getConf('upload')!== false) {
+                                    if($this->getConf('upload')> 0) {
                                       $Generated_Header = $this->_symptom_file_upload($issues,$issue_id);
                                     }
                                     else {
@@ -436,6 +436,52 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                 
                           }
                       }        
+                 }
+                 elseif(isset($_REQUEST['mod_severity']))
+                 {  // check if captcha is to be used by issue tracker in general
+//                    msg("severity mod detected",0);
+                    if ($this->getConf('use_captcha') === 0) { $captcha_ok = 1;}
+                    else { $captcha_ok = ($this->_captcha_ok());}
+                    if ($captcha_ok)
+                    {   if (checkSecurityToken())
+                        {    $old_value = $issues[$issue_id]['severity'];
+                             $issue_id  = htmlspecialchars(stripslashes($_REQUEST['issue_ID']));
+                             $project   = htmlspecialchars(stripslashes($_REQUEST['project']));
+                             $usr       = htmlspecialchars(stripslashes($_REQUEST['ausr']));
+                             $column    = 'severity';
+                             $issues[$issue_id]['severity'] = htmlspecialchars(stripslashes($_REQUEST['new_severity']));
+//                             echo 'new severity = '.$issues[$issue_id]['severity'].'<br />';
+                            //save issue-file
+                            $xvalue     = io_saveFile($pfile,serialize($issues));                    // $project, $issue,             $old_value, $column, $new_value              
+                            if($this->getConf('userinfo_email') >0) $this->_emailForIssueMod($project, $issues[$issue_id], $old_value, $column, $issues[$issue_id]['severity']);
+                            $this->_log_mods($project, $issues[$issue_id], $usr, $column, $old_value, $issues[$issue_id]['severity']);
+                            msg($this->getLang('msg_severitymodtrue'),1);
+                        }
+                    }   
+                 }
+                 elseif(isset($_REQUEST['mod_status']))
+                 {  // check if captcha is to be used by issue tracker in general
+//                    msg("status mod detected",0);
+                    if ($this->getConf('use_captcha') === 0) { $captcha_ok = 1;}
+                    else { $captcha_ok = ($this->_captcha_ok());}
+                    if ($captcha_ok)
+                    {   if (checkSecurityToken())
+                        {    $old_value = $issues[$issue_id]['status'];
+                             $issue_id  = htmlspecialchars(stripslashes($_REQUEST['issue_ID']));
+                             $project   = htmlspecialchars(stripslashes($_REQUEST['project']));
+                             $usr       = htmlspecialchars(stripslashes($_REQUEST['busr']));
+                             $column    = 'status';
+                             $issues[$issue_id]['status'] = htmlspecialchars(stripslashes($_REQUEST['new_status']));
+//                             echo 'new status = '.$issues[$issue_id]['status'].'<br />';
+                            //save issue-file
+                            $xvalue     = io_saveFile($pfile,serialize($issues));                   // $project, $issue,             $old_value, $column, $new_value                                   
+                            if(($this->getConf('status_special')!=='') && (stripos($this->getConf('status_special'),$value) === false)) {
+                                if($this->getConf('userinfo_email') >0) $this->_emailForIssueMod($project, $issues[$issue_id], $old_value, $column, $issues[$issue_id]['status']);
+                            }
+                            $this->_log_mods($project, $issues[$issue_id], $usr, $column, $old_value, $issues[$issue_id]['status']);
+                            msg($this->getLang('msg_statusmodtrue'),1);
+                        }
+                    }
                  }
                  // Render 
                                                         // Array  , project name
@@ -606,15 +652,13 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         // select with retriveing all_users from AD
         if($this->getConf('auth_ad_overflow') == false) {
             global $auth;        
-            $filter['grps'] = $this->getConf('assign');
-            $target         = $auth->retrieveUsers(0,0,$filter); 
-            $target2        = $this->array_implode($target);
-            foreach ($target2 as $x_umail)
-            {
-                    if (strrpos($x_umail, "@") > 0)
-                    {
-                        $x_umail_select = $x_umail_select . "['".$x_umail."','".$x_umail."'],";
-                    }
+            $filter['grps']  = $this->getConf('assign');
+            $target          = $auth->retrieveUsers(0,0,$filter);
+            $shw_assignee_as = $this->getConf('shw_assignee_as');
+            foreach ($target as $key => $x_umail)
+            {       // show assignee by login, name, mail
+                    if($shw_assignee_as=='login') $x_umail_select = $x_umail_select . "['".$key."','".$x_umail['mail']."'],";
+                    else $x_umail_select = $x_umail_select . "['".$x_umail[$shw_assignee_as]."','".$x_umail['mail']."'],";
             }      
             $x_umail_select .= "['',''],";
             $authAD_selector = "TableKit.Editable.selectInput('assigned',{}, [".$x_umail_select."]);";
@@ -745,19 +789,22 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     if($rowEven==="it_roweven") $rowEven="it_rowodd";
                     else $rowEven="it_roweven";
                                             
-                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.                       
-                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.
-                             '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.
-                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'product').'</td>'.
-                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'version').'</td>'.
-                             '<td'.$severity_img.'</td>'.
-                             '<td'.$status_img.'</td>'.
-                             '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$this->_get_one_value($issue,'user_name').'</a></td>'. 
-                             '<td class="canbreak itl__td_standard">'.$itl_item_title.'</td>'.
-                             '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$this->_get_one_value($issue,'assigned').'</a></td>'. 
-                             '<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.
-                             '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.
-                             '</tr>';        
+                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.NL.                       
+                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.NL.
+                             '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.NL.
+                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'product').'</td>'.NL.
+                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'version').'</td>'.NL.
+                             '<td'.$severity_img.'</td>'.NL.
+                             '<td'.$status_img.'</td>'.NL.
+                             '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$this->_get_one_value($issue,'user_name').'</a></td>'.NL. 
+                             '<td class="canbreak itl__td_standard">'.$itl_item_title.'</td>'.NL;
+                             
+                    // check how the assignee to be displayed: login, name or mail
+                    $a_display = $this->_get_assignee($issue,'assigned');         
+                    $body .= '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$a_display.'</a></td>'.NL. 
+                             '<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.NL.
+                             '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.NL.
+                             '</tr>'.NL;        
                 }
             } 
             $body .= '</tbody></table></div>';          
@@ -975,29 +1022,29 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             if((($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or 
                  (strpos($target2,$user_mail['userinfo']['mail']) != false)) && 
                 ($this->getConf('shw_mail_addr')===1))
-            {   $__assigened  = $issue[$issue_id]['assigned'];
-                $__assigenedaddr = $issue[$issue_id]['assigned'];
-                $__reportedby = $issue[$issue_id]['user_mail'];
+            {   $__assigened      = $this->_get_assignee($issue[$issue_id],'assigned');
+                $__assigenedaddr  = $issue[$issue_id]['assigned'];
+                $__reportedby     = $issue[$issue_id]['user_mail'];
                 $__reportedbyaddr = $issue[$issue_id]['user_mail'];
-                $mail_allowed = true;
+                $mail_allowed     = true;
             }
             else 
             {   foreach($target as $_assignee)
                   { if($_assignee['mail'] === $issue[$issue_id]['assigned'])
-                    {   $__assigened = $_assignee['name'];
+                    {   $__assigened     = $_assignee['name'];
                         $__assigenedaddr = $_assignee['mail'];
-                        $mail_allowed = true;
+                        $mail_allowed    = true;
                         break;
                     }
                   }
-                $__reportedby = $issue[$issue_id]['user_name'];
+                $__reportedby     = $issue[$issue_id]['user_name'];
                 $__reportedbyaddr = $issue[$issue_id]['user_mail'];
             }
         }
         else {  // auth_ad_overflow = true
-                $__reportedby = $issue[$issue_id]['user_name'];
+                $__reportedby     = $issue[$issue_id]['user_name'];
                 $__reportedbyaddr = $issue[$issue_id]['user_mail'];
-                $mail_allowed = true;
+                $mail_allowed     = true;
         }
                    
 // scripts for xsEditor -------------------------------------------------------
@@ -1155,20 +1202,96 @@ $issue_edit_head .= '<table class="itd__title">'.
                       <td class="itd__col5">'.$this->getLang('lbl_project').'</td>
                       <td class="itd__col6">'.$project.'</td>
                     </tr>';
+
+$issue_edit_head .= '<script>
+                      function updSeverity()
+                      {   document.getElementById("severity").style.display="none";
+                          document.getElementById("frm_severity").style.display="inline"; }
+                      
+                      function updStatus()
+                      {   document.getElementById("status").style.display="none";
+                          document.getElementById("frm_status").style.display="inline"; }
+                    </script>';
                    
 $issue_edit_head .= '<tr class="itd_tr_standard">
                       <td class="it__left_indent"></td>
                       <td class="itd__col2">'.$this->getLang('th_severity').':</td>
-                      <td class="itd__col3">'.$severity_img.$issue[$issue_id]['severity'].'</td>
+                      <td class="itd__col3"><span id="severity"';
+
+// --- #132 Feature Request: severity should be modifiable by admin/assignee ---
+                      // check if current user is admin/assignee
+                      if(strpos($target2,$user_mail['userinfo']['mail']) != false) {
+$issue_edit_head .= ' onClick="updSeverity()">'.$severity_img.$issue[$issue_id]['severity'].'</span>'.NL;
+                        // Build string to load severity select
+                        $severity = explode(',', $this->getConf('severity')) ;
+                        foreach ($severity as $x_severity) 
+                        {   $x_severity = trim($x_severity);
+                            if(stripos($issue[$issue_id]['severity'],$x_severity) !==false) $x_severity_select = $x_severity_select . '<option selected="selected" style="color: blue;" value="'.$x_severity.'">'.$x_severity.'</option>'; 
+                            else $x_severity_select = $x_severity_select . '<option value="'.$x_severity.'">'.$x_severity.'</option>'; }
+                      // built hidden form with select box of configured severity values
+$issue_edit_head .= '<div class="frm_severity" id="frm_severity" style="display:none !important;">
+                      <form method="post" accept-charset="'.$lang['encoding'].'>'.
+                     '<input type="hidden" name="project" value="'.$project.'" />        
+                      <input type="hidden" name="issue_ID" value="'.$issue[$issue_id]['id'].'" />
+                      <input type="hidden" name="mod_severity" value="1"/>
+                      <input type="hidden" name="ausr" value="'.$user_mail['userinfo']['name'].'"/>
+                      <select name="new_severity">'.$x_severity_select.'</select> '.NL;
+                      if ($this->getConf('use_captcha')==1) 
+                      {   $helper = null;
+              		        if(@is_dir(DOKU_PLUGIN.'captcha'))
+              			         $helper = plugin_load('helper','captcha');
+              			         
+              		        if(!is_null($helper) && $helper->isEnabled())
+              			      {  $issue_edit_head .= '<span>'.$helper->getHTML().'</span>'; }
+                      }                   
+$issue_edit_head .= '<input type="submit" class="button" id="btnmod_severity" name="btnmod_severity" value="'.$this->getLang('btn_mod').'" title="'.$this->getLang('btn_mod_title').'");/>'.NL.
+                      formSecurityToken(false).'</form></div>'.NL;
+                      }
+                      else $issue_edit_head .= '">'.$severity_img.$issue[$issue_id]['severity'].'</span>'.NL;
+                       
+$issue_edit_head .= ' </td>
                       <td class="itd__col4"></td>                   
                       <td class="itd__col5">'.$this->getLang('th_product').':</td>
                       <td class="itd__col6">'.$issue[$issue_id]['product'].'</td>
-                    </tr>';
+                    </tr>'.NL;
                    
 $issue_edit_head .= '<tr class="itd_tr_standard">
                       <td class="it__left_indent"></td>
                       <td class="itd__col2">'.$this->getLang('th_status').':</td>
-                      <td class="itd__col3">'.$status_img.$issue[$issue_id]['status'].'</td>
+                      <td class="itd__col3"><span id="status"';
+
+// --- #132 Feature Request: severity should be modifiable by admin/assignee ---
+                      // check if current user is admin/assignee
+                      if(strpos($target2,$user_mail['userinfo']['mail']) != false) {
+$issue_edit_head .= ' onClick="updStatus()">'.$status_img.$issue[$issue_id]['status'].'</span>'.NL;
+                        // Build string to load severity select
+                        $status = explode(',', $this->getConf('status')) ;
+                        foreach ($status as $x_status)
+                        {   $x_status = trim($x_status);
+                            if(stripos($issue[$issue_id]['status'],$x_status) !==false) $x_status_select = $x_status_select . '<option selected="selected" style="color: blue;" value="'.$x_status.'">'.$x_status.'</option>'; 
+                            else $x_status_select = $x_status_select . '<option value="'.$x_status.'">'.$x_status.'</option>'; }
+                      // built hidden form with select box of configured status values
+$issue_edit_head .= '<div class="frm_status" id="frm_status" style="display:none !important;">
+                      <form method="post" accept-charset="'.$lang['encoding'].'>'.
+                     '<input type="hidden" name="project" value="'.$project.'" />        
+                      <input type="hidden" name="issue_ID" value="'.$issue[$issue_id]['id'].'" />
+                      <input type="hidden" name="mod_status" value="1"/>
+                      <input type="hidden" name="busr" value="'.$user_mail['userinfo']['name'].'"/>
+                      <select name="new_status">'.$x_status_select.'</select> '.NL;
+                      if ($this->getConf('use_captcha')==1) 
+                      {   $helper = null;
+              		        if(@is_dir(DOKU_PLUGIN.'captcha'))
+              			         $helper = plugin_load('helper','captcha');
+              			         
+              		        if(!is_null($helper) && $helper->isEnabled())
+              			      {  $issue_edit_head .= '<span>'.$helper->getHTML().'</span>'; }
+                      }                   
+$issue_edit_head .= '<input type="submit" class="button" id="btnmod_status" name="btnmod_status" value="'.$this->getLang('btn_mod').'" title="'.$this->getLang('btn_mod_title').'");/>'.NL.
+                      formSecurityToken(false).'</form></div>'.NL;
+                      }
+                      else $issue_edit_head .= '">'.$status_img.$issue[$issue_id]['status'].'</span>'.NL;
+                       
+$issue_edit_head .= ' </td>
                       <td class="itd__col4"></td>                   
                       <td class="itd__col5">'.$this->getLang('th_version').':</td>
                       <td class="itd__col6">'.$issue[$issue_id]['version'].'</td>
@@ -1272,7 +1395,7 @@ $issue_addcontacts .='      <span style="display : none;" id="'.$blink2_id.'">
                             			         $helper = plugin_load('helper','captcha');
                             			         
                             		        if(!is_null($helper) && $helper->isEnabled())
-                            			      {  $issue_client_details .= '<p>'.$helper->getHTML().'</p>'; }
+                            			      {  $issue_addcontacts .= '<span>'.$helper->getHTML().'</span>'; }
                                     }
 $issue_addcontacts .='            <input  type="submit" class="button" style="font-size:8pt;" id="btn_add_contact" name="btn_add_contact" value="'.$this->getLang('btn_add').'" title="'.$this->getLang('btn_add').'");/>
                                 </form>
@@ -1294,14 +1417,14 @@ $issue_client_details .= '<tr class="itd__tables_tr">
                             <td class="it__left_indent"></td>
                             <td class="itd_tables_tdc2">'.$this->getLang('lbl_reporterphone').'</td>
                             <td class="itd_tables_tdc3">'.$issue[$issue_id]['user_phone'].'</td>
-                          </tr>
-                          <tr class="itd__tables_tr">
-                            <td class="it__left_indent"></td>
-                            <td class="itd_tables_tdc2">'.$this->getLang('lbl_reporteradcontact').NL.
-                            $issue_addimg;
-$issue_client_details .=    '</td>'.$issue_addcontacts.'
-                          </tr>'; 
+                          </tr>';
                         }
+$issue_client_details .=    '<tr class="itd__tables_tr">
+                                <td class="it__left_indent"></td>
+                                <td class="itd_tables_tdc2">'.$this->getLang('lbl_reporteradcontact').NL.
+                                $issue_addimg.NL.
+                                '</td>'.$issue_addcontacts.'
+                             </tr>'; 
 
 $issue_client_details .= '</tbody><tr>'.NL.'
                             <td colspan="3" class="img_tab_open_comment" id="'.$cell_ID.'">'.NL.'
@@ -1381,8 +1504,7 @@ $issue_initial_description .=  '<input  type="hidden" class="showid__option" nam
                 }
 $issue_initial_description .= '</tbody></table>';
 /* END mod for edit description by ticket owner ----------------------------------*/
-
-if((strpos($this->getConf('ltdReport'),'Symptom link 1')===false) || ($this->getConf('upload')!== false)) {
+if((strpos($this->getConf('ltdReport'),'Symptom link 1')===false) || ($this->getConf('upload')>0)) {
   $issue_attachments = '<table class="itd__tables"><tbody>
                         <tr>
                           <td colspan="2" class="itd_tables_tdh">'.$this->getLang('lbl_symptlinks').'</td>
@@ -1402,8 +1524,8 @@ if((strpos($this->getConf('ltdReport'),'Symptom link 1')===false) || ($this->get
   }
   /* mod for edit symptom links by ticket owner and admin/assignee ---------------*/
   // check if current user is author of the comment and offer an edit button
-              if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) || (strpos($target2,$user_mail['userinfo']['mail']) != false))
-              {     // add hidden edit toolbar and textarea
+              if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) || (strpos($target2,$user_mail['userinfo']['mail']) != false)) {
+                    // add hidden edit toolbar and textarea
                     $alink_id++;
                     $blink_id = 'statanker_'.$alink_id;
                     $anker_id = 'anker_'.$alink_id;
@@ -1806,8 +1928,77 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
             else $to=$issue['user_mail'].', '.$issue['assigned'];
   
             $cc=$issue['add_user_mail'];
-            $headers = "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
-            $this->mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
+            if ($this->getConf('mail_templates')==1) { 
+              $headers = "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
+              $this->mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
+            }
+            else {
+              mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
+            }
+    }
+/******************************************************************************/
+/* send an e-mail to user due to issue modificaion
+*/                                          
+    function _emailForIssueMod($project, $issue, $old_value, $column, $new_value)
+    {     
+//        if ($conf['plugin']['issuetracker']['userinfo_email']==1)
+        {   global $ID;
+            global $lang;
+            global $conf;
+            if($new_value == '') $new_value = $this->getLang('it__none');
+            if($old_value == '') $old_value = $this->getLang('it__none');
+                        
+            if ($this->getConf('mail_templates')==1) {
+                // load user html mail template
+                $sFilename            = DOKU_PLUGIN.'issuetracker/mailtemplate/edit_issuemod_mail.html';
+                $bodyhtml             = file_get_contents($sFilename);
+                $comment              = array();
+                $comment["field"]     = $column;
+                $comment["old_value"] = $old_value;
+                $comment["new_value"] = $new_value;
+                $comment["timestamp"] = date('Y-m-d G:i:s');
+                $user_mail            = pageinfo();
+                $comment["author"]    = $user_mail['userinfo']['mail'];
+            }
+            //issuemod_subject = 'Issue #%s on %s: %s';
+            $subject = sprintf($this->getLang('issuemod_subject'), $issue['id'], $project, $this->getLang('th_'.$column));
+            $subject = mb_encode_mimeheader($subject, "UTF-8", "Q" );
+            $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
+            //issuemod_changes = The issue changed on %s from %s to %s.
+            $changes = sprintf($this->getLang('issuemod_changes'),$this->getLang('th_'.$column), $old_value, $new_value);
+
+            $body = chr(10).$this->getLang('issuemod_head').chr(10).chr(10).
+                    $this->getLang('issuemod_intro').chr(10).
+                    $changes.chr(10).chr(10).
+                    $this->getLang('issuemod_title').$issue['title'].chr(10).
+                    $this->getLang('issuemod_issueid').$issue['id'].chr(10).
+                    $this->getLang('issuemod_product').$issue['product'].chr(10).
+                    $this->getLang('issuemod_version').$issue['version'].chr(10).
+                    $this->getLang('issuemod_severity').$issue['severity'].chr(10).
+                    $this->getLang('issuemod_status').$issue['status'].chr(10).
+                    $this->getLang('issuemod_creator').$issue['user_name'].chr(10).
+                    $this->getLang('issuenew_descr').$issue['description'].chr(10).
+                    $this->getLang('issuemod_see').DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
+                    $this->getLang('issuemod_br').chr(10).$this->getLang('issuemod_end');
+            $body = html_entity_decode($body);
+            if ($this->getConf('mail_templates')==1) $bodyhtml = $this->replace_bodyhtml($bodyhtml, $pstring, $project, $issue, $comment);
+            
+            $from=$this->getConf('email_address'). "\r\n";
+            
+            $user_mail = pageinfo();
+            if($user_mail['userinfo']['mail']===$issue['user_mail']) $to=$issue['assigned'];
+            elseif($user_mail['userinfo']['mail']===$issue['assigned']) $to=$issue['user_mail'];
+            else $to=$issue['user_mail'].', '.$issue['assigned'];
+            
+            $cc=$issue['add_user_mail'];
+            if ($this->getConf('mail_templates')==1) { 
+              $headers = "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
+              $this->mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
+            }
+            else {
+              mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
+            }
+        }
     }
 /******************************************************************************/
 /* send an e-mail to user due to issue modificaion
@@ -1815,7 +2006,6 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
     function _emailForMod($project,$issue,$comment,$reason)
     {       if($this->getConf('userinfo_email') ===0) return;
             global $ID;
-            
             if ($this->getConf('mail_templates')==1) {
                 // load user html mail template
                 $sFilename = DOKU_PLUGIN.'issuetracker/mailtemplate/cmnt_mod_mail.html';
@@ -1870,9 +2060,13 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
             else $to=$issue['user_mail'].', '.$issue['assigned'];
             
             $cc=$issue['add_user_mail'];
-            $headers = "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
-            $this->mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
-
+            if ($this->getConf('mail_templates')==1) { 
+              $headers = "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
+              $this->mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
+            }
+            else {
+              mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
+            }
     }
 /******************************************************************************/
 /* send an e-mail to user due to issue modificaion on Descriptions
@@ -1916,8 +2110,13 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
             else $to=$issue['user_mail'].', '.$issue['assigned']. "\r\n";
 
             $cc=$issue['add_user_mail']. "\r\n";
-            $headers = "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
-            $this->mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
+            if ($this->getConf('mail_templates')==1) { 
+              $headers = "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
+              $this->mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
+            }
+            else {
+              mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
+            }
     }
 /******************************************************************************/
     /***********************************
@@ -1932,6 +2131,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
         $subject = utf8_deaccent($subject);
         $subject = utf8_strip($subject);
       }
+
       if(!defined('MAILHEADER_EOL')) define('MAILHEADER_EOL',"\n");
       if(!utf8_isASCII($subject)) {
         $subject = '=?UTF-8?Q?'.mail_quotedprintable_encode($subject,0).'?=';
@@ -1979,6 +2179,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
         global $ID;
         $bodyhtml = str_ireplace("%%_SEE%%",DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring,$bodyhtml);
         $bodyhtml = str_ireplace("%%issuemod_head%%",$this->getLang('issuemod_head'),$bodyhtml);
+        $bodyhtml = str_ireplace("%%issuemod_intro%%",$this->getLang('issuemod_intro'),$bodyhtml);
+
         $bodyhtml = str_ireplace("%%issuemod_issueid%%",$this->getLang('issuemod_issueid'),$bodyhtml);
         $bodyhtml = str_ireplace("%%ID%%",$issue['id'],$bodyhtml);
         $bodyhtml = str_ireplace("%%issuemod_title%%",$this->getLang('issuemod_title'),$bodyhtml);
@@ -1999,7 +2201,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
         $bodyhtml = str_ireplace("%%ASSIGNED%%",$issue['assigned'],$bodyhtml);
         $bodyhtml = str_ireplace("%%th_created%%",$this->getLang('th_created'),$bodyhtml);
         $bodyhtml = str_ireplace("%%CREATED%%",$issue['created'],$bodyhtml);
-
+        $bodyhtml = str_ireplace("%%issueassigned_head%%",$lang['issueassigned_head'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%issueassigned_intro%%",$lang['issueassigned_intro'],$bodyhtml);
 
         $bodyhtml = str_ireplace("%%issue_resolved_intro%%",$this->getLang('issue_resolved_intro'),$bodyhtml);
         $bodyhtml = str_ireplace("%%issue_resolved_text%%",$this->getLang('issue_resolved_text'),$bodyhtml);
@@ -2020,10 +2223,14 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
         if($comment) {
             $bodyhtml = str_ireplace("%%lbl_cmts_wlog%%",$this->getLang('lbl_cmts_wlog'),$bodyhtml);
             $bodyhtml = str_ireplace("%%CMNT_ID%%",$comment['id'],$bodyhtml);
+            $bodyhtml = str_ireplace("%%EDIT_AUTHOR%%",$comment['author'],$bodyhtml);
             $bodyhtml = str_ireplace("%%CMNT_AUTHOR%%",$comment['author'],$bodyhtml);
             $bodyhtml = str_ireplace("%%CMNT_TIMESTAMP%%",date($this->getConf('d_format'),strtotime($comment['timestamp'])),$bodyhtml);
             $frmt_cmnt = str_ireplace(chr(10),"<br />",$comment['comment']);
             $bodyhtml = str_ireplace("%%COMMENT%%",$this->xs_format($frmt_cmnt),$bodyhtml);
+            $bodyhtml = str_ireplace("%%FIELD%%",str_ireplace(chr(10),"<br />",$comment["field"]),$bodyhtml);
+            $bodyhtml = str_ireplace("%%OLD_VALUE%%",$this->xs_format(str_ireplace(chr(10),"<br />",$comment["old_value"])),$bodyhtml);
+            $bodyhtml = str_ireplace("%%NEW_VALUE%%",$this->xs_format(str_ireplace(chr(10),"<br />",$comment["new_value"])),$bodyhtml);
         }
         $bodyhtml = str_ireplace("%%issuemod_br%%",$this->getLang('issuemod_br'),$bodyhtml);
         $bodyhtml = str_ireplace("%%issuemod_end%%",$this->getLang('issuemod_end'),$bodyhtml);
@@ -2038,6 +2245,32 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
     function _get_one_value($issue, $key) {
         if (array_key_exists($key,$issue))
             return $issue[$key];
+        return '';
+    }
+/******************************************************************************/
+/* elaborate the display string of assignee (login, name or mail)
+*/
+    function _get_assignee($issue, $key) {
+        if (array_key_exists($key,$issue)) {
+            global $auth;
+            $filter['grps']  = $this->getConf('assign');
+            $usr_array       = $auth->retrieveUsers(0,0,$filter);
+            $shw_assignee_as = $this->getConf('shw_assignee_as');
+
+            foreach ($usr_array as $u_key => $usr)
+            {       if($usr['mail']==$issue[$key]) {
+//                      echo  $shw_assignee_as.'<br />';
+                      if($shw_assignee_as=='login') {
+//                          echo  $issue[$key].' = '.$u_key.'<br />';
+                          return $u_key;
+                      }
+                      else {
+//                          echo  $issue[$key].' = '.$usr[$shw_assignee_as].'<br />';
+                          return $usr[$shw_assignee_as];
+                      }
+                    }
+            } 
+        }
         return '';
     }
 /******************************************************************************/
@@ -2218,6 +2451,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
     function _log_mods($project, $issue, $usr, $column, $old_value, $new_value)
     {     global $conf;
           // get mod-log file contents
+          $issue_id = $issue['id'];
           if($this->getConf('it_data')==false) $modfile = DOKU_INC."data/meta/".$project.'_'.$issue_id.'.mod-log';
           else $modfile = DOKU_INC. $this->getConf('it_data').$project.'_'.$issue_id.'.mod-log';
           if (@file_exists($modfile))
@@ -2232,7 +2466,6 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
           $mods[$mod_id]['field']     = $column;
           $mods[$mod_id]['old_value'] = $old_value;
           $mods[$mod_id]['new_value'] = $new_value;
-          
           // Save issues file contents
           $fh = fopen($modfile, 'w');
           fwrite($fh, serialize($mods));

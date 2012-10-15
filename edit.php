@@ -58,15 +58,21 @@
                     $lang['issuenew_descr'].$issue['description'].chr(10).
                     $lang['issuemod_see'].DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $lang['issuemod_br'].chr(10).$lang['issuemod_end'];
-            $body = html_entity_decode($body);
-            if ($conf['plugin']['issuetracker']['mail_templates']==1) $bodyhtml = replace_bodyhtml($bodyhtml, $pstring, $project, $issue, $comment);
             
-            $from = $conf['plugin']['issuetracker']['email_address'];
-            $to   = $issue['user_mail'];
-            $cc   = $issue['add_user_mail'];
             
-            $headers .= 'Content-type: text/html; charset=utf-8' . "\r\n"; 
-            mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
+                $body = html_entity_decode($body);
+                $from = $conf['plugin']['issuetracker']['email_address'];
+                $to   = $issue['user_mail'];
+                $cc   = $issue['add_user_mail'];
+                
+            if ($conf['plugin']['issuetracker']['mail_templates']==1) { 
+                $bodyhtml = replace_bodyhtml($bodyhtml, $pstring, $project, $issue, $comment);              
+              $headers .= "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
+              mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
+            }
+            else {
+              mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
+            }
         }
     }
 /******************************************************************************/
@@ -109,8 +115,14 @@
             $from = $conf['plugin']['issuetracker']['email_address'];
             $to   = $value;
 
-            $headers .= "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
-            mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
+            if ($conf['plugin']['issuetracker']['mail_templates']==1) { 
+              $bodyhtml = replace_bodyhtml($bodyhtml, $pstring, $project, $issue, $comment);              
+              $headers .= "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
+              mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
+            }
+            else {
+              mail_send($to, $subject, $body, $from, $cc='', $bcc='', $headers=null, $params=null);
+            }
     }
 /******************************************************************************
      * HTML Mail functions
@@ -388,7 +400,7 @@
       _log_mods($project, $issues[$id_issue], $usr, $field, $old_value, $value);
    // notification mails as long as status is not deleted
     if($conf['status_special']=='') $conf['status_special']='Deleted';
-    if (($field == 'status') && (stripos($conf['status_special'],$value) === false)) {
+    if (stripos($conf['status_special'],$value) === false) {
       _emailForIssueMod($project, $issues[$id_issue], $old_value, $field, $value);
     }
         // inform assigned workforce for new issue

@@ -61,7 +61,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             if ($splitparam[1] != '')
                 {
                 if ($splitparam[0]=='project')
-                	{$data['project'] = $splitparam[1];
+                	{$data['project'] = strtolower($splitparam[1]);
                     /*continue;*/}
 
                 if ($splitparam[0]=='product')   
@@ -186,7 +186,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 // *****************************************************************************
 // upload a symptom file
 // *****************************************************************************
-                                    if($this->getConf('upload')!== false) {
+                                    if($this->getConf('upload')>0) {
                                       $Generated_Header = $this->_symptom_file_upload($issues,$issue_id);
                                     }
 
@@ -317,15 +317,13 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         // search also action.php for 'auth_ad_overflow'
         if($this->getConf('auth_ad_overflow') == false) {
             global $auth;        
-            $filter['grps'] = $this->getConf('assign');
-            $target         = $auth->retrieveUsers(0,0,$filter); 
-            $target2        = $this->array_implode($target);
-            foreach ($target2 as $x_umail)
-            {
-                    if (strrpos($x_umail, "@") > 0)
-                    {
-                        $x_umail_select = $x_umail_select . "['".$x_umail."','".$x_umail."'],";
-                    }
+            $filter['grps']  = $this->getConf('assign');
+            $target          = $auth->retrieveUsers(0,0,$filter); 
+            $shw_assignee_as = $this->getConf('shw_assignee_as');
+            foreach ($target as $key => $x_umail)
+            {       // show assignee by login, name, mail
+                    if($shw_assignee_as=='login') $x_umail_select = $x_umail_select . "['".$key."','".$x_umail['mail']."'],";
+                    else $x_umail_select = $x_umail_select . "['".$x_umail[$shw_assignee_as]."','".$x_umail['mail']."'],";
             }      
             $x_umail_select .= "['',''],";
             $authAD_selector = "TableKit.Editable.selectInput('assigned',{}, [".$x_umail_select."]);";
@@ -460,8 +458,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                              '<td'.$severity_img.'</td>'.NL.
                              '<td'.$status_img.'</td>'.NL.
                              '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$this->_get_one_value($issue,'user_name').'</a></td>'.NL. 
-                             '<td class="canbreak itl__td_standard">'.$itl_item_title.'</td>'.NL.
-                             '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$this->_get_one_value($issue,'assigned').'</a></td>'.NL. 
+                             '<td class="canbreak itl__td_standard">'.$itl_item_title.'</td>'.NL;
+                             
+                    // check how the assignee to be displayed: login, name or mail
+                    $a_display = $this->_get_assignee($issue,'assigned');         
+                    $body .= '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$a_display.'</a></td>'.NL. 
                              '<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.NL.
                              '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.NL.
                              '</tr>'.NL;        
@@ -641,6 +642,33 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     }
 
 /******************************************************************************/
+/* elaborate the display string of assignee (login, name or mail)
+*/
+    function _get_assignee($issue, $key) {
+        if (array_key_exists($key,$issue)) {
+            global $auth;
+            $filter['grps']  = $this->getConf('assign');
+            $usr_array       = $auth->retrieveUsers(0,0,$filter);
+            $shw_assignee_as = $this->getConf('shw_assignee_as');
+
+            foreach ($usr_array as $u_key => $usr)
+            {       if($usr['mail']==$issue[$key]) {
+//                      echo  $shw_assignee_as.'<br />';
+                      if($shw_assignee_as=='login') {
+//                          echo  $issue[$key].' = '.$u_key.'<br />';
+                          return $u_key;
+                      }
+                      else {
+//                          echo  $issue[$key].' = '.$usr[$shw_assignee_as].'<br />';
+                          return $usr[$shw_assignee_as];
+                      }
+                    }
+            } 
+        }
+        return '';
+    }
+
+/******************************************************************************/
 /* send an e-mail to admin due to new issue created
 */
     function _emailForNewIssue($project,$issue)
@@ -675,8 +703,13 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $from=$this->getConf('email_address') ;
             $to=$from;
             $cc=$issue['add_user_mail'];
-            $headers = "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
-            $this->mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
+            if ($this->getConf('mail_templates')==1) { 
+              $headers = "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
+              $this->mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
+            }
+            else {
+              mail_send($to, $subject, $body, $from, $cc, $bcc='', $headers=null, $params=null);
+            }
         }     
     }
 
