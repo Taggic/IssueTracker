@@ -186,7 +186,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 // *****************************************************************************
 // upload a symptom file
 // *****************************************************************************
-                                    if($this->getConf('upload')>0) {
+                                    $mime_type = $_FILES['uploadedfile']['type'];
+                                    if(($this->getConf('upload')> 0) && (strlen($mime_type)>1)) {
                                       $Generated_Header = $this->_symptom_file_upload($issues,$issue_id);
                                     }
 
@@ -316,10 +317,12 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         // select with retriveing all_users from AD
         // search also action.php for 'auth_ad_overflow'
         if($this->getConf('auth_ad_overflow') == false) {
-            global $auth;        
+            global $auth;
+            global $conf;
             $filter['grps']  = $this->getConf('assign');
             $target          = $auth->retrieveUsers(0,0,$filter); 
-            $shw_assignee_as = $this->getConf('shw_assignee_as');
+            $shw_assignee_as = trim($this->getConf('shw_assignee_as'));
+            if(stripos("login, mail, name",$shw_assignee_as) === false) $shw_assignee_as = "login";
             foreach ($target as $key => $x_umail)
             {       // show assignee by login, name, mail
                     if($shw_assignee_as=='login') $x_umail_select = $x_umail_select . "['".$key."','".$x_umail['mail']."'],";
@@ -432,14 +435,14 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     if ($noStatIMG === false) {                    
                         $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_status))).'.gif';
 //                                if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
-                        $status_img =' align="center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/>'.NL;
+                        $status_img ='  class="it_center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/>'.NL;
                     }                    
                     else { $status_img = $style.$a_status; }
                     // check if severity image or text to be displayed                                            
                     if ($noSevIMG === false) {                    
                         $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_severity))).'.gif';
 //                                if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
-                        $severity_img =' align="center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/>'.NL;
+                        $severity_img ='  class="it_center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/>'.NL;
                     }
                     else { $severity_img = $style.$a_severity; }
                     
@@ -515,7 +518,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                         {
                             if ($noStatIMG === false) {                    
                                 $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
-                                $reduced_issues .='<td align="center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/></td>'.NL;
+                                $reduced_issues .='<td class="it_center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/></td>'.NL;
                             }
                             else { $reduced_issues .= '<td'.$style.$isval.'</td>'.NL; }
                         }                                            
@@ -523,7 +526,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                         {
                             if ($noSevIMG === false) {                    
                                 $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
-                                $reduced_issues .='<td align="center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/></td>'.NL;
+                                $reduced_issues .='<td  class="it_center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/></td>'.NL;
                             }
                             else { $reduced_issues .= '<td'.$style.$isval.'</td>'.NL; }
                         }
@@ -647,10 +650,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     function _get_assignee($issue, $key) {
         if (array_key_exists($key,$issue)) {
             global $auth;
+            global $conf;
             $filter['grps']  = $this->getConf('assign');
             $usr_array       = $auth->retrieveUsers(0,0,$filter);
-            $shw_assignee_as = $this->getConf('shw_assignee_as');
-
+            $shw_assignee_as = trim($this->getConf('shw_assignee_as'));
+            if(stripos("login, mail, name",$shw_assignee_as) === false) $shw_assignee_as = "login";
             foreach ($usr_array as $u_key => $usr)
             {       if($usr['mail']==$issue[$key]) {
 //                      echo  $shw_assignee_as.'<br />';
@@ -810,14 +814,14 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $bodyhtml = str_ireplace("%%DESCRIPTION%%",$this->xs_format($frmt_descr),$bodyhtml);
         
                         
-        if($comment) {
+//        if($comment) {
             $bodyhtml = str_ireplace("%%lbl_cmts_wlog%%",$this->getLang('lbl_cmts_wlog'),$bodyhtml);
             $bodyhtml = str_ireplace("%%CMNT_ID%%",$comment['id'],$bodyhtml);
             $bodyhtml = str_ireplace("%%CMNT_AUTHOR%%",$comment['author'],$bodyhtml);
             $bodyhtml = str_ireplace("%%CMNT_TIMESTAMP%%",date($this->getConf('d_format'),strtotime($comment['timestamp'])),$bodyhtml);
             $frmt_cmnt = str_ireplace(chr(10),"<br />",$comment['comment']);
             $bodyhtml = str_ireplace("%%COMMENT%%",$this->xs_format($frmt_cmnt),$bodyhtml);
-        }
+//        }
         $bodyhtml = str_ireplace("%%issuemod_br%%",$this->getLang('issuemod_br'),$bodyhtml);
         $bodyhtml = str_ireplace("%%issuemod_end%%",$this->getLang('issuemod_end'),$bodyhtml);
         
@@ -923,7 +927,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             '<input type="hidden" name="created" value="'.$cur_date.'"/>'.NL.
 //            '<input type="hidden" name="comments" value="'.$comments_file.'"/>'.
             '</p>'.NL.
-            '<table>
+            '<table class="it_form_table">
               <tr>
                 <td>'.$this->getLang('th_project').'</td>
                 <td><label class="it__cir_projectlabel">'.$project.'</label></td>
@@ -1449,6 +1453,7 @@ address format and the domain exists.
 /* upload a file if valid on mime type and file extension
 */
   function _symptom_file_upload(&$issues, $issue_id) {
+      global $conf;
       if($this->getConf('it_data')==false) $target_path = "data/meta/";
       else $target_path = $this->getConf('it_data');
       $ip_block_path = $target_path."ipblock";
@@ -1467,17 +1472,22 @@ address format and the domain exists.
           $ip_blocked_sec = $this->getConf('ip_blockd_time')*60;
            
           // search folder ipblock
-          $path = openDir(DOKU_INC.$ip_block_path);        
-          while(false !== ($filename = readdir($path))){ 
-              if($filename != "." && $filename != ".."){
-                  // delete aged ipblocks
-                  if(file_exists(DOKU_INC.$ip_block_path.'/'.$filename)) {
-                      $t_check = filemtime(DOKU_INC.$ip_block_path.'/'.$filename)+$ip_blocked_sec;
-                      if($t_check <= time()) { @unlink(DOKU_INC.$ip_block_path.'/'.$filename); }
+          if(is_dir(DOKU_INC.$ip_block_path)) { 
+              $path = openDir(DOKU_INC.$ip_block_path); 
+              while(false !== ($filename = readdir($path))){ 
+                  if($filename != "." && $filename != ".."){
+                      // delete aged ipblocks
+                      if(file_exists(DOKU_INC.$ip_block_path.'/'.$filename)) {
+                          $t_check = filemtime(DOKU_INC.$ip_block_path.'/'.$filename)+$ip_blocked_sec;
+                          if($t_check <= time()) { @unlink(DOKU_INC.$ip_block_path.'/'.$filename); }
+                      }
                   }
               }
+              closedir($path); 
           }
-          closedir($path); 
+          else {
+              mkdir(DOKU_INC.$ip_block_path.'/', 0777); 
+          }         
           
           $ip_addr = $_SERVER['REMOTE_ADDR'];
           if($ip_addr == "") {

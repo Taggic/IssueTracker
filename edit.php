@@ -226,7 +226,7 @@
         $bodyhtml = str_ireplace("%%description%%",xs_format($frmt_descr),$bodyhtml);
         
                         
-        if($comment) {
+//        if($comment) {
             $bodyhtml = str_ireplace("%%lbl_cmts_wlog%%",$lang['lbl_cmts_wlog'],$bodyhtml);
             $bodyhtml = str_ireplace("%%cmnt_id%%",$comment['id'],$bodyhtml);
             $bodyhtml = str_ireplace("%%edit_author%%",$comment['author'],$bodyhtml);
@@ -236,7 +236,7 @@
             $bodyhtml = str_ireplace("%%field%%",str_ireplace(chr(10),"<br />",$comment["field"]),$bodyhtml);
             $bodyhtml = str_ireplace("%%old_value%%",xs_format(str_ireplace(chr(10),"<br />",$comment["old_value"])),$bodyhtml);
             $bodyhtml = str_ireplace("%%new_value%%",xs_format(str_ireplace(chr(10),"<br />",$comment["new_value"])),$bodyhtml);
-        }
+//        }
         $bodyhtml = str_ireplace("%%issuemod_br%%",$lang['issuemod_br'],$bodyhtml);
         $bodyhtml = str_ireplace("%%issuemod_end%%",$lang['issuemod_end'],$bodyhtml);
         

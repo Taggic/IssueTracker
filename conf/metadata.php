@@ -24,6 +24,7 @@ $meta['mail_add_resolution']      = array('onoff');
 $meta['mail_modify_resolution']   = array('onoff');
 $meta['mail_modify__description'] = array('onoff');
 $meta['shw_mail_addr']  = array('onoff');   // show mail address instead of user names to registered users
+$meta['shw_assignee_as']= array('multichoice', '_choices' => array('login', 'name', 'mail'));// show assignee by login, name or mail address
 $meta['shwtbl_usr']	    =	array('multicheckbox', '_choices' => array('product', 'version', 'severity', 'created', 'status', 'user', 'title', 'description', 'assigned', 'resolution', 'modified'));
 $meta['use_captcha']    = array('onoff');   // Use captcha on by default
 $meta['severity']       = array('string');  // Configure allowed severities

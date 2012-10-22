@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2012-10-15',
+         'date'   => '2012-10-22',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -371,8 +371,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 // *****************************************************************************
 // upload a symptom file
 // *****************************************************************************
-                                    if($this->getConf('upload')> 0) {
-                                      $Generated_Header = $this->_symptom_file_upload($issues,$issue_id);
+                                    $mime_type = $_FILES['uploadedfile']['type'];
+                                    if(($this->getConf('upload')> 0) && (strlen($mime_type)>1)) {
+                                      $Generated_Header .= $this->_symptom_file_upload($issues,$issue_id);
+                                      echo "what so ever";
                                     }
                                     else {
                                           $old_value = $issues[$issue_id]['attachment1'].'<br />'.$issues[$issue_id]['attachment2'].'<br />'.$issues[$issue_id]['attachment3'];
@@ -470,12 +472,15 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                              $issue_id  = htmlspecialchars(stripslashes($_REQUEST['issue_ID']));
                              $project   = htmlspecialchars(stripslashes($_REQUEST['project']));
                              $usr       = htmlspecialchars(stripslashes($_REQUEST['busr']));
+                             $value     = $_REQUEST['new_status'];
                              $column    = 'status';
                              $issues[$issue_id]['status'] = htmlspecialchars(stripslashes($_REQUEST['new_status']));
 //                             echo 'new status = '.$issues[$issue_id]['status'].'<br />';
                             //save issue-file
-                            $xvalue     = io_saveFile($pfile,serialize($issues));                   // $project, $issue,             $old_value, $column, $new_value                                   
+                            $xvalue     = io_saveFile($pfile,serialize($issues));                                                      
+                            
                             if(($this->getConf('status_special')!=='') && (stripos($this->getConf('status_special'),$value) === false)) {
+                                                                                              // $project, $issue,             $old_value, $column, $new_value
                                 if($this->getConf('userinfo_email') >0) $this->_emailForIssueMod($project, $issues[$issue_id], $old_value, $column, $issues[$issue_id]['status']);
                             }
                             $this->_log_mods($project, $issues[$issue_id], $usr, $column, $old_value, $issues[$issue_id]['status']);
@@ -651,10 +656,12 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         // see issue 37: AUTH:AD switch to provide text input instead 
         // select with retriveing all_users from AD
         if($this->getConf('auth_ad_overflow') == false) {
-            global $auth;        
+            global $auth;
+            global $conf;
             $filter['grps']  = $this->getConf('assign');
             $target          = $auth->retrieveUsers(0,0,$filter);
             $shw_assignee_as = $this->getConf('shw_assignee_as');
+            if(stripos("login, mail, name",$shw_assignee_as) === false) $shw_assignee_as = "login";
             foreach ($target as $key => $x_umail)
             {       // show assignee by login, name, mail
                     if($shw_assignee_as=='login') $x_umail_select = $x_umail_select . "['".$key."','".$x_umail['mail']."'],";
@@ -770,7 +777,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     if ($noStatIMG === false) {                    
                         $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_status))).'.gif';
 //                        if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
-                        $status_img =' align="center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16">';
+                        $status_img ='  class="it_center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16">';
                     }                    
                     else { $status_img = $style.$a_status; }
                     // check if severity image or text to be displayed                                            
@@ -778,7 +785,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_severity))).'.gif';
 
 //                        if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
-                        $severity_img =' align="center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16">';
+                        $severity_img ='  class="it_center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16">';
                     }
                     else { $severity_img = $style.$a_severity; }
                     
@@ -853,7 +860,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         {
                             if ($noStatIMG === false) {                    
                                 $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
-                                $reduced_issues .='<td align="center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"></td>';
+                                $reduced_issues .='<td  class="it_center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"></td>';
                             }
                             else { $reduced_issues .= '<td'.$style.$isval; }
                         }                                            
@@ -862,7 +869,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         {
                             if ($noSevIMG === false) {                    
                                 $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
-                                $reduced_issues .='<td align="center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"></td>';
+                                $reduced_issues .='<td  class="it_center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"></td>';
                             }
                             else { $reduced_issues .= '<td'.$style.$isval.'</td>'; }
                         }
@@ -1335,12 +1342,12 @@ $issue_edit_head .= '<td class="itd__col4"></td>
                   $alink_id++;
                   $blink_id = 'statanker_'.$alink_id;
                   $anker_id = 'anker_'.$alink_id;
-                  $cell_ID = 'img_tab_open_reporterdtls'.$blink_id;                              
+                  $cell_ID = 'img_tab_open_reporterdtls_'.$blink_id;                              
 $issue_client_details = '<table class="itd__tables" id="tbl_'.$anker_id.'"><tbody>
                         <tr>
                            <td class="itd_tables_tdh" colSpan="3">'.$this->getLang('lbl_reporterdtls').'</td>
                         </tr>
-                        <tbody style="display : none;" id="'.$blink_id.'"><tr class="itd__tables_tr">
+                        <tbody style="display : none;" id="'.$blink_id.'"><tr class="itd__tables_tr" style="width:100%;">
                            <td class="it__left_indent"></td>
                            <td class="itd_tables_tdc2">'.$this->getLang('lbl_reportername').'</td>
                            <td class="itd_tables_tdc3">'.$issue[$issue_id]['user_name'].'</td>
@@ -1402,7 +1409,7 @@ $issue_addcontacts .='            <input  type="submit" class="button" style="fo
                               </span>
                             </td>'.NL;
 $issue_addimg = '<img class="cmt_list_plus_img" alt="add" src="'.DOKU_BASE.'lib/plugins/issuetracker/images/blank.gif" id="'.$anker2_id.'" onClick="span_open(\''.$blink2_id.'\')" />
-                 <p style="margin-top:-6px;"><span style="font-size:7pt;">'.sprintf($this->getLang('itd_follower'),$follower).'</span></p>';
+                 <p style="margin-top:-4px;"><span style="font-size:7pt;">'.sprintf($this->getLang('itd_follower'),$follower).'</span></p>';
 }
 //--------------------------------------------------------------------------------------------------------------
                                
@@ -1464,7 +1471,7 @@ $issue_initial_description = '<table class="itd__tables"><tbody>
                   $anker_id = 'anker_'.$alink_id;
         
             $issue_initial_description .= '   <tr>
-                                                 <td colSpan="2" style="display : none;" id="'.$blink_id.'">';
+                                                 <td class="itd_edit_tr" colSpan="2" style="display : none;" id="'.$blink_id.'">';
                     
             $issue_initial_description .= $this->it_edit_toolbar('description_mod');
                     
@@ -1476,7 +1483,7 @@ $issue_initial_description = '<table class="itd__tables"><tbody>
                                          '<input type="hidden" name="author"value="'.$u_mail_check.'" />'.NL.        
                                          '<input type="hidden" name="timestamp" value="'.$cur_date.'" />'.NL.
                                          '<input type="hidden" name="mod_description" value="1"/>'.NL.
-                                         '<textarea id="description_mod" name="description_mod" type="text" cols="106" rows="7" value="">'.strip_tags($x_comment).'</textarea>'.NL;        
+                                         '<textarea class="itd_textarea" id="description_mod" name="description_mod" type="text" cols="106" rows="7" value="">'.strip_tags($x_comment).'</textarea><br>'.NL;        
                                          
                                 if ($this->getConf('use_captcha')==1) 
                                 {   $helper = null;
@@ -1510,16 +1517,16 @@ if((strpos($this->getConf('ltdReport'),'Symptom link 1')===false) || ($this->get
                           <td colspan="2" class="itd_tables_tdh">'.$this->getLang('lbl_symptlinks').'</td>
                         </tr>
                         <tr  class="itd__tables_tr">
-                          <td colspan="2" style="padding-left:0.45em;">1. <a href="'.$issue[$issue_id]['attachment1'].'"><img border="0" alt="symptoms 1" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment1'].'" href="'.$issue[$issue_id]['attachment1'].'">'.$issue[$issue_id]['attachment1'].'</a></td>
+                          <td class="itd_attachments_tr" colspan="2" style="padding-left:0.45em;">1. <a href="'.$issue[$issue_id]['attachment1'].'"><img border="0" alt="symptoms 1" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment1'].'" href="'.$issue[$issue_id]['attachment1'].'">'.$issue[$issue_id]['attachment1'].'</a></td>
                         </tr>'.NL;
   if(strpos($this->getConf('ltdReport'),'Symptom link 2')===false){
     $issue_attachments .= '<tr  class="itd__tables_tr">
-                            <td colspan="2" style="padding-left:0.45em;">2. <a href="'.$issue[$issue_id]['attachment2'].'"><img border="0" alt="symptoms 2" style="margin-right:0.5em" vspace=1em align=absMiddle src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment2'].'" href="'.$issue[$issue_id]['attachment2'].'">'.$issue[$issue_id]['attachment2'].'</a></td>
+                            <td class="itd_attachments_tr" colspan="2" style="padding-left:0.45em;">2. <a href="'.$issue[$issue_id]['attachment2'].'"><img border="0" alt="symptoms 2" style="margin-right:0.5em" vspace=1em align=absMiddle src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment2'].'" href="'.$issue[$issue_id]['attachment2'].'">'.$issue[$issue_id]['attachment2'].'</a></td>
                           </tr>'.NL;
   }
   if(strpos($this->getConf('ltdReport'),'Symptom link 3')===false){
     $issue_attachments .= '<tr  class="itd__tables_tr">
-                            <td colspan="2" style="padding-left:0.45em;">3. <a href="'.$issue[$issue_id]['attachment3'].'"><img border="0" alt="symptoms 3" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment3'].'" href="'.$issue[$issue_id]['attachment3'].'">'.$issue[$issue_id]['attachment3'].'</a></td>
+                            <td class="itd_attachments_tr" colspan="2" style="padding-left:0.45em;">3. <a href="'.$issue[$issue_id]['attachment3'].'"><img border="0" alt="symptoms 3" style="margin-right:0.5em" vspace="1" align="middle" src="'.$imgBASE.'sympt.gif" width="16" height="16"></a><a title="'.$issue[$issue_id]['attachment3'].'" href="'.$issue[$issue_id]['attachment3'].'">'.$issue[$issue_id]['attachment3'].'</a></td>
                           </tr>'.NL;
   }
   /* mod for edit symptom links by ticket owner and admin/assignee ---------------*/
@@ -1681,7 +1688,7 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
                       $anker_id = 'anker_'.$alink_id;
         
                     $issue_comments_log .= '   <tr>
-                                                 <td colSpan="2" style="display : none;" id="'.$blink_id.'">';
+                                                 <td class="itd_edit_tr" colSpan="2" style="display : none;" id="'.$blink_id.'">';
                     
                     $issue_comments_log .= $this->it_edit_toolbar('comment_mod');
                     
@@ -1759,7 +1766,7 @@ $issue_comments_log .= '<input  type="hidden" class="showid__option" name="showi
 $issue_add_comment .='<table class="itd__tables">'.
                       '<tr>'.
                         '<td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_cmts_adcmt').'</td>
-                      </tr><tr><td colSpan="2" style="display : none;" id="'.$blink_id.'">';
+                      </tr><tr><td class="itd_edit_tr" colSpan="2" style="display : none;" id="'.$blink_id.'">';
 $issue_add_comment .= $this->it_edit_toolbar('comment');                     
 // mod for editor ---------------------------------------------------------------------
 
@@ -1771,7 +1778,7 @@ $issue_add_comment .= formSecurityToken(false).
                      '<input type="hidden" name="comment_issue_ID" value="'.$issue[$issue_id]['id'].'" />'.NL.
                      '<input type="hidden" name="author" value="'.$u_mail_check.'" />'.NL.        
                      '<input type="hidden" name="timestamp" value="'.$cur_date.'" />'.NL.        
-                     '<textarea id="comment" name="comment" type="text" cols="106" rows="7" value=""></textarea>'.NL;        
+                     '<textarea class="itd_textarea" id="comment" name="comment" type="text" cols="106" rows="7" value=""></textarea><br>'.NL;        
 
                       if ($this->getConf('use_captcha')==1) 
                       {   $helper = null;
@@ -1806,7 +1813,7 @@ $issue_edit_resolution ='<table class="itd__tables">
 $issue_edit_resolution .= '<tr class="itd__tables_tr">
                             <td class="itd_comment_tr" colSpan="2" style="padding-left:0.45em;">'.$this->xs_format($x_resolution).'</td>
                           </tr>
-                          <tr><td colSpan="2" style="display : none;" id="'.$blink_id.'">';
+                          <tr><td class="itd_edit_tr" colSpan="2" style="display : none;" id="'.$blink_id.'">';
 
 /*------------------------------------------------------------------------------
  * extension based on Issue: 39, reported by lukas
@@ -1829,7 +1836,7 @@ $issue_edit_resolution .= formSecurityToken(false).
                           '<input type="hidden" name="usr" value="'.$u_name.'"/>'.NL.
                           '<input type="hidden" name="add_resolution" value="1"/>'.NL;        
     
-$issue_edit_resolution .= "<textarea id='x_resolution' name='x_resolution' type='text' cols='106' rows='7' value=''>".strip_tags($x_resolution)."</textarea>";
+$issue_edit_resolution .= "<textarea class='itd_textarea' id='x_resolution' name='x_resolution' type='text' cols='106' rows='7' value=''>".strip_tags($x_resolution)."</textarea><br>";
                               
                       if ($this->getConf('use_captcha')==1) 
                       {   $helper = null;
@@ -1861,7 +1868,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                                         <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('th_resolution').'</td>
                                     </tr>';
             $issue_edit_resolution .= '<tr class="itd__tables_tr">
-                                        <td colSpan="2" style="padding-left:0.45em;">'.$this->xs_format($x_resolution).'</td>
+                                        <td class="itd_resolution_tr" colSpan="2" style="padding-left:0.45em;">'.$this->xs_format($x_resolution).'</td>
                                       </tr></table>'.NL;
 
             $wmsg = $this->getLang('lbl_lessPermission'); 
@@ -2177,6 +2184,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 /******************************************************************************/
     function replace_bodyhtml($bodyhtml, $pstring, $project, $issue, $comment) {
         global $ID;
+//        echo "ID = ". $ID . "<br />";
         $bodyhtml = str_ireplace("%%_SEE%%",DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring,$bodyhtml);
         $bodyhtml = str_ireplace("%%issuemod_head%%",$this->getLang('issuemod_head'),$bodyhtml);
         $bodyhtml = str_ireplace("%%issuemod_intro%%",$this->getLang('issuemod_intro'),$bodyhtml);
@@ -2220,7 +2228,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
         $bodyhtml = str_ireplace("%%DESCRIPTION%%",$this->xs_format($frmt_descr),$bodyhtml);
         
                         
-        if($comment) {
+//        if($comment) {
             $bodyhtml = str_ireplace("%%lbl_cmts_wlog%%",$this->getLang('lbl_cmts_wlog'),$bodyhtml);
             $bodyhtml = str_ireplace("%%CMNT_ID%%",$comment['id'],$bodyhtml);
             $bodyhtml = str_ireplace("%%EDIT_AUTHOR%%",$comment['author'],$bodyhtml);
@@ -2231,7 +2239,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
             $bodyhtml = str_ireplace("%%FIELD%%",str_ireplace(chr(10),"<br />",$comment["field"]),$bodyhtml);
             $bodyhtml = str_ireplace("%%OLD_VALUE%%",$this->xs_format(str_ireplace(chr(10),"<br />",$comment["old_value"])),$bodyhtml);
             $bodyhtml = str_ireplace("%%NEW_VALUE%%",$this->xs_format(str_ireplace(chr(10),"<br />",$comment["new_value"])),$bodyhtml);
-        }
+//        }
         $bodyhtml = str_ireplace("%%issuemod_br%%",$this->getLang('issuemod_br'),$bodyhtml);
         $bodyhtml = str_ireplace("%%issuemod_end%%",$this->getLang('issuemod_end'),$bodyhtml);
         
@@ -2253,10 +2261,11 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
     function _get_assignee($issue, $key) {
         if (array_key_exists($key,$issue)) {
             global $auth;
+            global $conf;
             $filter['grps']  = $this->getConf('assign');
             $usr_array       = $auth->retrieveUsers(0,0,$filter);
             $shw_assignee_as = $this->getConf('shw_assignee_as');
-
+            if(stripos("login, mail, name",$shw_assignee_as) === false) $shw_assignee_as = "login";
             foreach ($usr_array as $u_key => $usr)
             {       if($usr['mail']==$issue[$key]) {
 //                      echo  $shw_assignee_as.'<br />';
@@ -2688,6 +2697,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 /* upload a file if valid on mime type and file extension
 */
   function _symptom_file_upload(&$issues, $issue_id) {
+      global $conf;
       if($this->getConf('it_data')==false) $target_path = "data/meta/";
       else $target_path = $this->getConf('it_data');
       $ip_block_path = $target_path."ipblock";
@@ -2714,17 +2724,22 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
           $ip_blocked_sec = $this->getConf('ip_blockd_time')*60;
            
           // search folder ipblock
-          $path = openDir(DOKU_INC.$ip_block_path);        
-          while(false !== ($filename = readdir($path))){ 
-              if($filename != "." && $filename != ".."){
-                  // delete aged ipblocks
-                  if(file_exists(DOKU_INC.$ip_block_path.'/'.$filename)) {
-                      $t_check = filemtime(DOKU_INC.$ip_block_path.'/'.$filename)+$ip_blocked_sec;
-                      if($t_check <= time()) { @unlink(DOKU_INC.$ip_block_path.'/'.$filename); }
+          if(is_dir(DOKU_INC.$ip_block_path)) { 
+              $path = openDir(DOKU_INC.$ip_block_path); 
+              while(false !== ($filename = readdir($path))){ 
+                  if($filename != "." && $filename != ".."){
+                      // delete aged ipblocks
+                      if(file_exists(DOKU_INC.$ip_block_path.'/'.$filename)) {
+                          $t_check = filemtime(DOKU_INC.$ip_block_path.'/'.$filename)+$ip_blocked_sec;
+                          if($t_check <= time()) { @unlink(DOKU_INC.$ip_block_path.'/'.$filename); }
+                      }
                   }
               }
+              closedir($path); 
           }
-          closedir($path); 
+          else {
+              mkdir(DOKU_INC.$ip_block_path.'/', 0777); 
+          }         
           
           $ip_addr = $_SERVER['REMOTE_ADDR'];
           if($ip_addr == "") {
@@ -2749,7 +2764,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
       }      
 
       // get file extension 
-      $mime_type = $_FILES['uploadedfile']['type'];    
+      $mime_type = $_FILES['uploadedfile']['type'];
       $file_extension = strrchr($_FILES['uploadedfile']['name'],'.'); // last occurance of dot to detect extension
       $file_dot_extension = strtolower($file_extension);   
       $file_extension = str_replace(".", "", strtolower($file_dot_extension));  
@@ -2769,37 +2784,37 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
       if($_FILES['uploadedfile']['size'] > ($this->getConf('max_fsize'))){
           $error_flag = 1;
           $Generated_Header .= '<span>'.sprintf($this->getLang('wmsg6'), $this->getConf('max_fsize')).' (File: <b>'.$_FILES['uploadedfile']['name'].'</b>)</span><br>';
-      }                
+      } 
 // -----------------------------------------------------------------------------
-    if($error_flag > 0) { 
-      echo $Generated_Header = '<div class="it__negative_feedback">'.$Generated_Header.'</div>';
-    }                  
-    else {
-      $safe_filename = preg_replace(array("/\s+/", "/[^-\.\w]+/"),array("_", ""),trim(basename( $_FILES['uploadedfile']['name']))); 
-      $target_path = $target_path . $issue_id . '_sympt_' . $safe_filename; 
-      if(move_uploaded_file($_FILES['uploadedfile']['tmp_name'], DOKU_INC.$target_path)) {
-          $issues[$issue_id]['attachment1'] = DOKU_URL.$target_path;
-//                                            msg("The file ".$safe_filename." has been successfully uploaded.",1);
-      } else{
-          msg("There was an error uploading the file, please try again!",-1);
+      if($error_flag > 0) { 
+        echo $Generated_Header = '<div class="it__negative_feedback">'.$Generated_Header.'</div>';
+      }                  
+      else {
+        $safe_filename = preg_replace(array("/\s+/", "/[^-\.\w]+/"),array("_", ""),trim(basename( $_FILES['uploadedfile']['name']))); 
+        $target_path = $target_path . $issue_id . '_sympt_' . $safe_filename; 
+        if(move_uploaded_file($_FILES['uploadedfile']['tmp_name'], DOKU_INC.$target_path)) {
+            $issues[$issue_id]['attachment1'] = DOKU_URL.$target_path;
+//                msg("The file ".$safe_filename." has been successfully uploaded.",1);
+        } else{
+            msg("There was an error uploading the file, please try again!",-1);
+        }
+// -----------------------------------------------------------------------------
+        // block ip
+        if($this->getConf('ip_blocked') == 1) {
+                $ip_addr=$_SERVER['REMOTE_ADDR']; 
+                if($ip_addr==""){
+                    if(getenv(HTTP_X_FORWARDED_FOR)) { $ip_addr = getenv('HTTP_X_FORWARD_FOR'); }
+                    else { $ip_addr = getenv('REMOTE_ADDR'); }
+                }
+                if(!is_dir(DOKU_INC.$ip_block_path.'ipblock/')) { mkdir(DOKU_INC.$ip_block_path.'/', 0777); }
+                if($ip_addr != ""){
+                    $empty = '.'; 
+                    $iplog = fopen(DOKU_INC.$ip_block_path.'/'.$ip_addr, "w+");
+                    fwrite($iplog, $empty); 
+                    fclose($iplog); 
+                }
+            }            
       }
-// -----------------------------------------------------------------------------
-      // block ip
-      if($this->getConf('ip_blocked') == 1) {
-              $ip_addr=$_SERVER['REMOTE_ADDR']; 
-              if($ip_addr==""){
-                  if(getenv(HTTP_X_FORWARDED_FOR)) { $ip_addr = getenv('HTTP_X_FORWARD_FOR'); }
-                  else { $ip_addr = getenv('REMOTE_ADDR'); }
-              }
-              if(!is_dir(DOKU_INC.$ip_block_path.'ipblock/')) { mkdir(DOKU_INC.$ip_block_path.'/', 0777); }
-              if($ip_addr != ""){
-                  $empty = '.'; 
-                  $iplog = fopen(DOKU_INC.$ip_block_path.'/'.$ip_addr, "w+");
-                  fwrite($iplog, $empty); 
-                  fclose($iplog); 
-              }
-          }            
-    }
 // -----------------------------------------------------------------------------
     return $Generated_Header;
   }

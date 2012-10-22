@@ -25,6 +25,7 @@ $lang['mail_add_resolution']      = 'inform about resolution entry';
 $lang['mail_modify_resolution']   = 'inform about resolution modification';
 $lang['mail_modify__description'] = 'inform about modification of initial description';
 $lang['shw_mail_addr']  = 'mail address visible instead of user name(to registered users only)';
+$lang['shw_assignee_as']= 'show assignee by login, name or mail address';
 $lang['shwtbl_usr']     = 'Configure columns to be shown to user as overview';
 $lang['use_captcha']    = 'Use captcha'; 
 $lang['severity']       = 'Define severity levels you will use <br> (comma separated, dependency to icon file name)';

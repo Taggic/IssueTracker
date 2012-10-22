@@ -33,7 +33,9 @@
 }
 
 /* ----- Report Elements ------------ */
-div.it__cir_form {
+.it_form_table, .it_form_table tr td {
+  border:        none !important;
+	font-size:   0.95em !important;
 }
 .it__cir_projectlabel {
 	padding-left:           0.45em;
@@ -43,6 +45,7 @@ div.it__cir_form {
 	display:                 block;
 	float:                    left;
 	padding-left:           0.45em;
+  margin-top:                3px;
 	margin-left:               2em;
 	width:                    15em;
 	border:      1px solid #CED2DB;
@@ -57,6 +60,7 @@ div.it__cir_form {
 	padding-left:           0.45em;
 	margin-left:               2em;
 	width:                  15.7em;
+  font-size:             inherit;
 	border:      1px solid #CED2DB;
 	border-radius:             3px;
 }
@@ -155,7 +159,13 @@ TABLE.itd__title {
 	border-spacing:           0px;
 }
 table.itd__title TR TD {
-	vertical-align:         middle;
+	border:                   0px;
+	margin:                   0px;
+	padding:                  0px;
+	vertical-align:         middle !important;
+}
+table.itd__title TR TD IMG {
+	vertical-align:         middle !important;
 }
 table.itd__title TR TD P {
 	vertical-align:         middle;
@@ -164,21 +174,33 @@ table.itd__title TR TD P {
 	border-style:           outset;
 	background-color:      #CED2DB;
 	padding:                   5px;
+  margin:                      0;
 	border-radius:             4px;
 }
 table.itd_tr_standard {
 	background-color: #f0f0f0;
 	border:                    0px;
 }
+.itd_attachments_tr {
+	border:                   0px;
+	margin:                   0px;
+	padding:                  0px;
+  font-size:      1.18em !important;
+}
 .itd__col2, .itd__col3, .itd__col4, .itd__col5, .itd__col6 {
 	border:                    0px;
 	background-color:      #f0f0f0;
+  height: 0.85em;
+  margin: 0;
+  padding: 0;
+  vertical-align: text-bottom;
 }
 .itd__col2 {
 	width:                     13%;
 	font-size:              0.75em;
 }
 .itd__col3, .itd__col4 {
+	font-size:              0.85em;
 	width:                     25%;
 }
 .itd__col5 {
@@ -193,45 +215,64 @@ table.itd_tr_standard {
 .itd__tables {
 	border:                    0px;
 	margin:                    0px;
+	margin-top:                4px;
 	padding:                   4px;
 	width:                     90%;
 	border-spacing:            0px;
+	font-size:              0.85em;  
 }
 .itd_tables_tdh {
   background-color:      #CED2DB;
 	width:                     90%;
-	border:     1px dotted #9999FF;
+	border:     none;
 	color:                 #555555;
 	font-weight:              bold;
 	white-space:            nowrap;
 	text-align:               left;
 	vertical-align:         middle;
+  padding: 0;
   padding-left:             12px;
-	border-radius:             3px;
+	border-radius:             3px !important;
+  margin:                      0;
+  font-family:         sans-serif;  
 }
-.itd__tables_tr {
+.itd__tables_tr, .itd__tables_tr td {
 	border:                      0;
 	background-color:      #f0f0f0;
+}
+.itd__tables_tr {
+  font-size:              0.85em;
 }
 .itd_tables_tdc2 {
 	border:                      0;
 	width:                     13%;
-	font-size:              0.75em;  
+	font-size:              1.10em;  
+  padding: 0;
+  margin: 0;
 }
 .itd_tables_tdc3 {
 	border:                      0;
 	width:                     75%;
+	font-size:              1.18em;  
+  padding: 0;
+  margin: 0;
+}
+td.it_center {
+  text-align:center;
+  margin-left: auto;
+  margin-right: auto; 
 }
 
 .itd__tables code {
-  font-size:              1em !important;    
+  font-size:              0.85em !important;    
 }
 
 .itd_comment_trh {
-	background-color:      #ffffff;
+	border:                      0;
+	background-color:      #ffffff !important;
 	padding-top:            0.75em;
 	padding-left:           0.45em;
-	font-size:              0.75em;
+  font-size:      0.85em !important;
 	font-style:             italic;
 }
 .itd_comment_tr {
@@ -239,8 +280,9 @@ table.itd_tr_standard {
 	border-bottom:       solid 2px;
 	border-color:          #b0b0b0;
 	background-color:      #f0f0f0;
+  font-size:      1.18em !important;
 	padding:                0.75em;
-	border-radius:          0.25em;
+	border-radius:          0.25em !important;
   position:relative;
 }
 
@@ -251,6 +293,11 @@ table.itd_tr_standard {
   line-height:    1em !important;
   font-weight: normal !important;
   position:relative;
+}
+.itd_edit_tr {
+	border:              none;
+  padding:                0;
+  margin:                 0;
 }
 
 .it_edittoolbar, .itr_edittoolbar {
@@ -265,16 +312,21 @@ table.itd_tr_standard {
 }
 
 .img_tab_open_comment {
+  border: none;
   background-image:url(images/enfold.png);
   background-repeat:no-repeat;
   height:19px;
   background-position: 0 0;
+  margin: 0;
+  padding: 0;
+  vertical-align: text-bottom;
  }
 
 .lnk_tab_open_comment {
+  border-top:1px solid lightgrey !important;
   width:                   222px;
 	text-align:             center;
-  cursor:pointer;
+  cursor:                pointer;
 }
 
 .xseditor_button {
@@ -289,7 +341,8 @@ fieldset.minor_mod {
   border: 0 !important;
   width:15em !important;
   height:1.5em !important;
-  margin-bottom:-2em !important;
+  margin-bottom:0 !important;
+  margin-left:0 !important;
 }
 
 .cmt_mod_exclamation {
@@ -313,6 +366,7 @@ fieldset.minor_mod {
 }
 .cmt_del_img {
   background-image:url(images/delete.gif);
+  border: none;
   margin-top: -10px ;
   margin-right: -10px ;
   float:right;
@@ -320,6 +374,7 @@ fieldset.minor_mod {
 
 .cmt_del_img:hover {
   background-image:url(images/delete_hov.gif) !important;
+  border: none;
   margin-top: -10px ;
   margin-right: -10px ;
   float:right;
@@ -341,7 +396,7 @@ fieldset.minor_mod {
   font-size:   0.8em !important;  
 }
 
-.it_search_result tr td{
+.it_search_result tr td p {
   border-top: 1px solid lightgrey !important;
   border-bottom: 1px solid lightgrey !important;
   border-left: 0  !important;
@@ -373,3 +428,16 @@ fieldset.minor_mod {
 .resize-handle-active {
   cursor: w-resize;
 } 
+
+div.frm_status select, div.frm_severity select, div.frm_status#btnmod_status, div.frm_severity#btnmod_severity {
+  font-size: 0.85em !important;
+}    
+
+div.frm_status input, div.frm_status span, div.frm_severity input, div.frm_severity span {
+  font-size: 0.85em !important;
+}
+
+.itd_textarea {
+  margin-top: 3px;
+  padding: 0.5em;
+}
