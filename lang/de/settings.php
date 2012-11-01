@@ -8,13 +8,13 @@
  
 // for the configuration manager
 $lang['d_format']			    = 'G:i:s d-m-Y';
-$lang['it_data']          = 'IssueTracker Verzeichnis im Data Ordner (leer = meta)';
-$lang['upload']           = 'Indizien upload erlauben ?';
-$lang['max_fsize']        = 'maximale Dateigr&ouml;sse in Byte';
-$lang['ip_blocked']       = 'Anti-Spam einchlaten';
+$lang['it_data']          = 'IssueTracker Verzeichnis im Data Ordner (leer = meta)<img title="Warnung: Es wird empfohlen den Pfad zu &auml;ndern. Bei existierenden Installationen sind die Datein entsprechend zu verschieben. Bitte f&uuml;gen Sie den Pfad hier entsprechend ein (z.B. \'data/it_store/\')." alt="Warnung" src="./lib/plugins/config/images/warning.png" style="float:right;"> ';
+$lang['upload']           = 'Indizien upload erlauben?';
+$lang['max_fsize']        = 'Maximale Dateigr&ouml;sse in Byte';
+$lang['ip_blocked']       = 'Anti-Spam einschalten';
 $lang['ip_blockd_time']   = 'IP für x Minuten nach Upload blocken';
 $lang['send_email']			  = '&Uuml;ber neue Aufgaben per E-Mail informieren?'; 
-$lang['mail_templates']   = 'HTML eMail templates nutzen?';
+$lang['mail_templates']   = 'HTML E-Mail Templates nutzen?';
 $lang['email_address']		= 'Wer wird informiert?';
 $lang['registered_users']	= 'Nur registrierten Benutzern mit passenden Zugangsrechten ist es erlaubt im Issue Tracker neue Aufgaben und Kommentare anzulegen';
 $lang['auth_ad_overflow'] = 'Kompensierung AUTH:AD Fehler (>1.000 user Objekte)';
@@ -24,13 +24,13 @@ $lang['mail_modify_comment']      = 'Mailinfo bei Kommentar&auml;nderung';
 $lang['mail_add_resolution']      = 'Mailinfo bei L&ouml;sungseintrag';
 $lang['mail_modify_resolution']   = 'Mailinfo bei L&ouml;sungs&auml;nderung';
 $lang['mail_modify__description'] = 'Mailinfo bei &Auml;nderung der Beschreibung';
-$lang['shw_mail_addr']    = 'Mail Adresse statt Namen (sichtbar nur f&uuml;r registrierte Benutzer)';
-$lang['shw_assignee_as']  = 'Assignee anzeigen mit Login, Name oder Mail Adresse';
+$lang['shw_mail_addr']    = 'E-Mail Adresse statt Namen (sichtbar nur f&uuml;r registrierte Benutzer)';
+$lang['shw_assignee_as']  = 'Beauftragten anzeigen mit Login, Name oder E-Mail Adresse';
 $lang['shwtbl_usr']			  = 'Folgende Spalten sollen dem Benutzer angezeigt werden';
 $lang['use_captcha']		  = 'CAPTCHA benutzen?'; 
 $lang['severity']			    = 'Schweregrade die benutzt werden sollen<br>(kommagetrennt, Namen mit passenden Bilddateien)';
 $lang['status']				    = 'Status-Levels die benutzt werden sollen<br>(kommagetrennt, Namen mit passenden Bilddateien)';
-$lang['status_special']   = 'ausgeblendet (gel&ouml;scht), nur Einzelwert zul&auml;ssig !';
+$lang['status_special']   = 'Ausgeblendet (gel&ouml;scht), nur Einzelwert zul&auml;ssig !';
 $lang['products']			    = 'Produktnamen die benutzt werden sollen<br>(kommagetrennt)';
 $lang['assign']				    = 'Wiki Benutzergruppe denen Tickets zugewiesen werden k&ouml;nnen<br>(senkrechter Strich "|" als Trennzeichen)';
 $lang['noStatIMG']			  = 'Statustext statt Symbole anzeigen';

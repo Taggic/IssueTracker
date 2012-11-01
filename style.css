@@ -91,9 +91,14 @@
 	vertical-align:            top;
 }
 
-itl__count_div {
+.itl__count_div {
   font-size:              0.95em;
 }
+
+.itl__count_tbl {
+  border:              0;
+}
+
 
 .itl__showid_input {
 	width:                     3em;
@@ -263,10 +268,6 @@ td.it_center {
   margin-right: auto; 
 }
 
-.itd__tables code {
-  font-size:              0.85em !important;    
-}
-
 .itd_comment_trh {
 	border:                      0;
 	background-color:      #ffffff !important;
@@ -294,10 +295,39 @@ td.it_center {
   font-weight: normal !important;
   position:relative;
 }
-.itd_edit_tr {
-	border:              none;
-  padding:                0;
-  margin:                 0;
+
+.itd_comment_tr li div.it_code, .itd_comment_tr div.it_code {
+  margin:           3px 3px 3px 0 !important;
+  padding:          3px !important;
+  border:         1px dotted #b0b0b0;
+  font-size:      inherit;
+  line-height:    inherit;
+  font-weight: normal !important;
+  position:relative;
+  float: none;
+  border-radius: 4px 4px 4px 4px;
+  box-shadow: 3px 3px 5px 2px #CCCCCC;
+}
+
+.itd_comment_tr li div.it_code code, .itd_comment_tr div.it_code code {
+  font-size:      inherit;
+  line-height:    inherit;
+  background-color: inherit;
+  border-radius: 0px;
+  box-shadow: none;
+}
+
+tr.itd_edit_tr {
+	border:      1px solid #dddddd;
+  padding:                   3px;
+  margin-top:                2px;
+	border-radius:             4px;
+}
+
+td.itd_edit_tr {
+	border:                   none;
+  padding:                     0;
+  margin:                    3px;
 }
 
 .it_edittoolbar, .itr_edittoolbar {
@@ -440,4 +470,34 @@ div.frm_status input, div.frm_status span, div.frm_severity input, div.frm_sever
 .itd_textarea {
   margin-top: 3px;
   padding: 0.5em;
+  width:100%;
 }
+
+.frm_report_manager input, .frm_report_manager select {
+  width: 10em;
+  border: 1px solid #dddddd;
+  font: inherit;
+}
+
+.frm_report_manager input {
+  text-align: right;
+}
+
+.frm_report_manager table, .frm_report_manager table th, .frm_report_manager table td {
+  border: none !important;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size:   0.95em;
+  text-align: center;
+}
+
+.frm_report_manager .button {
+  text-align: center;
+}
+
+.frm_report_manager td.other_controls {
+  text-align: left;
+}
+
+

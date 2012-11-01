@@ -243,7 +243,87 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             {
                 $Generated_Table = $this->_count_render($issues,$start,$step,$next_start,$data);                
             }            
+            // display the Report Manager form
+            elseif (stristr($data['display'],'REPORTING')!= false)
+            {   msg('REPORT GUI',0);
+                /*----------------------------------------------------------------------------*/
+                /*    REPORT GUI                                                              */
+                /*----------------------------------------------------------------------------*/
+                // Build string to load projects select
+                if($this->getConf('it_data')==false) $path = DOKU_INC."data/meta/";
+                else $path = DOKU_INC. $this->getConf('it_data');   
+                $xprojects = $this->__find_projects($path);
+                $x_projects = explode(',',$xprojects);
+                foreach ($x_projects as $project)
+                {   $project = trim($project);
+                    if(strlen($project)>1) $x_projects_select .= '<option value="'.$project.'">'.$project.'</option>';
+                }
+                $x_projects_select .= '<option value="" selected="selected"></option>';
+                
+                // Build string to load products select
+                $xproducts = explode(',', $this->getConf('products')) ;
+                foreach ($xproducts as $x_products)
+                {   $x_products = trim($x_products);
+                    if(strlen($x_products)>1) $x_products_select .= '<option value="'.$x_products.'">'.$x_products.'</option>';
+                }
+                $x_products_select .= '<option value="" selected="selected"></option>';
+              
+                // Build string to load severity select
+                $xseverity = explode(',', $this->getConf('severity')) ;
+                foreach ($xseverity as $x_severity)
+                {   $x_severity = trim($x_severity);
+                    if(strlen($x_severity)>1) $x_severity_select .= '<option value="'.$x_severity.'">'.$x_severity.'</option>';
+                } 
+                $x_severity_select .= '<option value="" selected="selected"></option>';
+                
+                // Build string to load status select
+                $xstatus = explode(',', $this->getConf('status')) ;
+                foreach ($xstatus as $x_status)
+                {   $x_status = trim($x_status);
+                    if(strlen($x_status)>1) $x_status_select .= '<option value="'.$x_status.'">'.$x_status.'</option>';
+                }
+                $x_status_select .= '<option value="" selected="selected"></option>';
+                
+                // build string to load date-frame select
+                $x_date_frame_select .= '<option value="days" selected="selected">days</option>'.NL.
+                                        '<option value="weeks">weeks</option>'.NL.
+                                        '<option value="months">months</option>'.NL;
+                
+                // assemble the form output
+                $Generated_Header = '<br /><hr><div class="div_report_manager">
+                                      <form class="frm_report_manager" method="post" accept-charset="'.$lang['encoding'].'">
+                                        <table><tr>
+                                        <td><span class="description" for="projects">Project </span></td>
+                                        <td><span class="description" for="products">Product </span></td>
+                                        <td><span class="description" for="severity">Severity </span></td>
+                                        <td><span class="description" for="status"  >Status </span></td>
+                                        <td colspan="2"><span class="description" for="date_range">The last </span></td>
+                                        </tr>
+                                        <tr>
+                                        <td><select name="projects">'  .$x_projects_select  .'</select></td>
+                                        <td><select name="products">'  .$x_products_select  .'</select></td>
+                                        <td><select name="severity">'  .$x_severity_select  .'</select></td>
+                                        <td><select name="status">'    .$x_status_select    .'</select></td>
+                                        <td><input  name="date_range" value="" /></td>
+                                        <td><select name="date_frame">'.$x_date_frame_select.'</select></td>
+                                        </tr>
+                                        <tr class="last">
+                                        <td colspan="6" class="other_controls">
+                                        '.NL;
+                                        if ($this->getConf('use_captcha')==1) 
+                                        {   $helper = null;
+                                		        if(@is_dir(DOKU_PLUGIN.'captcha'))
+                                			         $helper = plugin_load('helper','captcha');
+                                			         
+                                		        if(!is_null($helper) && $helper->isEnabled())
+                                			      {  $Generated_Header .= '<span class="captcha">'.$helper->getHTML().'</span>'; }
+                                        }
 
+                $Generated_Header .= '<input type="submit" class="button" id="it_btn_rprt_mngr" name="it_btn_rprt_mngr" value="'.$this->getLang('it_btn_rprt_mngr').'" title="'.$this->getLang('it_btn_rprt_mngr').'");/>'.NL.
+                                          formSecurityToken(false).'
+                                    </td></tr></table></form>
+                                </div><br /><hr>';
+            }
             // Render            
             $renderer->doc .= $Generated_Header.$Generated_Table.$Generated_Scripts.$Generated_Report;
 
@@ -452,7 +532,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 
                         if($rowEven==="it_roweven") $rowEven="it_rowodd";
                         else $rowEven="it_roweven";                    
-                    
+
+                    $it_issue_username = $this->_get_one_value($issue,'user_name');
                     $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.NL.                       
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.NL.
                              '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.NL.
@@ -460,11 +541,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'version').'</td>'.NL.
                              '<td'.$severity_img.'</td>'.NL.
                              '<td'.$status_img.'</td>'.NL.
-                             '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$this->_get_one_value($issue,'user_name').'</a></td>'.NL. 
+                             '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$it_issue_username.'</a></td>'.NL. 
                              '<td class="canbreak itl__td_standard">'.$itl_item_title.'</td>'.NL;
                              
                     // check how the assignee to be displayed: login, name or mail
-                    $a_display = $this->_get_assignee($issue,'assigned');         
+                    $a_display = $this->_get_assignee($issue,'assigned');                                      
                     $body .= '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$a_display.'</a></td>'.NL. 
                              '<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.NL.
                              '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.NL.
@@ -656,20 +737,14 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $shw_assignee_as = trim($this->getConf('shw_assignee_as'));
             if(stripos("login, mail, name",$shw_assignee_as) === false) $shw_assignee_as = "login";
             foreach ($usr_array as $u_key => $usr)
-            {       if($usr['mail']==$issue[$key]) {
-//                      echo  $shw_assignee_as.'<br />';
-                      if($shw_assignee_as=='login') {
-//                          echo  $issue[$key].' = '.$u_key.'<br />';
-                          return $u_key;
-                      }
-                      else {
-//                          echo  $issue[$key].' = '.$usr[$shw_assignee_as].'<br />';
-                          return $usr[$shw_assignee_as];
-                      }
-                    }
+            {     if($usr['mail']==$issue[$key]) 
+                  {   if($shw_assignee_as=='login') { return $u_key; }
+                      else { return $usr[$shw_assignee_as]; }
+                  }
             } 
         }
-        return '';
+        $b_display = explode("@",$issue[$key]);
+        return $b_display[0];
     }
 
 /******************************************************************************/
@@ -1338,8 +1413,8 @@ address format and the domain exists.
         $x_comment = preg_replace('/\[blockquote\]/i', '<blockquote>', $x_comment);
         $x_comment = preg_replace('/\[\/blockquote\]/i', '</blockquote>', $x_comment);    
 
-        $x_comment = preg_replace('/\[code\]/i', '<code>', $x_comment);
-        $x_comment = preg_replace('/\[\/code\]/i', '</code>', $x_comment);    
+        $x_comment = preg_replace('/\[code\]/i', '<div class="it_code"><code>', $x_comment);
+        $x_comment = preg_replace('/\[\/code\]/i', '</code></div>', $x_comment);    
 
         $x_comment = preg_replace('/\[red\]/i', '<span style="color:red;">', $x_comment);
         $x_comment = preg_replace('/\[\/red\]/i', '</span>', $x_comment);    
@@ -1566,6 +1641,23 @@ address format and the domain exists.
 // -----------------------------------------------------------------------------
     return $Generated_Header;
   }
+/******************************************************************************/
+  function __find_projects($path) { 
+    if ($handle=opendir($path)) { 
+      while (false!==($file=readdir($handle))) { 
+        if ($file<>"." AND $file<>"..") { 
+          if (is_file($path.'/'.$file)) { 
+            $ext = explode('.',$file);
+            $last = count($ext) - 1;
+	          if ($ext[$last] == 'issues') {
+              $projects .= ','.substr($file,0,strlen($file)-strlen('.issues'));
+            }
+          } 
+        } 
+      } 
+    }
+    return $projects; 
+  }    
 /******************************************************************************/
 }
 ?>

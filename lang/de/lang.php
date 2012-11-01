@@ -103,6 +103,10 @@ $lang['cmt_tab_open']        = 'Kommentar hinzuf&uuml;gen';
 $lang['cmt_tab_mod']         = 'Kommentar &auml;ndern';
 $lang['rsl_tab_open']        = 'L&ouml;sung hinzuf&uuml;gen/&auml;ndern';
 $lang['dtls_usr_hidden']     = 'Benutzerdaten ausgeblendet';
+$lang['dtls_reporter_hidden']   = 'Reporter';
+$lang['dtls_follower_hidden']   = 'Beobachter';
+$lang['dtls_assignee_hidden']   = 'Bearbeiter';
+$lang['dtls_foreigner_hidden']  = 'jemand anderes';
 $lang['minor_mod']           = 'kleine &Auml;nderung';
 $lang['minor_mod_cbx_title'] = 'keine eMails bei kleinen  &Auml;nderungen';
 /******************************************************************************/

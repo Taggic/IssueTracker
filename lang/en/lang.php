@@ -105,6 +105,10 @@ $lang['cmt_tab_open']           = 'add Comment';
 $lang['cmt_tab_mod']            = 'modify Comment';
 $lang['rsl_tab_open']           = 'add / modify Resolution';
 $lang['dtls_usr_hidden']        = 'user details hidden';
+$lang['dtls_reporter_hidden']   = 'Reporter';
+$lang['dtls_follower_hidden']   = 'Follower';
+$lang['dtls_assignee_hidden']   = 'Assignee';
+$lang['dtls_foreigner_hidden']  = 'Foreigner';
 $lang['minor_mod']              = 'Minor change';
 $lang['minor_mod_cbx_title']    = 'prevent sending eMails upon cosmetic changes';
 /******************************************************************************/
@@ -137,7 +141,7 @@ $lang['issuemod_changes']       = 'The issue changed on %s from %s to %s.'; //$c
 /* send an e-mail to user due to issue set to resolved on details
 /* _emailForResolutionMod
 */                            
-$lang['issue_resolved_subject'] = 'Issue %s on %s was resolved';
+$lang['issue_resolved_subject'] = 'Issue #%s on %s was resolved';
 $lang['issue_resolved_intro']   = 'Your reported issue was resolved.';
 $lang['issue_resolved_status']  = 'Solved';
 $lang['issue_resolved_text']    = 'Solution:   ';
@@ -156,7 +160,7 @@ $lang['issuenew_descr']         = 'Description:  ';
 /* deviations from before for sending an e-mail to assignee
 /* _emailForNewIssue
 */
-$lang['issueassigned_subject']  = ' issue %s assigned to you';
+$lang['issueassigned_subject']  = ' issue #%s assigned to you';
 $lang['issueassigned_head']     = 'Hi,';
 $lang['issueassigned_intro']    = 'you are assigned to following Issue:';
 $lang['it__none']               = '--';
@@ -178,3 +182,7 @@ $lang['search_Subject']         = 'Subject';
 /******************************************************************************/
 $lang['table_kit_OK']           = 'OK';
 $lang['table_kit_Cancel']       = ' Cancel';
+
+/******************************************************************************/
+// Report Manager
+$lang['it_btn_rprt_mngr']         = 'Create Report';

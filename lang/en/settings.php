@@ -8,7 +8,7 @@
  
 // for the configuration manager
 $lang['d_format']         = 'Y-m-d G:i:s';
-$lang['it_data']          = 'IssueTracker root within data folder ("" = meta)';
+$lang['it_data']          = 'IssueTracker root within data folder ("" = meta)<img title="Warning: It is very recommended to store the Issues outside the meta folder. So please enter a path here (e.g. \'data/it_store/\')." alt="warning" src="./lib/plugins/config/images/warning.png" style="float:right;"> ';
 $lang['upload']           = 'allow symptom file uploads';
 $lang['max_fsize']        = 'limit file size for uploads in Byte';
 $lang['ip_blocked']       = 'turn on the anti-spam feature';

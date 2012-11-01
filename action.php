@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2012-10-22',
+         'date'   => '2012-11-01',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -795,7 +795,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     
                     if($rowEven==="it_roweven") $rowEven="it_rowodd";
                     else $rowEven="it_roweven";
-                                            
+                    
+                    $it_issue_username = $this->_get_one_value($issue,'user_name');
                     $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.NL.                       
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.NL.
                              '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.NL.
@@ -803,11 +804,11 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'version').'</td>'.NL.
                              '<td'.$severity_img.'</td>'.NL.
                              '<td'.$status_img.'</td>'.NL.
-                             '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$this->_get_one_value($issue,'user_name').'</a></td>'.NL. 
+                             '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$it_issue_username.'</a></td>'.NL. 
                              '<td class="canbreak itl__td_standard">'.$itl_item_title.'</td>'.NL;
                              
                     // check how the assignee to be displayed: login, name or mail
-                    $a_display = $this->_get_assignee($issue,'assigned');         
+                    $a_display = $this->_get_assignee($issue,'assigned');
                     $body .= '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$a_display.'</a></td>'.NL. 
                              '<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.NL.
                              '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.NL.
@@ -1057,6 +1058,11 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 // scripts for xsEditor -------------------------------------------------------
 $issue_edit_head .= '<span>
          <script type="text/javascript">
+          function resizeBoxId(obj,size) {
+              var arows = document.getElementById(obj).rows;
+              document.getElementById(obj).rows = arows + size;
+          }
+          
           function doHLine(tag1,obj)
           {
           textarea = document.getElementById(obj);
@@ -1461,7 +1467,7 @@ $issue_initial_description = '<table class="itd__tables"><tbody>
                                 <tr class="itd__tables_tr">
                                   <td class="itd_comment_tr" colSpan="2" style="padding-left:0.45em;">'.$this->xs_format($x_comment).'</td>
                                 </tr>';
-                             
+                                                           
 /* mod for edit description by ticket owner and admin/assignee ---------------*/
 // check if current user is author of the comment and offer an edit button
             if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) || (strpos($target2,$user_mail['userinfo']['mail']) != false)) 
@@ -1470,20 +1476,24 @@ $issue_initial_description = '<table class="itd__tables"><tbody>
                   $blink_id = 'statanker_'.$alink_id;
                   $anker_id = 'anker_'.$alink_id;
         
-            $issue_initial_description .= '   <tr>
+            $issue_initial_description .= '   <tr class="itd_edit_tr">
                                                  <td class="itd_edit_tr" colSpan="2" style="display : none;" id="'.$blink_id.'">';
                     
-            $issue_initial_description .= $this->it_edit_toolbar('description_mod');
+            $issue_initial_description .= $this->it_edit_toolbar('description_mod_'.$alink_id);
                     
             $issue_initial_description .= '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
-                                          
             $issue_initial_description .= formSecurityToken(false). 
                                          '<input type="hidden" name="project" value="'.$project.'" />'.NL.
                                          '<input type="hidden" name="comment_issue_ID" value="'.$issue[$issue_id]['id'].'" />'.NL.
                                          '<input type="hidden" name="author"value="'.$u_mail_check.'" />'.NL.        
                                          '<input type="hidden" name="timestamp" value="'.$cur_date.'" />'.NL.
                                          '<input type="hidden" name="mod_description" value="1"/>'.NL.
-                                         '<textarea class="itd_textarea" id="description_mod" name="description_mod" type="text" cols="106" rows="7" value="">'.strip_tags($x_comment).'</textarea><br>'.NL;        
+                                         '<textarea class="itd_textarea" id="description_mod_'.$alink_id.'" name="description_mod" type="text" cols="106" rows="7" value="">'.strip_tags($x_comment).'</textarea><br />
+                                          <span class="reply_close_link">
+                                            <a href="javascript:resizeBoxId(\'description_mod_'.$alink_id.'\', -20)"><img src="'.$imgBASE.'reduce.png" title="reduce textarea" style="float:right;" /></a>
+                                            <a href="javascript:resizeBoxId(\'description_mod_'.$alink_id.'\', +20)"><img src="'.$imgBASE.'enlarge.png" title="enlarge textarea" style="float:right;" /></a>
+                                         </span>'.NL;
+        
                                          
                                 if ($this->getConf('use_captcha')==1) 
                                 {   $helper = null;
@@ -1634,7 +1644,20 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
                             }
                         elseif($this->getConf('auth_ad_overflow') == true) {
                             $x_mail = '<a href="mailto:'.$this->_get_one_value($a_comment,'author').'">'.$this->_get_one_value($a_comment,'author').'</a>'; }
-                        else {   $x_mail = '<i> ('.$this->getLang('dtls_usr_hidden').') </i>';  }
+                        else {   
+                            // here it is necessary for others to know if issue reporter, follower or assignee is commenting
+                            // implement the function to differenciate between these roles
+                            // => check mail address with reporter, follower and assignee/admin group else it is a foreigner
+                            $role       = $this->_get_one_value($a_comment,'author');
+                            if ($issue[$issue_id]['user_mail'] === $role)
+                                $x_mail = '<i> ('.$this->getLang('dtls_reporter_hidden').') </i>';  
+                            elseif (stripos($issue['add_user_mail'],$role) != false)
+                                $x_mail = '<i> ('.$this->getLang('dtls_follower_hidden').') </i>';  
+                            elseif (stripos($target2,$role) != false)
+                                $x_mail = '<i> ('.$this->getLang('dtls_assignee_hidden').') </i>';  
+                            else
+                                $x_mail = '<i> ('.$this->getLang('dtls_foreigner_hidden').') </i>';  
+                        }
 
                         if($this->_get_one_value($a_comment,'mod_timestamp')) { $insert_lbl = '<label class="cmt_mod_exclamation">!</label>';}
                         else $insert_lbl ='';
@@ -1687,10 +1710,10 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
                       $blink_id = 'statanker_'.$alink_id;
                       $anker_id = 'anker_'.$alink_id;
         
-                    $issue_comments_log .= '   <tr>
+                    $issue_comments_log .= '   <tr class="itd_edit_tr">
                                                  <td class="itd_edit_tr" colSpan="2" style="display : none;" id="'.$blink_id.'">';
                     
-                    $issue_comments_log .= $this->it_edit_toolbar('comment_mod');
+                    $issue_comments_log .= $this->it_edit_toolbar('comment_mod_'.$alink_id);
                     
                     $issue_comments_log .= '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
                                           
@@ -1701,7 +1724,12 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
                                          '<input type="hidden" name="author"value="'.$user_mail['userinfo']['mail'].'" />'.NL.        
                                          '<input type="hidden" name="timestamp" value="'.$cur_date.'" />'.NL.
                                          '<input type="hidden" name="comment_id" value="'.$this->_get_one_value($a_comment,'id').'" />'.NL.        
-                                         '<textarea id="comment_mod" name="comment_mod" type="text" cols="106" rows="7" value="">'.strip_tags($x_comment).'</textarea>'.NL;        
+                                         '<textarea class="itd_textarea" id="comment_mod_'.$alink_id.'" name="comment_mod" type="text" cols="106" rows="7" value="">'.strip_tags($x_comment).'</textarea><br />
+                                          <span class="reply_close_link">
+                                            <a href="javascript:resizeBoxId(\'comment_mod_'.$alink_id.'\', -20)"><img src="'.$imgBASE.'reduce.png" title="reduce textarea" style="float:right;" /></a>
+                                            <a href="javascript:resizeBoxId(\'comment_mod_'.$alink_id.'\', +20)"><img src="'.$imgBASE.'enlarge.png" title="enlarge textarea" style="float:right;" /></a>
+                                          </span>'.NL;
+        
                     if ($this->getConf('use_captcha')==1) 
                     {   $helper = null;
             		        if(@is_dir(DOKU_PLUGIN.'captcha'))
@@ -1766,8 +1794,8 @@ $issue_comments_log .= '<input  type="hidden" class="showid__option" name="showi
 $issue_add_comment .='<table class="itd__tables">'.
                       '<tr>'.
                         '<td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_cmts_adcmt').'</td>
-                      </tr><tr><td class="itd_edit_tr" colSpan="2" style="display : none;" id="'.$blink_id.'">';
-$issue_add_comment .= $this->it_edit_toolbar('comment');                     
+                      </tr><tr class="itd_edit_tr"><td class="itd_edit_tr" colSpan="2" style="display : none;" id="'.$blink_id.'">';
+$issue_add_comment .= $this->it_edit_toolbar('comment_'.$alink_id);                     
 // mod for editor ---------------------------------------------------------------------
 
 $issue_add_comment .= '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
@@ -1778,7 +1806,12 @@ $issue_add_comment .= formSecurityToken(false).
                      '<input type="hidden" name="comment_issue_ID" value="'.$issue[$issue_id]['id'].'" />'.NL.
                      '<input type="hidden" name="author" value="'.$u_mail_check.'" />'.NL.        
                      '<input type="hidden" name="timestamp" value="'.$cur_date.'" />'.NL.        
-                     '<textarea class="itd_textarea" id="comment" name="comment" type="text" cols="106" rows="7" value=""></textarea><br>'.NL;        
+                     '<textarea class="itd_textarea" id="comment_'.$alink_id.'" name="comment" type="text" cols="106" rows="7" value=""></textarea><br>
+                      <span class="reply_close_link">
+                        <a href="javascript:resizeBoxId(\'comment_'.$alink_id.'\', -20)"><img src="'.$imgBASE.'reduce.png" title="reduce textarea" style="float:right;" /></a>
+                        <a href="javascript:resizeBoxId(\'comment_'.$alink_id.'\', +20)"><img src="'.$imgBASE.'enlarge.png" title="enlarge textarea" style="float:right;" /></a>
+                      </span>'.NL;
+        
 
                       if ($this->getConf('use_captcha')==1) 
                       {   $helper = null;
@@ -1813,7 +1846,7 @@ $issue_edit_resolution ='<table class="itd__tables">
 $issue_edit_resolution .= '<tr class="itd__tables_tr">
                             <td class="itd_comment_tr" colSpan="2" style="padding-left:0.45em;">'.$this->xs_format($x_resolution).'</td>
                           </tr>
-                          <tr><td class="itd_edit_tr" colSpan="2" style="display : none;" id="'.$blink_id.'">';
+                          <tr class="itd_edit_tr"><td class="itd_edit_tr" colSpan="2" style="display : none;" id="'.$blink_id.'">';
 
 /*------------------------------------------------------------------------------
  * extension based on Issue: 39, reported by lukas
@@ -1836,7 +1869,12 @@ $issue_edit_resolution .= formSecurityToken(false).
                           '<input type="hidden" name="usr" value="'.$u_name.'"/>'.NL.
                           '<input type="hidden" name="add_resolution" value="1"/>'.NL;        
     
-$issue_edit_resolution .= "<textarea class='itd_textarea' id='x_resolution' name='x_resolution' type='text' cols='106' rows='7' value=''>".strip_tags($x_resolution)."</textarea><br>";
+$issue_edit_resolution .= "<textarea class='itd_textarea' id='x_resolution' name='x_resolution' type='text' cols='106' rows='7' value=''>".strip_tags($x_resolution)."</textarea><br>".
+                          '<span class="reply_close_link">
+                            <a href="javascript:resizeBoxId(\'x_resolution\', -20)"><img src="'.$imgBASE.'reduce.png" title="reduce textarea" style="float:right;" /></a>
+                            <a href="javascript:resizeBoxId(\'x_resolution\', +20)"><img src="'.$imgBASE.'enlarge.png" title="enlarge textarea" style="float:right;" /></a>
+                          </span>'.NL;
+
                               
                       if ($this->getConf('use_captcha')==1) 
                       {   $helper = null;
@@ -2264,23 +2302,17 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
             global $conf;
             $filter['grps']  = $this->getConf('assign');
             $usr_array       = $auth->retrieveUsers(0,0,$filter);
-            $shw_assignee_as = $this->getConf('shw_assignee_as');
+            $shw_assignee_as = trim($this->getConf('shw_assignee_as'));
             if(stripos("login, mail, name",$shw_assignee_as) === false) $shw_assignee_as = "login";
             foreach ($usr_array as $u_key => $usr)
-            {       if($usr['mail']==$issue[$key]) {
-//                      echo  $shw_assignee_as.'<br />';
-                      if($shw_assignee_as=='login') {
-//                          echo  $issue[$key].' = '.$u_key.'<br />';
-                          return $u_key;
-                      }
-                      else {
-//                          echo  $issue[$key].' = '.$usr[$shw_assignee_as].'<br />';
-                          return $usr[$shw_assignee_as];
-                      }
-                    }
+            {     if($usr['mail']==$issue[$key]) 
+                  {   if($shw_assignee_as=='login') { return $u_key; }
+                      else { return $usr[$shw_assignee_as]; }
+                  }
             } 
         }
-        return '';
+        $b_display = explode("@",$issue[$key]);
+        return $b_display[0];
     }
 /******************************************************************************/
 /* Captcha OK	    
@@ -2351,8 +2383,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
         $x_comment = preg_replace('/\[blockquote\]/i', '<blockquote>', $x_comment);
         $x_comment = preg_replace('/\[\/blockquote\]/i', '</blockquote>', $x_comment);    
 
-        $x_comment = preg_replace('/\[code\]/i', '<code>', $x_comment);
-        $x_comment = preg_replace('/\[\/code\]/i', '</code>', $x_comment);    
+        $x_comment = preg_replace('/\[code\]/i', '<div class="it_code"><code>', $x_comment);
+        $x_comment = preg_replace('/\[\/code\]/i', '</code></div>', $x_comment);    
 
         $x_comment = preg_replace('/\[red\]/i', '<span style="color:red;">', $x_comment);
         $x_comment = preg_replace('/\[\/red\]/i', '</span>', $x_comment);    
