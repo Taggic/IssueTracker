@@ -24,10 +24,11 @@ $lang['btn_reportsave'] = 'Submit';
 /******************************************************************************/
 // Issue List controls
 $lang['lbl_issueqty']           = 'Quantity of %s Issues:&nbsp;';
-$lang['lbl_scroll']             = 'Scroll issue List: &nbsp;&nbsp;&nbsp;';
+$lang['lbl_scroll']             = 'Scroll Issue List: &nbsp;';
 $lang['lbl_filtersev']          = 'Filter Severity:&nbsp;';
 $lang['lbl_filterstat']         = 'Filter Status:&nbsp;';
 $lang['lbl_filterprod']         = 'Filter Product:&nbsp;';
+$lang['cbx_myissues']           = 'MyIssues:&nbsp;';
 $lang['btn_go']                 = 'Go';
 
 $lang['btn_previuos']           = '<<<';

@@ -40,6 +40,7 @@
 .it__cir_projectlabel {
 	padding-left:           0.45em;
 	margin-left:               2em;
+  line-height:              166%;
 }
 .it__cir_input, .it__cir_linput {
 	display:                 block;

@@ -28,6 +28,7 @@ $lang['lbl_scroll']             = 'Rolar a lista de ocorr&ecirc;ncias: &nbsp;&nb
 $lang['lbl_filtersev']          = 'Filtrar Severidade:&nbsp;';
 $lang['lbl_filterstat']         = 'Filtrar Status:&nbsp;';
 $lang['lbl_filterprod']         = 'Filtrar Produto:&nbsp;';
+$lang['cbx_myissues']           = 'Meus incidentes:&nbsp;';
 $lang['btn_go']                 = 'OK';
 
 $lang['btn_previuos']           = '<<<';

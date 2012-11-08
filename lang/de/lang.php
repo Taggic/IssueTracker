@@ -28,6 +28,7 @@ $lang['lbl_scroll']          = 'Anzeigen: &nbsp;&nbsp;&nbsp;';
 $lang['lbl_filtersev']       = 'Schweregrad:&nbsp;';
 $lang['lbl_filterstat']      = 'Status:&nbsp;';
 $lang['lbl_filterprod']      = 'Produkt:&nbsp;';
+$lang['cbx_myissues']        = 'Meine Tickets';
 $lang['btn_go']              = 'Go';
 
 $lang['btn_previuos']        = '<<<';

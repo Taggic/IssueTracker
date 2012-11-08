@@ -55,6 +55,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $data['severity'] = 'ALL';
         $data['view']     = '10';
         $data['controls'] = 'ON';
+        $data['myissues'] = false;
         
         foreach($params as $param){            
             $splitparam = explode('=',$param);
@@ -92,7 +93,12 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                  if ($splitparam[0]=='controls')
                 	{$data['controls'] = strtoupper($splitparam[1]);
                 	 if ($data['controls'] == '') {$data['controls'] = 'ON';}
-                   /*continue;*/}                                   
+                   /*continue;*/}
+                                                      
+/*                 if ($splitparam[0]=='myissues')
+                	{$data['myissues'] = strtoupper($splitparam[1]);
+                	 if ($data['myissues'] == '') {$data['myissues'] = false;}
+                   /*continue;}        */                           
                 }
         }
         return $data;
@@ -446,19 +452,19 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         global $lang;
         if ($step==0) $step=10;
         if ($start==0) $start=count($issues)-$step+1;
-        $next_start = $start + $step + 1;
+        $next_start  = $start + $step + 1;
         if ($next_start>count($issues)) $next_start=count($issues);
 
-        $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
-        $style =' style="text-align:left; white-space:pre-wrap;">';
+        $imgBASE     = DOKU_BASE."lib/plugins/issuetracker/images/";
+        $style       =' style="text-align:left; white-space:pre-wrap;">';
 //        $date_style =' style="text-align:center; white-space:pre;">';
-        $user_grp = pageinfo();
-        $noStatIMG = $this->getConf('noStatIMG');
-        $noSevIMG = $this->getConf('noSevIMG');
-        $project = $data['project'];
+        $user_grp    = pageinfo();
+        $noStatIMG   = $this->getConf('noStatIMG');
+        $noSevIMG    = $this->getConf('noSevIMG');
+        $project     = $data['project'];
         $prod_filter = $data['product'];
         $stat_filter = $data['status'];
-        $sev_filter = $data['severity'];
+        $sev_filter  = $data['severity'];
                 
         if(array_key_exists('userinfo', $user_grp))
         {   foreach ($user_grp['userinfo']['grps'] as $ugrp)
@@ -481,7 +487,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             {   $cFlag = true;
                 break;  } 
         }      
-        
+                
         // members of defined groups $user_grps allowed to change issue contents 
         if ($cFlag === true)       
         {   $dynatable_id = "t_".uniqid((double)microtime()*1000000,1);
@@ -498,15 +504,23 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     "<th id='resolution'>".$this->getLang('th_resolution')."</th>".NL.
                     "<th id='modified'>".$this->getLang('th_modified')."</th></tr></thead>".NL;        
             $body = '<tbody>'.NL;
+
+            // Note: The checked attribute is a boolean attribute. 
+            // It is enough if checked is mentioned to hook the checkbox !
+            if($data['myissues'] == false) { $data['myissues']= ""; }
+            else { $data['myissues']= "checked"; }
             
             for ($i=$next_start-1;$i>=0;$i=$i-1)
             {   // check start and end of rows to be displayed
-                    $issue = $issues[$i];                    
-                    $a_status = strtoupper($this->_get_one_value($issue,'status'));
-                    $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
-                    $a_product = strtoupper($this->_get_one_value($issue,'product'));
+                $issue = $issues[$i];                    
+                $a_status   = strtoupper($this->_get_one_value($issue,'status'));
+                $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
+                $a_product  = strtoupper($this->_get_one_value($issue,'product'));
                     
-                if ((($data['status']=='ALL') || (stristr($data['status'],$a_status)!= false)) && (($data['severity']=='ALL') || (stristr($data['severity'],$a_severity)!= false)) && (($data['product']=='ALL') || (stristr($data['product'],$a_product)!= false)))
+                if ((($data['status']   =='ALL') || (stristr($data['status'],$a_status)       != false)) && 
+                    (($data['severity'] =='ALL') || (stristr($data['severity'],$a_severity)   != false)) && 
+                    (($data['product']  =='ALL') || (stristr($data['product'],$a_product)     != false)) &&
+                    (($data['myissues'] == ''  ) || ($this->_find_myissues($issue, $user_grp) == true)))
                 {   
                     if ($y>=$step) break;
                     if (stripos($this->getConf('status_special'),$a_status) !== false) continue;
@@ -576,13 +590,16 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $reduced_issues='';
             for ($i=$next_start-1;$i>=0;$i=$i-1)
             {   // check start and end of rows to be displayed
-                    $issue = $issues[$i];                    
-                    $a_status = strtoupper($this->_get_one_value($issue,'status'));
-                    $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
-                    $a_product = strtoupper($this->_get_one_value($issue,'product'));
-                    
-                if ((($data['status']=='ALL') || (stristr($data['status'],$a_status)!= false)) && (($data['severity']=='ALL') || (stristr($data['severity'],$a_severity)!= false)) && (($data['product']=='ALL') || (stristr($data['product'],$a_product)!= false)))
-                {   
+                $issue      = $issues[$i];                    
+                $a_status   = strtoupper($this->_get_one_value($issue,'status'));
+                $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
+                $a_product  = strtoupper($this->_get_one_value($issue,'product'));
+                                                 
+                if ((($data['status']   =='ALL') || (stristr($data['status'],$a_status)       != false)) && 
+                    (($data['severity'] =='ALL') || (stristr($data['severity'],$a_severity)   != false)) && 
+                    (($data['product']  =='ALL') || (stristr($data['product'],$a_product)     != false)) &&
+                    (($data['myissues'] == ''  ) || ($this->_find_myissues($issue, $user_grp) == true)))
+               {   
                     if ($y>=$step) break;
                     if (stripos($this->getConf('status_special'),$a_status) !== false) continue;
                     $y=$y+1;
@@ -670,41 +687,44 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 
                '<tr class="itd__tables_tr">'.NL.
                '   <td align ="left" valign="top" width="15%">'.NL.
-               '     <p class="it__cir_projectlabel">'.$this->getLang('lbl_scroll').' <br />'.NL.
-                                                      $this->getLang('lbl_filtersev').' <br />'.NL.
-                                                      $this->getLang('lbl_filterstat').' <br />'.NL.
-                                                      $this->getLang('lbl_filterprod').' </p>'.NL.
+               '     <p class="it__cir_projectlabel">'.'<label for="itl_step"         style="align:left;">'.$this->getLang('lbl_scroll').    '</label><br />'.NL.
+                                                       '<label for="itl_sev_filter"   style="align:left;">'.$this->getLang('lbl_filtersev'). '</label><br />'.NL.
+                                                       '<label for="itl_stat_filter"  style="align:left;">'.$this->getLang('lbl_filterstat').'</label><br />'.NL.
+                                                       '<label for="itl__prod_filter" style="align:left;">'.$this->getLang('lbl_filterprod').'</label><br />'.NL.
+                                                       '<label for="itl_myis_filter"  style="align:left;">'.$this->getLang('cbx_myissues').  '</label></p>'.NL.
                '   </td>'.NL.
                '   <td align ="left" valign="top" width="25%">'.NL.
                '    <form name="myForm" action="" method="post">'.NL.
-               '       <input type="hidden" name="itl_start" id="itl_start" value="'.$start.'"/>'.NL.
-               '       <input type="hidden" name="itl_step" id="itl_step" value="'.$step.'"/>'.NL.
-               '       <input type="hidden" name="itl_next" id="itl_next" value="'.$next_start.'"/>'.NL.
-               '       <input type="hidden" name="itl_project" id="itl_project" value="'.$project.'"/>'.NL.
-               '       <input class="itl__buttons" type="button" name="showprevious" value="'.$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>'.NL.
-               '       <input class="itl__step_input"  name="itl_step" id="itl_step" type="text" value="'.$step.'"/>'.NL.
-               '       <input class="itl__buttons" type="button" name="shownext" value="'.$this->getLang('btn_next').'" title="'.$this->getLang('btn_next_title').'" onClick="changeAction(2)"/><br />'.NL.
-               '       <input class="itl__sev_filter"  name="itl_sev_filter" id="itl_sev_filter" type="text" value="'.$sev_filter.'"/><br />'.NL.                         
-               '       <input class="itl__stat_filter" name="itl_stat_filter" id="itl_stat_filter" type="text" value="'.$stat_filter.'"/>'.NL.
-               '       <input class="itl__prod_filter" name="itl__prod_filter" id="itl__prod_filter" type="text" value="'.$data['product'].'"/>'.NL.
-               '       <input class="itl__buttons" type="button" name="go" value="'.$this->getLang('btn_go').'" title="'.$this->getLang('btn_go').'" onClick="changeAction(3)"/><br />'.NL.
+               '       <input                          type="hidden" name="itl_start"        id="itl_start"        value="'.$start.'"/>'.NL.
+               '       <input                          type="hidden" name="itl_step"         id="itl_step"         value="'.$step.'"/>'.NL.
+               '       <input                          type="hidden" name="itl_next"         id="itl_next"         value="'.$next_start.'"/>'.NL.
+               '       <input                          type="hidden" name="itl_project"      id="itl_project"      value="'.$project.'"/>'.NL.
+               '       <input class="itl__buttons"     type="button" name="showprevious"                           value="'.$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>'.NL.
+               '       <input class="itl__step_input"  type="text"   name="itl_step"         id="itl_step"         value="'.$step.'"/>'.NL.
+               '       <input class="itl__buttons"     type="button" name="shownext"                               value="'.$this->getLang('btn_next').'"     title="'.$this->getLang('btn_next_title').'"     onClick="changeAction(2)"/><br />'.NL.
+               '       <input class="itl__sev_filter"  type="text"   name="itl_sev_filter"   id="itl_sev_filter"   value="'.$sev_filter.'"/><br />'.NL.                         
+               '       <input class="itl__stat_filter" type="text"   name="itl_stat_filter"  id="itl_stat_filter"  value="'.$stat_filter.'"/><br />'.NL.
+               '       <input class="itl__prod_filter" type="text"   name="itl__prod_filter" id="itl__prod_filter" value="'.$data['product'].'"/><br />'.NL.
+               '       <input                          type="checkbox" name="itl_myis_filter" id="itl_myis_filter" value="1" '.$data['myissues'].' title="'.$this->getLang('cbx_myissues').'"/><br />'.NL.
+               '       <input class="itl__buttons"     type="button" name="go"                                     value="'.$this->getLang('btn_go').'"        title="'.$this->getLang('btn_go').'"            onClick="changeAction(3)"/><br />'.NL.
                '    </form>'.NL.                      
                '   </td>'.NL.
                '   <td width="2%">&nbsp;</td>'.NL.
                '   <td class="itl__showdtls" align ="left" width="40%">'.NL.
                '    <form  method="post" action="doku.php?id=' . $ID . '&do=showcase">'.NL.
                '       <label class="it__searchlabel">'.$this->getLang('lbl_showid').'</label>'.NL.
-               '       <input class="itl__sev_filter" name="showid" id="showid" type="text" value="0"/>'.NL.
-               '       <input type="hidden" name="project" id="project" value="'.$project.'"/>'.NL.
-               '       <input type="hidden" name="itl_sev_filter" id="itl_sev_filter" value="'.$sev_filter.'"/>'.NL.
-               '       <input type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$stat_filter.'"/>'.NL.
-               '       <input class="itl__showid_button" id="showcase" type="submit" name="showcase" value="'.$this->getLang('btn_showid').'" title="'.$this->getLang('btn_showid_title').'"/>'.NL.
+               '       <input class="itl__sev_filter"    type="text"   name="showid"          id="showid"          value="0"/>'.NL.
+               '       <input                            type="hidden" name="project"         id="project"         value="'.$project.'"/>'.NL.
+               '       <input                            type="hidden" name="itl_sev_filter"  id="itl_sev_filter"  value="'.$sev_filter.'"/>'.NL.
+               '       <input                            type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$stat_filter.'"/>'.NL.
+               '       <input                            type="hidden" name="itl_myis_filter" id="itl_myis_filter" value="1" '.$data['myissues'].'/>'.NL.
+               '       <input class="itl__showid_button" type="submit" name="showcase"        id="showcase"        value="'.$this->getLang('btn_showid').'"    title="'.$this->getLang('btn_showid_title').'"/>'.NL.
                '    </form><br />'.NL.
                '    <form  method="post" action="doku.php?id=' . $ID . '&do=it_search">'.NL.
                '       <label class="it__searchlabel">'.$this->getLang('lbl_search').'</label>'.NL.
-               '       <input class="itl__sev_filter" name="it_str_search" id="it_str_search" type="text" value="'.$search.'"/>'.NL.
-               '       <input type="hidden" name="project" id="project" value="'.$project.'"/>'.NL.
-               '       <input class="itl__search_button" id="searchcase" type="submit" name="searchcase" value="'.$this->getLang('btn_search').'" title="'.$this->getLang('btn_search_title').'"/>'.NL.
+               '       <input class="itl__sev_filter"    type="text"   name="it_str_search"   id="it_str_search"   value="'.$search.'"/>'.NL.
+               '       <input                            type="hidden" name="project"         id="project"         value="'.$project.'"/>'.NL.
+               '       <input class="itl__search_button" type="submit" name="searchcase"      id="searchcase"      value="'.$this->getLang('btn_search').'" title="'.$this->getLang('btn_search_title').'"/>'.NL.
                '    </form>'.NL.
                '   </td>'.NL.
                '</tr>'.NL.'</tbody>'.NL.'</table>'.NL.'</div>'.NL;
@@ -738,15 +758,18 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             if(stripos("login, mail, name",$shw_assignee_as) === false) $shw_assignee_as = "login";
             foreach ($usr_array as $u_key => $usr)
             {     if($usr['mail']==$issue[$key]) 
-                  {   if($shw_assignee_as=='login') { return $u_key; }
-                      else { return $usr[$shw_assignee_as]; }
+                  {   if   ($shw_assignee_as=='login') { return $u_key; }
+                      elseif($shw_assignee_as=='mail') { return $usr['mail']; }
+                      else                             { return $usr['name']; }
                   }
             } 
         }
-        $b_display = explode("@",$issue[$key]);
-        return $b_display[0];
+        if(stripos("mail",$shw_assignee_as) !== false) return $issue[$key];
+        else {
+          $b_display = explode("@",$issue[$key]);
+          return $b_display[0];
+        }
     }
-
 /******************************************************************************/
 /* send an e-mail to admin due to new issue created
 */
@@ -1658,6 +1681,34 @@ address format and the domain exists.
     }
     return $projects; 
   }    
+/******************************************************************************/
+/* 
+ * Check for MyIssues
+ *  
+ * Check if the issue is related to the current user
+ * the user maybe the issue reporter, assignee or registered as follower      
+ * it will return true/false
+ *  
+ * @author   Taggic <taggic@t-online.de>
+ * @param    array $issue the single issue
+ * @param    array $user the current user info  
+ * @return   bool       true if foo in bar
+ *
+ */
+ 
+  function _find_myissues($issue, $user) {
+      // current user is issue reporter
+      if($user['userinfo']['mail'] === $issue['user_mail']) return true;
+      
+      // current user is assigned to this issue
+      if($user['userinfo']['mail'] === $issue['assigned']) return true;
+      
+      // current user is registered as follower within the comments log of actual issue
+      if(stristr($issue['add_user_mail'],$user['userinfo']['mail']) !== false) return true;
+      
+      // else return false
+       return false;      
+  }
 /******************************************************************************/
 }
 ?>
