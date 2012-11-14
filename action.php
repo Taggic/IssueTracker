@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2012-11-02',
+         'date'   => '2012-11-14',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -1015,11 +1015,26 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         // load issue details and display on page
         global $lang;
         global $auth;
+        global $ID;
         $issue_id = $this->parameter;
         if (!$issue_id) { $issue_id = '0'; }
         
-//        echo 'Project = '.$project.'<br />Issue ID = '. $issue_id.'<br />';
-        
+/*      ------------------------------------------------------------------------
+ *        introduced due to issue #159
+ *      ------------------------------------------------------------------------        
+ *      - check ACL of current user for current ID 
+ *        (AUTH_READ permission is necessary at least)                        
+ *        return $ret    where $ret is empty and finally no content will be displayed */
+        if(auth_quickaclcheck($ID)<1) { return $ret; }
+/*      - ignore function also if page content does not contain the IssueTracker 
+ *        syntax due to the function can be invoked just by action parameters
+ *        what would bypass the DokuWiki ACL                                  
+ *        return $ret    where $ret is empty and finally no content will be displayed */
+        $rawText = rawWiki($ID);
+        if(stripos($rawText, "{{issuetracker>") == false) { return $ret; }
+//      ------------------------------------------------------------------------ 
+
+       
         if ($issue_id === false) return;
         $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
         $noStatIMG = $this->getConf('noStatIMG');
@@ -2899,7 +2914,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
  * @author   Taggic <taggic@t-online.de>
  * @param    array $issue the single issue
  * @param    array $user the current user info  
- * @return   bool       true if foo in bar
+ * @return   bool (true / false)
  *
  */
  
