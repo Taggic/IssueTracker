@@ -730,7 +730,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                '</tr>'.NL.'</tbody>'.NL.'</table>'.NL.'</div>'.NL;
          }
 
-         $usr = '<span style="display:none;" id="currentuser">'.$user_grp['userinfo']['name'].'</span>' ;   //to log issue mods            
+         $usr  = '<span style="display:none;" id="currentuser">'.$user_grp['userinfo']['name'].'</span>' ;   //to log issue mods            
+         $usr .= '<span style="display:none;" id="currentID">'.urlencode($ID).'</span>' ; // to log issue mods
          $a_lang  = '<span style="display:none;" name="table_kit_OK" id="table_kit_OK">'.$this->getLang('table_kit_OK').'</span>'; // for tablekit.js
          $a_lang .= '<span style="display:none;" name="table_kit_Cancel" id="table_kit_Cancel">'.$this->getLang('table_kit_Cancel').'</span>'; // for tablekit.js
          $ret  = $a_lang.$usr.$ret.$head.$body;              
@@ -795,7 +796,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     $this->getLang('issuemod_version').$issue['version'].chr(10).
                     $this->getLang('issuemod_severity').$issue['severity'].chr(10).
                     $this->getLang('issuemod_status').$issue['status'].chr(10).
-                    $this->getLang('issuemod_creator').$issue['user_name'].chr(10).chr(10).
+                    $this->getLang('issuemod_creator').$issue['user_name'].chr(10).
+                    $this->getLang('th_assigned').$issue['assigned'].chr(10).chr(10).
                     $this->getLang('issuenew_descr').$this->xs_format($issue['description']).chr(10).chr(10).
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$this->getLang('issuemod_end');

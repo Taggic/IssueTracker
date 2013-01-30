@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Chinese language file for IssueTracker
  *
@@ -129,7 +129,7 @@ $lang['issuenew_descr']          = '描述:  ';
 /* deviations from before for send an e-mail to assignee
 /* _emailForNewIssue
 */
-$lang['issueassigned_subject']   = '需求碼 %s 被指派給您了';
+$lang['issueassigned_subject']   = '需求碼 %s (%s) 被指派給您了';
 $lang['issueassigned_head']      = '您好,';
 $lang['issueassigned_intro']     = '您被指派對應下列的使用者需求:';
 /******************************************************************************/

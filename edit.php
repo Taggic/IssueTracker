@@ -4,7 +4,6 @@
   if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../../').'/');
   if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
   require_once(DOKU_PLUGIN.'syntax.php');  
-
   
 // POST Sent by the edited array
 //    * &row=n: The row index of the edited cell
@@ -17,7 +16,7 @@
 /******************************************************************************/
 /* send an e-mail to user due to issue modificaion
 */                                          
-    function _emailForIssueMod($project, $issue, $old_value, $column, $new_value)
+    function _emailForIssueMod($currentID, $project, $issue, $old_value, $column, $new_value, $usr)
     {     
 //        if ($conf['plugin']['issuetracker']['userinfo_email']==1)
         {   global $ID;
@@ -35,7 +34,6 @@
                 $comment["old_value"] = $old_value;
                 $comment["new_value"] = $new_value;
                 $comment["timestamp"] = date('Y-m-d G:i:s');
-                $user_mail = pageinfo();
                 $comment["author"] = $user_mail['userinfo']['mail'];
             }
             //issuemod_subject = 'Issue #%s on %s: %s';
@@ -55,8 +53,9 @@
                     $lang['issuemod_severity'].$issue['severity'].chr(10).
                     $lang['issuemod_status'].$issue['status'].chr(10).
                     $lang['issuemod_creator'].$issue['user_name'].chr(10).
+                    $lang['th_assigned'].$issue['assigned'].chr(10).                    
                     $lang['issuenew_descr'].$issue['description'].chr(10).
-                    $lang['issuemod_see'].DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
+                    $lang['issuemod_see'].DOKU_URL.'doku.php?id='.$currentID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $lang['issuemod_br'].chr(10).$lang['issuemod_end'];
             
             
@@ -66,7 +65,7 @@
                 $cc   = $issue['add_user_mail'];
                 
             if ($conf['plugin']['issuetracker']['mail_templates']==1) { 
-                $bodyhtml = replace_bodyhtml($bodyhtml, $pstring, $project, $issue, $comment);              
+                $bodyhtml = replace_bodyhtml($currentID, $bodyhtml, $pstring, $project, $issue, $comment, $usr);              
               $headers .= "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
               mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
             }
@@ -78,10 +77,8 @@
 /******************************************************************************/
 /* send an e-mail to assignee about routed service request
 */                                          
-    function _emailToAssigneeMod($project,$issue,$value)
-    {       
-            global $ID;
-            global $lang;
+    function _emailToAssigneeMod($currentID, $project, $issue, $value, $usr)
+    {       global $lang;
             global $conf;
             if ($conf['plugin']['issuetracker']['mail_templates']==1) {
                 // load user html mail template
@@ -89,10 +86,9 @@
                 $bodyhtml = file_get_contents($sFilename);
                 $comment = array();
                 $comment["timestamp"] = date('Y-m-d G:i:s');
-                $user_mail = pageinfo();
                 $comment["author"] = $user_mail['userinfo']['mail'];
             }
-            $subject = $project.sprintf($lang['issueassigned_subject'],$issue['id']);
+            $subject = sprintf($lang['issueassigned_subject'], $issue['id'], $project);
             $subject = mb_encode_mimeheader($subject, "UTF-8", "Q" );
             $pstring = sprintf("showid=%s&project=%s", urlencode($issue['id']), urlencode($project));
 
@@ -105,18 +101,19 @@
                     $lang['issuemod_severity'].$issue['severity'].chr(10).
                     $lang['issuemod_status'].$issue['status'].chr(10).
                     $lang['issuemod_creator'].$issue['user_name'].chr(10).
+                    $lang['th_assigned'].$issue['assigned'].chr(10).                    
                     $lang['issuenew_descr'].$issue['description'].chr(10).
-                    $lang['issuemod_see'].DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
+                    $lang['issuemod_see'].DOKU_URL.'doku.php?id='.$currentID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $lang['issuemod_br'].chr(10).$lang['issuemod_end'];
             
             $body = html_entity_decode($body);
-            if ($conf['plugin']['issuetracker']['mail_templates']==1) $bodyhtml = replace_bodyhtml($bodyhtml, $pstring, $project, $issue, $comment);
+            if ($conf['plugin']['issuetracker']['mail_templates']==1) $bodyhtml = replace_bodyhtml($currentID, $bodyhtml, $pstring, $project, $issue, $comment, $usr);
             
             $from = $conf['plugin']['issuetracker']['email_address'];
             $to   = $value;
 
             if ($conf['plugin']['issuetracker']['mail_templates']==1) { 
-              $bodyhtml = replace_bodyhtml($bodyhtml, $pstring, $project, $issue, $comment);              
+              $bodyhtml = replace_bodyhtml($currentID, $bodyhtml, $pstring, $project, $issue, $comment, $usr);              
               $headers .= "Mime-Version: 1.0 Content-Type: text/plain; charset=ISO-8859-1 Content-Transfer-Encoding: quoted-printable";
               mail_send_html($to, $subject, $body, $bodyhtml, $from, $cc, $bcc='', $headers, $params=null);
             }
@@ -179,11 +176,11 @@
     }
 
 /******************************************************************************/
-    function replace_bodyhtml($bodyhtml, $pstring, $project, $issue, $comment) {
+    function replace_bodyhtml($currentID, $bodyhtml, $pstring, $project, $issue, $comment, $usr) {
         global $ID;
         global $lang;
         
-        $bodyhtml = str_ireplace("%%_see%%",DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring,$bodyhtml);
+        $bodyhtml = str_ireplace("%%_see%%",DOKU_URL.'doku.php?id='.$currentID.'&do=showcaselink&'.$pstring,$bodyhtml);
         $bodyhtml = str_ireplace("%%issuemod_head%%",$lang['issuemod_head'],$bodyhtml);
         $bodyhtml = str_ireplace("%%issuemod_intro%%",$lang['issuemod_intro'],$bodyhtml);
 
@@ -216,8 +213,6 @@
         $bodyhtml = str_ireplace("%%resolution%%",xs_format($frmt_res),$bodyhtml);
         $bodyhtml = str_ireplace("%%timestamp%%",date($conf['plugin']['issuetracker']['d_format']),$bodyhtml);
         
-        $user_grp = pageinfo();        
-        $usr      = $user_grp['userinfo']['name'] ; 
         $bodyhtml = str_ireplace("%%resolver%%",$usr,$bodyhtml);
         $bodyhtml = str_ireplace("%%mod_by%%",$usr,$bodyhtml);
         $bodyhtml = str_ireplace("%%issuedescrmod_subject%%",sprintf($lang['issuedescrmod_subject'],$issue['id'], $project),$bodyhtml);
@@ -346,7 +341,7 @@
     }
 /******************************************************************************/
 /* improved implode needed
-*/
+
     function array_implode($arrays, &$target = array()) 
     {         
          foreach ($arrays as $item) {
@@ -358,11 +353,13 @@
          }
          return $target;
     }
+*/
+/******************************************************************************/
 /******************************************************************************/
     global $ID;
     global $lang;
     global $conf;
-
+    
     // Include the language file
     if ($conf['lang']=='') $conf['lang']=='en'; 
     if ($conf['lang']!=='') {
@@ -372,12 +369,12 @@
         if ($conf['lang'] != 'en') @include($path.$conf['lang'].'/lang.php');
     }
 
-    $exploded = explode(' ',htmlspecialchars(stripslashes($_POST['id'])));
-    $project = $exploded[0];
-    $id_issue = intval($exploded[1]);
-    $usr = $_POST['usr'];
-    $cur_date = date('Y-m-d G:i:s');
-    
+    $exploded  = explode(' ',htmlspecialchars(stripslashes($_POST['id'])));
+    $project   = $exploded[0];
+    $id_issue  = intval($exploded[1]);
+    $usr       = $_POST['usr'];    
+    $currentID = $_POST['currentID'];
+    $cur_date  = date('Y-m-d G:i:s');
      
     // get issues file contents
     if($conf['plugin']['issuetracker']['it_data']==false) $pfile = DOKU_INC."data/meta/".$project.'.issues';
@@ -401,7 +398,7 @@
    // notification mails as long as status is not deleted
     if($conf['status_special']=='') $conf['status_special']='Deleted';
     if (stripos($conf['status_special'],$value) === false) {
-      _emailForIssueMod($project, $issues[$id_issue], $old_value, $field, $value);
+      _emailForIssueMod($currentID, $project, $issues[$id_issue], $old_value, $field, $value, $usr);
     }
         // inform assigned workforce for new issue
     if ($field == 'assigned') {
@@ -418,7 +415,7 @@
         }
         else $issues[$id_issue]['status'] = $status[1];
         
-        _emailToAssigneeMod($project, $issues[$id_issue], $value);
+        _emailToAssigneeMod($currentID, $project, $issues[$id_issue], $value);
     }
     // Save issues file contents
     $fh = fopen($pfile, 'w');

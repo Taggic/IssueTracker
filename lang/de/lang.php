@@ -160,7 +160,7 @@ $lang['issuenew_descr']      = 'Beschreibung:  ';
 /* deviations from before for send an e-mail to assignee
 /* _emailForNewIssue
 */
-$lang['issueassigned_subject']  = ' - Wiki IssueTracker - Ticket %s wurde Ihnen zugewiesen';
+$lang['issueassigned_subject']  = 'Wiki IssueTracker - Ticket %s zum Projekt %s wurde Ihnen zugewiesen';
 $lang['issueassigned_head']     = 'Hallo!';
 $lang['issueassigned_intro']    = 'Ihnen wurde folgendes Ticket zugewiesen:';
 $lang['it__none']               = '--';

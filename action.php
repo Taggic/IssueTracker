@@ -152,9 +152,9 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 **  Generate output
 */
     function output(&$data) {
-
+             global $ID;
          if (($data->data == 'showcase') || ($data->data == 'showcaselink') || ($data->data == 'store_resolution')) {
-             
+
              $data->preventDefault();
     //        if ($mode == 'xhtml'){            
                  $renderer->info['cache'] = false;         
@@ -619,6 +619,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $Generated_Table  .= '</table></div>'.NL;
             // build parameter for $_GET method
             $pstring = sprintf("showid=%s&amp;project=%s", urlencode($issue_id), urlencode($project));
+            msg($ID,0);
             $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->getLang('back').'">'.$this->getLang('back').'</a>';
             $Generated_Table  .= $itl_item_title.NL;        
         }
@@ -1001,6 +1002,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                '</tr>'.NL.'</tbody>'.NL.'</table>'.NL.'</div>'.NL;
 
          $usr  = '<span style="display:none;" id="currentuser">'.$user_grp['userinfo']['name'].'</span>' ; // to log issue mods
+         $usr .= '<span style="display:none;" id="currentID">'.urlencode($ID).'</span>' ; // to log issue mods
          $a_lang  = '<span style="display:none;" name="table_kit_OK" id="table_kit_OK">'.$this->getLang('table_kit_OK').'</span>'; // for tablekit.js
          $a_lang .= '<span style="display:none;" name="table_kit_Cancel" id="table_kit_Cancel">'.$this->getLang('table_kit_Cancel').'</span>'; // for tablekit.js
 
@@ -2069,6 +2071,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                     $this->getLang('issuemod_severity').$issue['severity'].chr(10).
                     $this->getLang('issuemod_status').$issue['status'].chr(10).
                     $this->getLang('issuemod_creator').$issue['user_name'].chr(10).
+                    $this->getLang('th_assigned').$issue['assigned'].chr(10).                    
                     $this->getLang('issuenew_descr').$issue['description'].chr(10).
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$this->getLang('issuemod_end');
@@ -2136,6 +2139,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                     $this->getLang('issuemod_severity').$issue['severity'].chr(10).
                     $this->getLang('issuemod_status').$issue['status'].chr(10).
                     $this->getLang('issuemod_creator').$issue['user_name'].chr(10).
+                    $this->getLang('th_assigned').$issue['assigned'].chr(10).                    
                     $body3.
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $this->getLang('issuemod_br').chr(10).$project.$this->getLang('issuemod_end'). "\r\n";
@@ -2185,7 +2189,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                     $this->getLang('issuemod_version').$issue['version'].chr(10).
                     $this->getLang('issuemod_severity').$issue['severity'].chr(10).
                     $this->getLang('issuemod_status').$issue['status'].chr(10).
-                    $this->getLang('issuemod_creator').$issue['user_name'].chr(10).chr(10).
+                    $this->getLang('issuemod_creator').$issue['user_name'].chr(10).
+                    $this->getLang('th_assigned').$issue['assigned'].chr(10).chr(10).
                     $this->getLang('issuemod_date').date($this->getConf('d_format'),strtotime($comment['timestamp'])).chr(10).chr(10).
                     $this->getLang('th_description').chr(10).$issue['description'].chr(10).chr(10).
                     $this->getLang('issuemod_see').DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.chr(10).chr(10).

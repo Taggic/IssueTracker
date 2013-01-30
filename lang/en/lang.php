@@ -59,8 +59,8 @@ $lang['itd_follower']           = '(Follower: %s)';
 
 $lang['lbl_project']            = 'Project:';
 $lang['lbl_issueid']            = 'ID:';
-$lang['lbl_reporter']           = 'Reported by:';
-$lang['lbl_reporterdtls']       = 'Reporter Details';
+$lang['lbl_reporter']           = 'Creator:';
+$lang['lbl_reporterdtls']       = 'Creator Details';
 $lang['lbl_initdescr']          = 'Initial description';
 $lang['lbl_reportername']       = 'Name:';
 $lang['lbl_reportermail']       = 'eMail:';
@@ -86,9 +86,9 @@ $lang['th_product']             = 'Product';
 $lang['th_version']             = 'Version';
 $lang['th_severity']            = 'Severity';
 $lang['th_status']              = 'Status';
-$lang['th_username']            = 'User name ';
-$lang['th_usermail']            = 'User email';
-$lang['th_userphone']           = 'User phone';
+$lang['th_username']            = 'Creator';
+$lang['th_usermail']            = 'Creator email';
+$lang['th_userphone']           = 'Creator phone';
 $lang['th_reporteradcontact']   = 'Add contact';
 $lang['th_title']               = 'Title';
 $lang['th_description']         = 'Issue Description';
@@ -106,7 +106,7 @@ $lang['cmt_tab_open']           = 'add Comment';
 $lang['cmt_tab_mod']            = 'modify Comment';
 $lang['rsl_tab_open']           = 'add / modify Resolution';
 $lang['dtls_usr_hidden']        = 'user details hidden';
-$lang['dtls_reporter_hidden']   = 'Reporter';
+$lang['dtls_reporter_hidden']   = 'Creator';
 $lang['dtls_follower_hidden']   = 'Follower';
 $lang['dtls_assignee_hidden']   = 'Assignee';
 $lang['dtls_foreigner_hidden']  = 'Foreigner';
@@ -161,7 +161,7 @@ $lang['issuenew_descr']         = 'Description:  ';
 /* deviations from before for sending an e-mail to assignee
 /* _emailForNewIssue
 */
-$lang['issueassigned_subject']  = ' issue #%s assigned to you';
+$lang['issueassigned_subject']  = 'Issue #%s on %s assigned to you'; //$issue['id'], $project
 $lang['issueassigned_head']     = 'Hi,';
 $lang['issueassigned_intro']    = 'you are assigned to following Issue:';
 $lang['it__none']               = '--';

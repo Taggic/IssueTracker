@@ -156,7 +156,7 @@ $lang['issuenew_descr']         = 'Descrição:  ';
 /* deviations from before for sending an e-mail to assignee
 /* _emailForNewIssue
 */
-$lang['issueassigned_subject']  = ' Ocorrência %s atribuída para você';
+$lang['issueassigned_subject']  = 'Ocorrência %s em %s atribuída para você';
 $lang['issueassigned_head']     = 'Olá,';
 $lang['issueassigned_intro']    = 'foi-lhe atribuída a seguinte Ocorrência:';
 $lang['it__none']               = '--';
