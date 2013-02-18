@@ -131,15 +131,6 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             
             $renderer->info['cache'] = false;     
                
-            // get issues file contents
-            if($this->getConf('it_data')==false) $pfile = DOKU_INC."data/meta/".$data['project'].'.issues';
-            else $pfile = DOKU_INC. $this->getConf('it_data').$data['project'].'.issues';
-
-            if (@file_exists($pfile))
-            	{$issues  = unserialize(@file_get_contents($pfile));}
-            else
-            	{$issues = array();}            	          
-
             $Generated_Header = '';
             $Generated_Table = '';
             $Generated_Scripts = '';
@@ -159,12 +150,10 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                           if ($captcha_ok)
                             {
                                 if (checkSecurityToken())
-                                {                                
-                                    //Add it to the issue file
-                                    $issue_id=count($issues);      
-                                    foreach ($issues as $value)
-                                        {if ($value['id'] >= $issue_id) {$issue_id=$value['id'] + 1;}}
-                                    
+                                {   // get issues file contents
+                                    $all = false;
+                                    $issues = $this->_get_issues($data, $all);
+                                   
                                     $issues[$issue_id]['id'] = $issue_id;    
                                     $issues[$issue_id]['product'] = htmlspecialchars(stripslashes($_REQUEST['product']));
                                     $issues[$issue_id]['version'] = htmlspecialchars(stripslashes($_REQUEST['version']));
@@ -238,7 +227,10 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             }
             // Create issue list            
             elseif (stristr($data['display'],'ISSUES')!= false)
-            {   $step = $data['view'];
+            {   // get issues file contents
+                $all = true;
+                $issues = $this->_get_issues($data, $all);
+                $step = $data['view'];
                 $Generated_Table = $this->_table_render($issues,$data,$step,$start); 
                 if (strtolower($data['controls'])==='on') {
                     $Generated_Scripts = $this->_scripts_render();
@@ -246,7 +238,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             }
             // Count only ...        
             elseif (stristr($data['display'],'COUNT')!= false) 
-            {
+            {   // get issues file contents
+                $all = true;
+                $issues = $this->_get_issues($data, $all);
                 $Generated_Table = $this->_count_render($issues,$start,$step,$next_start,$data);                
             }            
             // display the Report Manager form
@@ -343,6 +337,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     {   global $ID;
         $count = array();
         $productfilter=$data['product'];
+
         foreach ($issues as $issue)
         {
             if ((strcasecmp($productfilter,'ALL')===0) || (stristr($productfilter,$this->_get_one_value($issue,'product'))!= false))
@@ -491,8 +486,14 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         // members of defined groups $user_grps allowed to change issue contents 
         if ($cFlag === true)       
         {   $dynatable_id = "t_".uniqid((double)microtime()*1000000,1);
+            
+            if(($this->getConf('multi_projects')!==false) && ($this->getConf('shw_project_col')!==false)) 
+                { $th_project = "<th id='project'>".$this->getLang('th_project')."</th>"; }
+                
             $head = "<div class='itl__table'><table id='".$dynatable_id."' class='sortable editable resizable inline' width='100%'>".NL.
-                    "<thead><tr><th class=\"sortfirstdesc\" id='id'>".$this->getLang('th_id')."</th>".NL.
+                    "<thead><tr>".NL.
+                     $th_project.NL.
+                    "<th class=\"sortfirstdesc\" id='id'>".$this->getLang('th_id')."</th>".NL.
                     "<th id='created'>".$this->getLang('th_created')."</th>".NL.
                     "<th id='product'>".$this->getLang('th_product')."</th>".NL.
                     "<th id='version'>".$this->getLang('th_version')."</th>".NL.
@@ -502,13 +503,15 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     "<th id='title'>".$this->getLang('th_title')."</th>".NL.
                     "<th id='assigned'>".$this->getLang('th_assigned')."</th>".NL. 
                     "<th id='resolution'>".$this->getLang('th_resolution')."</th>".NL.
-                    "<th id='modified'>".$this->getLang('th_modified')."</th></tr></thead>".NL;        
+                    "<th id='modified'>".$this->getLang('th_modified')."</th>".NL.
+                    "</tr></thead>".NL;        
             $body = '<tbody>'.NL;
 
             // Note: The checked attribute is a boolean attribute. 
             // It is enough if checked is mentioned to hook the checkbox !
             if($data['myissues'] == false) { $data['myissues']= ""; }
             else { $data['myissues']= "checked"; }
+            
             
             for ($i=$next_start-1;$i>=0;$i=$i-1)
             {   // check start and end of rows to be displayed
@@ -548,7 +551,12 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                         else $rowEven="it_roweven";                    
 
                     $it_issue_username = $this->_get_one_value($issue,'user_name');
-                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.NL.                       
+                    if(($this->getConf('multi_projects')!==false) && ($this->getConf('shw_project_col')!==false)) 
+                    {   $project = $this->_get_one_value($issue,'project');
+                        $td_project = '<td class="itl__td_standard">'.$project.'</td>';
+                    }
+                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.NL.
+                              $td_project.NL.              
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.NL.
                              '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.NL.
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'product').'</td>'.NL.
@@ -570,8 +578,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         } 
 
         else       
-        {   
-            //$head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$project."' class=\"sortable resizable inline\"><thead><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Created'>Created</th><th id='Version'>Version</th><th id='User'>User</th><th id='Description'>Description</th><th id='assigned'>assigned</th><th id='Resolution'>Resolution</th><th id='Modified'>Modified</th></tr></thead>";        
+        {   //$head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$project."' class=\"sortable resizable inline\"><thead><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Created'>Created</th><th id='Version'>Version</th><th id='User'>User</th><th id='Description'>Description</th><th id='assigned'>assigned</th><th id='Resolution'>Resolution</th><th id='Modified'>Modified</th></tr></thead>";        
             $dynatable_id = "t_".uniqid((double)microtime()*1000000,1);
             //Build table header according settings
             $configs = explode(',', $this->getConf('shwtbl_usr')) ;
@@ -1710,6 +1717,64 @@ address format and the domain exists.
       
       // else return false
        return false;      
+  }
+/******************************************************************************/
+/* 
+ * Load all issues into an array
+ *  
+ * Check if multi_project is set to true
+ * Load current $project or all projects of it_data_store     
+ * Return the issues array
+ *  
+ * @author   Taggic <taggic@t-online.de>
+ * @param    array $data  
+ * @return   $issues
+ *
+ */
+ 
+  function _get_issues($data, $all = false) {
+    // detect the IssueTracker data store (path)
+    if($this->getConf('it_data')==false) $it_datastore = DOKU_INC."data/meta/";
+    else $it_datastore = DOKU_INC. $this->getConf('it_data');
+    
+    // check if last sign is a slash
+    $i = strrchr ($it_datastore, chr(47));     // chr(47) = "/"
+    $j = strrchr ($it_datastore, chr(92));     // chr(92) = "\"
+    if(($i !== strlen($it_datastore)) && ($i !== strlen($it_datastore))) { $it_datastore .= chr(47); }
+    
+    if(($this->getConf('multi_projects')!==false) && ($all !== false)) {
+        // loop through it_datastore and list all .issues files
+        $xprojects = $this->__find_projects($it_datastore);
+        $x_projects = explode(',',$xprojects);
+        $issues = array();
+        $tmp    = array();
+        
+        foreach ($x_projects as $project)
+        {   $project = trim($project);
+            if(is_file($it_datastore.$project.'.issues') == true) {
+                $tmp = unserialize(@file_get_contents($it_datastore.$project.'.issues'));
+                
+                // loop through the field and add project to each row
+                foreach($tmp as &$tmps)
+                {   $tmps['project'] = $project; }
+                
+                $issues = array_merge($issues, $tmp);
+                $tmp = array();
+            }
+        }
+    }
+    else {
+        // get issues from single project file
+        if($this->getConf('it_data')==false) $pfile = $it_datastore.$data['project'].'.issues';
+        else $pfile = $it_datastore.$data['project'].'.issues';
+    
+        if (@file_exists($pfile))
+        	{$issues  = unserialize(@file_get_contents($pfile));}
+        else
+        	{$issues = array();}
+        }
+
+    return $issues;
   }
 /******************************************************************************/
 }

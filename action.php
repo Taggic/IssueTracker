@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2012-11-14',
+         'date'   => '2013-02-18',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -159,7 +159,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     //        if ($mode == 'xhtml'){            
                  $renderer->info['cache'] = false;         
                  $issue_id = $this->parameter;
-                 $project  = $this->project;
+                 $project  = $this->project;                 
                  $user_grp = pageinfo();        
                  $usr      = $user_grp['userinfo']['name'] ;  //to log issue mods
                  // get issues file contents
@@ -504,43 +504,31 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                  $renderer->info['cache'] = false;         
                  $itl_start = $this->itl_start;
                  $step = $this->itl_step;
+
                  if ($step == '') {$step=10;}
                  $itl_next = $this->itl_next;
                  $a = $this->itl_pjct;
-//                 echo 'Project: '.$a.'<br />';
-                 
-                 // get issues file contents
-                if($this->getConf('it_data')==false) $pfile = DOKU_INC."data/meta/".$a.'.issues';
-                else $pfile = DOKU_INC. $this->getConf('it_data').$a.'.issues';        
-                if (@file_exists($pfile))
-                	{$issues  = unserialize(@file_get_contents($pfile));}
-/*                else
-                	{   // prompt error message that issue with ID does not exist
-                      echo '<div class="it__negative_feedback">'.printf($this->getLang('msg_pfilemissing'), $project).'</div><br />';
-                      return;
-                  } */           	          
 
+                 // get issues file contents
+                  $all = true;
+                  $issues = $this->_get_issues($a, $all);
+            
                  if ($data->data == 'issuelist_next') {
                     $start = $itl_next;
-                    if ($start<0) { $start='0'; }
-                    $next_start = $start + $step;                    
-                    if ($next_start>count($issues)) {
-                      $next_start=count($issues);
-                      $start = $next_start - $step;
-                      if ($start<0) { $start='0'; }
-                      }
-//                    echo 'start = '.$start.';  step = '.$step.';  next_start = '.$next_start.'<br />';
-                 }
-                 elseif ($data->data == 'issuelist_previous') {
-                    $start = $itl_start - $step;
-                    if ($start<0) { $start='0'; }                    
+                    if ($start<0)  { $start='0'; }
+                    elseif($start>count($issues)) {$start=count($issues)-step;}
                     $next_start = $start + $step;
                     if ($next_start>count($issues)) {
                       $next_start=count($issues);
                       $start = $next_start - $step;
                       if ($start<0) { $start='0'; }
-                      }
+                      }                         
 //                    echo 'start = '.$start.';  step = '.$step.';  next_start = '.$next_start.'<br />';
+                 }
+                 elseif ($data->data == 'issuelist_previous') {
+                    $start = $itl_start - $step;
+                    if ($start<0) { $start='0'; $next_start = $start + $step;}                    
+                    else $next_start = $itl_start;
                  }
                  elseif (($data->data == 'issuelist_filter')||($data->data == 'issuelist_filterlink')) {
                     $start = $itl_start;
@@ -562,7 +550,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 else {$myissues = true;}
                 
                 $Generated_Header  = '';                       
-                $Generated_Table   = $this->_table_render($a,$step,$start,$next_start,$stat_filter,$sev_filter,$productfilter,$myissues); 
+                $Generated_Table   = $this->_table_render($a,$step,$start,$next_start,$stat_filter,$sev_filter,$productfilter,$myissues,$all); 
                 $Generated_Scripts = $this->_scripts_render();
         }
         elseif ($data->data == 'showmodlog'){
@@ -711,7 +699,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 /******************************************************************************/
 /* Create list of next/previous Issues
 */
-    function _table_render($project,$step,$start,$next_start,$stat_filter,$sev_filter,$productfilter,$myissues)
+    function _table_render($project,$step,$start,$next_start,$stat_filter,$sev_filter,$productfilter,$myissues,$all=false)
     {
         global $ID;
         $imgBASE       = DOKU_BASE."lib/plugins/issuetracker/images/";
@@ -723,14 +711,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         $sev_filter    = strtoupper($sev_filter);
         $productfilter = strtoupper($productfilter);
         
-        if($this->getConf('it_data')==false) $pfile = DOKU_INC."data/meta/".$project.'.issues';
-        else $pfile = DOKU_INC. $this->getConf('it_data').$project.'.issues';
-
-        if (@file_exists($pfile))
-        	{$issues  = unserialize(@file_get_contents($pfile));}
-        else
-        	{ msg("No [$pfile] found.",-1); return; }            	          
-
+        // get issues file contents
+        $all = false;
+        $issues = $this->_get_issues($project, $all);
+                                    
         if ($start>count($issues)) $start=count($issues)-$step;                
         if(array_key_exists('userinfo', $user_grp))
         {
@@ -759,9 +743,16 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 
         // members of defined groups allowed$user_grps changing issue contents 
         if ($cFlag === true)       
-        {   
-            $head = "<div class='itl__table'><table id='".$project."' class='sortable editable resizable inline' width='100%'>".NL.
-                    "<thead><tr><th class=\"sortfirstdesc\" id='id'>".$this->getLang('th_id')."</th>".NL.
+        {   // get issues file contents
+            $all = true;
+            $issues = $this->_get_issues($project, $all);
+                        
+            $dynatable_id = "t_".uniqid((double)microtime()*1000000,1);
+            if($this->getConf('multi_projects')!==false) { $th_project = "<th id='project'>".$this->getLang('th_project')."</th>"; }
+            $head = "<div class='itl__table'><table id='".$dynatable_id."' class='sortable editable resizable inline' width='100%'>".NL.
+                    "<thead><tr>".NL.
+                     $th_project.NL.
+                    "<th class=\"sortfirstdesc\" id='id'>".$this->getLang('th_id')."</th>".NL.
                     "<th id='created'>".$this->getLang('th_created')."</th>".NL.
                     "<th id='product'>".$this->getLang('th_product')."</th>".NL.
                     "<th id='version'>".$this->getLang('th_version')."</th>".NL.
@@ -771,7 +762,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     "<th id='title'>".$this->getLang('th_title')."</th>".NL.
                     "<th id='assigned'>".$this->getLang('th_assigned')."</th>".NL. 
                     "<th id='resolution'>".$this->getLang('th_resolution')."</th>".NL.
-                    "<th id='modified'>".$this->getLang('th_modified')."</th></tr></thead>".NL;        
+                    "<th id='modified'>".$this->getLang('th_modified')."</th>".NL.
+                    "</tr></thead>".NL;        
             $body = '<tbody>'.NL;
         
             // Note: The checked attribute is a boolean attribute. 
@@ -779,10 +771,9 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             if($myissues == false) { $myissues= ""; }
             else { $myissues= "checked"; }
 
-        
             for ($i=$next_start-1;$i>=0;$i=$i-1)
             {   // check start and end of rows to be displayed
-                    $issue = $issues[$i];                    
+                    $issue = $issues[$i];
                     $a_status = strtoupper($this->_get_one_value($issue,'status'));
                     $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
                     $a_product = strtoupper($this->_get_one_value($issue,'product'));
@@ -812,14 +803,19 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     else { $severity_img = $style.$a_severity; }
                     
                     // build parameter for $_GET method
-                        $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
+                        $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($this->_get_one_value($issue,'project')));
                         $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a>';
                     
                     if($rowEven==="it_roweven") $rowEven="it_rowodd";
                     else $rowEven="it_roweven";
                     
                     $it_issue_username = $this->_get_one_value($issue,'user_name');
-                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.NL.                       
+                    if(($this->getConf('multi_projects')!==false) && ($this->getConf('shw_project_col')!==false)) 
+                    {   $project = $this->_get_one_value($issue,'project');
+                        $td_project = '<td class="itl__td_standard">'.$project.'</td>';
+                    }
+                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.NL.
+                              $td_project.NL.              
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.NL.
                              '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.NL.
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'product').'</td>'.NL.
@@ -837,11 +833,13 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                              '</tr>'.NL;        
                 }
             } 
-            $body .= '</tbody></table></div>';          
+            $body .= '</tbody></table></div>';
         } 
-
         else       
-        {   
+        {   // get issues file contents
+            $all = false;
+            $issues = $this->_get_issues($project, $all);
+            $dynatable_id = "t_".uniqid((double)microtime()*1000000,1);
             //Build table header according settings
             $configs = explode(',', $this->getConf('shwtbl_usr')) ;
             $reduced_header ='';
@@ -901,7 +899,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         }
                         elseif ($config == 'title')
                         {   // build parameter for $_GET method
-                            $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
+                            $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($this->_get_one_value($issue,'project')));
                             $reduced_issues .='<td>'.
                                               '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$isval.'">'.$isval.'</a></td>';
                         }
@@ -926,10 +924,21 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             }
             
             $head = NL.$reduced_header.NL;
-            $body = '<tbody>'.$reduced_issues.'</tbody></table></div>';
+            $body = '<tbody>'.$reduced_issues.'</tbody></table></div>';          
         }
         
         if ($productfilter==="") {$productfilter='ALL';}
+            
+            if($i<=0) 
+            {    $next_start = count($issues);
+                 $start = $next_start - $step;
+                 if($start<0) $start=0;
+            }
+            else {
+                $start = $i;
+                $next_start = $start + $step; 
+                if($next_start>count($issues)) $next_start = count($issues);
+            }
 // -----------------------------------------------------------------------------
 // Control render        
         //$a,,$productfilter
@@ -2645,10 +2654,11 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 // replace user mail address after modification of user profile
   function _update_it_files($user_before, $user) {
       // create array of related files
-      $path = DOKU_INC."data/meta";
+      if($this->getConf('it_data')==false) $path = DOKU_INC."data/meta/";
+      else $path = DOKU_INC.$this->getConf('it_data');
       $file_array = $this->_file_list($path, '.issues.cmnts.mod-log');
 
-      if(strlen($user_before['mail'])<1) {
+      if((strlen($user_before['mail'])<1) && ($this->getConf('allowdebug')!==false)) {
           msg("Can't update IssueTracker records due to missing old mail value. \nThis may lead into troubles for the just updated user. \nBetter to turn back the changes same way (except on passwords) and use the Update Profile action of your template.",-1);
           return;
       }
@@ -2935,6 +2945,107 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
       
       // else return false
        return false;      
+  }
+/******************************************************************************/
+  function __find_projects($path) { 
+    if ($handle=opendir($path)) { 
+      while (false!==($file=readdir($handle))) { 
+        if ($file<>"." AND $file<>"..") { 
+          if (is_file($path.'/'.$file)) { 
+            $ext = explode('.',$file);
+            $last = count($ext) - 1;
+	          if ($ext[$last] == 'issues') {
+              $projects .= ','.substr($file,0,strlen($file)-strlen('.issues'));
+            }
+          } 
+        } 
+      } 
+    }
+    return $projects; 
+  }    
+/******************************************************************************/
+/* 
+ * Load all issues into an array
+ *  
+ * Check if multi_project is set to true
+ * Load current $project or all projects of it_data_store     
+ * Return the issues array
+ *  
+ * @author   Taggic <taggic@t-online.de>
+ * @param    string $project  delivers the project name; used if $all = false
+ * @param    bool   $all      determines if all projects to be retrieved   
+ * @return   array  $issues   result: is an array of issues
+ *
+ */
+ 
+  function _get_issues($project, $all = false) {
+    // detect the IssueTracker data store (path)
+    if($this->getConf('it_data')==false) $it_datastore = DOKU_INC."data/meta/";
+    else $it_datastore = DOKU_INC. $this->getConf('it_data');
+    
+    // check if last sign is a slash
+    $i = strrchr ($it_datastore, chr(47));     // chr(47) = "/"
+    $j = strrchr ($it_datastore, chr(92));     // chr(92) = "\"
+    if(($i !== strlen($it_datastore)) && ($i !== strlen($it_datastore))) { $it_datastore .= chr(47); }
+    
+    if(($this->getConf('multi_projects')!==false) && ($all !== false)) {
+        // loop through it_datastore and list all .issues files
+        $xprojects = $this->__find_projects($it_datastore);
+        $x_projects = explode(',',$xprojects);
+        $issues = array();
+        $tmp    = array();
+        
+        foreach ($x_projects as $project)
+        {   $project = trim($project);
+            if(is_file($it_datastore.$project.'.issues') == true) {
+                $tmp = unserialize(@file_get_contents($it_datastore.$project.'.issues'));
+                
+                // loop through the field and add project to each row
+                foreach($tmp as &$tmps)
+                {   $tmps['project'] = $project; }
+                
+                $issues = array_merge($issues, $tmp);
+                $tmp = array();
+            }
+        }
+    }
+    else {
+        // get issues from single project file
+        if($this->getConf('it_data')==false) $pfile = $it_datastore.$project.'.issues';
+        else $pfile = $it_datastore.$project.'.issues';
+    
+        if (@file_exists($pfile))
+        	{$issues  = unserialize(@file_get_contents($pfile));}
+        else
+        	{$issues = array();}
+        }
+//    $arr1 = $this->array_msort($issues, array('project'=>SORT_DESC, 'id'=>SORT_ASC));
+    $arr1 = $this->array_msort($issues, array('project'=>SORT_DESC));
+    return $arr1;
+  }
+/******************************************************************************/
+  function array_msort($array, $cols)
+   {
+       $colarr = array();
+       foreach ($cols as $col => $order) {
+           $colarr[$col] = array();
+           foreach ($array as $k => $row) { $colarr[$col]['_'.$k] = strtolower($row[$col]); }
+       }
+       $eval = 'array_multisort(';
+       foreach ($cols as $col => $order) {
+           $eval .= '$colarr[\''.$col.'\'],'.$order.',';
+       }
+       $eval = substr($eval,0,-1).');';
+       eval($eval);
+       $ret = array();
+       foreach ($colarr as $col => $arr) {
+           foreach ($arr as $k => $v) {
+               $k = substr($k,1);
+               if (!isset($ret[$k])) $ret[$k] = $array[$k];
+               $ret[$k][$col] = $array[$k][$col];
+           }
+       }
+       return $ret;   
   }
 /******************************************************************************/
 }

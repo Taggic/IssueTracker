@@ -32,3 +32,5 @@ $conf['assign']            = 'admin';                  // Configure groups usabl
 $conf['noStatIMG']         = false;                    // define if status text instead of pictures will be displayed at Issue list
 $conf['noSevIMG']          = false;                    // define if severity text instead of pictures will be displayed at Issue list
 $conf['ltdReport']         = '';                       // empty by default
+$conf['multi_projects']	   = false;                    // global switch to tell IssueTracker that syntax parameter "project" to be ignored. However, the syntax has to contain the parameter.
+$conf['shw_project_col']	 = false;                    // show an additional column for the project name per issue on ListView

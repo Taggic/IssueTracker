@@ -35,3 +35,5 @@ $meta['assign']         = array('string');  // Configure groups usable for issue
 $meta['noStatIMG']      = array('onoff');   // define if status text instead of pictures will be displayed at Issue list
 $meta['noSevIMG']       = array('onoff');   // define if severity text instead of pictures will be displayed at Issue list
 $meta['ltdReport']      = array('multicheckbox', '_choices' => array('Version', 'User phone', 'Add contact', 'Severity', 'Symptom link 1', 'Symptom link 2', 'Symptom link 3')); // default = false or a comma separated list of controls to be hidden
+$meta['multi_projects']	= array('onoff');   // global switch to tell IssueTracker that syntax parameter "project" to be ignored. However, the syntax has to contain the parameter.
+$meta['shw_project_col']= array('onoff');   // show an additional column for the project name per issue on ListView
