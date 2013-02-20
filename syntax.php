@@ -154,6 +154,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                     $all = false;
                                     $issues = $this->_get_issues($data, $all);
                                    
+                                    //Add it to the issue file
+                                    $issue_id=count($issues);      
+                                    foreach ($issues as $value)
+                                        {if ($value['id'] >= $issue_id) {$issue_id=$value['id'] + 1;}}
+
                                     $issues[$issue_id]['id'] = $issue_id;    
                                     $issues[$issue_id]['product'] = htmlspecialchars(stripslashes($_REQUEST['product']));
                                     $issues[$issue_id]['version'] = htmlspecialchars(stripslashes($_REQUEST['version']));
@@ -190,8 +195,12 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                     $valid_umail = $this->validEmail($xuser);
                                     if ( ($valid_umail == true) && ((stripos($xdescription, " ") > 0) || (strlen($xdescription)>5)) && (strlen($issues[$issue_id]['version']) >0))
                                     {                                
-                                        //save issue-file
-                                          $xvalue = io_saveFile($pfile,serialize($issues));
+                                          // assemble the path to IssueTracker data store & file
+                                          if($this->getConf('it_data')==false) $pfile = DOKU_INC."data/meta/".$data['project'].'.issues';
+                                          else $pfile = DOKU_INC. $this->getConf('it_data').$data['project'].'.issues';
+                                
+                                          //save issue-file
+                                          $xvalue = io_saveFile($pfile,serialize($issues)); 
                                           $this->_log_mods($data['project'], $issues[$issue_id], $issues[$issue_id]['user_name'], 'status', '', $issues[$issue_id]['status']);
                                           
                                           $pstring = sprintf("showid=%s&project=%s", urlencode($issues[$issue_id]['id']), urlencode($project));
