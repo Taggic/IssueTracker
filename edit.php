@@ -415,7 +415,7 @@
         }
         else $issues[$id_issue]['status'] = $status[1];
         
-        _emailToAssigneeMod($currentID, $project, $issues[$id_issue], $value);
+        _emailToAssigneeMod($currentID, $project, $issues[$id_issue], $value, $usr);
     }
     // Save issues file contents
     $fh = fopen($pfile, 'w');
