@@ -49,13 +49,14 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $params = explode('|',$match);
         
         //Default Value
-        $data['display']  = 'ISSUES';
-        $data['product']  = 'ALL';
-        $data['status']   = 'ALL';
-        $data['severity'] = 'ALL';
-        $data['view']     = '10';
-        $data['controls'] = 'ON';
-        $data['myissues'] = false;
+        $data['display']    = 'ISSUES';
+        $data['product']    = 'ALL';
+        $data['status']     = 'ALL';
+        $data['severity']   = 'ALL';
+        $data['view']       = '10';
+        $data['controls']   = 'ON';
+        $data['prod_limit'] = 'OFF';
+        $data['myissues']   = false;
         
         foreach($params as $param){            
             $splitparam = explode('=',$param);
@@ -66,8 +67,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     /*continue;*/}
 
                 if ($splitparam[0]=='product')   
-                	{$data['product'] = strtoupper($splitparam[1]);
-                	 if ($data['product'] == '') {$data['product'] = 'ALL';}
+                	{$data['product']  = strtoupper($splitparam[1]);
+                   if ($data['product'] == '') {$data['product'] = 'ALL';}
                     /*continue;*/}
 
                 if ($splitparam[0]=='status')   
@@ -93,7 +94,14 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                  if ($splitparam[0]=='controls')
                 	{$data['controls'] = strtoupper($splitparam[1]);
                 	 if ($data['controls'] == '') {$data['controls'] = 'ON';}
-                   /*continue;*/}
+                   /*continue;*/
+                  }
+
+                 if ($splitparam[0]=='prod_limit')
+                	{$data['prod_limit'] = strtoupper($splitparam[1]);
+                	 if ($data['prod_limit'] == '') {$data['prod_limit'] = 'OFF';}
+                   /*continue;*/
+                  }
                                                       
 /*                 if ($splitparam[0]=='myissues')
                 	{$data['myissues'] = strtoupper($splitparam[1]);
@@ -969,7 +977,22 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             /*--------------------------------------------------------------------*/
             // load set of product names defined by admin
             /*--------------------------------------------------------------------*/
-            $products = explode(',', $this->getConf('products'));
+            if($data['prod_limit'] !== "OFF") { 
+                $temp2 = explode(',', $this->getConf('products'));
+                foreach($temp2 as $a) {
+                    if(stripos(strtoupper($data['product']),strtoupper($a))!==false) {
+                        if(strlen($temp)<1){
+                            $temp .= $a;
+                        }
+                        else $temp .= ','.$a;   
+                    }
+                }
+                $products = explode(',', $temp);
+            }
+            else {
+                 $products = explode(',', $this->getConf('products'));
+            }
+            
             $STR_PRODUCTS = "";
             foreach ($products as $_products)
             {
