@@ -102,6 +102,12 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 	 if ($data['prod_limit'] == '') {$data['prod_limit'] = 'OFF';}
                    /*continue;*/
                   }
+                  
+                 if ($splitparam[0]=='id')
+                	{$data['id'] = strtoupper($splitparam[1]);
+                	 if ($data['id'] == '') {$data['id'] = '0';}
+                   /*continue;*/
+                  }
                                                       
 /*                 if ($splitparam[0]=='myissues')
                 	{$data['myissues'] = strtoupper($splitparam[1]);
@@ -262,7 +268,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             }            
             // display the Report Manager form
             elseif (stristr($data['display'],'REPORTING')!= false)
-            {   msg('REPORT GUI',0);
+            {   // msg('REPORT GUI',0);
                 /*----------------------------------------------------------------------------*/
                 /*    REPORT GUI                                                              */
                 /*----------------------------------------------------------------------------*/
@@ -340,6 +346,24 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                           formSecurityToken(false).'
                                     </td></tr></table></form>
                                 </div><br /><hr>';
+            }
+                        // display the Report Manager form
+            elseif (stristr($data['display'],'single_issue')!= false)
+            {   // retrieve issue details
+                $all      = false;
+                $issues   = $this->_get_issues($data, $all);
+                $issue_id = $data['id'];
+                if($issues[$issue_id]['status'] == $this->getLang('issue_resolved_status')) { $a_style="<del>"; $e_style="</del>";}
+                // define output
+                $Generated_Table  = $a_style."<a href='".DOKU_URL.'doku.php?id='.$ID."&do=showcaselink&showid=".$issue_id."&project=".$data['project']."' title='".$issues[$issue_id]['status']."'>".NL;
+                $Generated_Table .= "<span>#".$issue_id.":</span>&nbsp;";
+                $Generated_Table .= "<span>".$issues[$issue_id]['title']."</span>&nbsp;";
+                $Generated_Table .= "<span>(".$issues[$issue_id]['status'].")</span>";
+                $Generated_Table .= "</a>".$e_style;
+                
+                $Generated_Header  = "";
+                $Generated_Scripts = "";
+                $Generated_Report  = "";                 
             }
             // Render            
             $renderer->doc .= $Generated_Header.$Generated_Table.$Generated_Scripts.$Generated_Report;
