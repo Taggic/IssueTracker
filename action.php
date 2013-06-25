@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2013-02-18',
+         'date'   => '2013-06-25',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display comments of a dedicated issue.',
          'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
@@ -773,64 +773,67 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 
             for ($i=$next_start-1;$i>=0;$i=$i-1)
             {   // check start and end of rows to be displayed
+                if(count($issues)> $i) {
                     $issue = $issues[$i];
-                    $a_status = strtoupper($this->_get_one_value($issue,'status'));
+                    $a_status   = strtoupper($this->_get_one_value($issue,'status'));
                     $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
-                    $a_product = strtoupper($this->_get_one_value($issue,'product'));
+                    $a_product  = strtoupper($this->_get_one_value($issue,'product'));
                     
-                if ((($stat_filter=='ALL')                 || (stristr($stat_filter,$a_status)          != false)) && 
-                   (($sev_filter=='ALL')                   || (stristr($sev_filter,$a_severity)         != false)) && 
-                   ((strcasecmp($productfilter,'ALL')===0) || (stristr($productfilter,$a_product)       != false)) &&
-                   (($myissues == ''   )                   || ($this->_find_myissues($issue, $user_grp) == true)))
-                {   
-                    if ($y>=$step) break;
-                    if ((stripos($this->getConf('status_special'),$a_status) !== false) && (stripos($stat_filter,$this->getConf('status_special')) === false)) continue;                   
-                    $y=$y+1;
-                    // check if status image or text to be displayed
-                    if ($noStatIMG === false) {                    
-                        $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_status))).'.gif';
-//                        if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
-                        $status_img ='  class="it_center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16">';
-                    }                    
-                    else { $status_img = $style.$a_status; }
-                    // check if severity image or text to be displayed                                            
-                    if ($noSevIMG === false) {                    
-                        $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_severity))).'.gif';
-
-//                        if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
-                        $severity_img ='  class="it_center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16">';
+                    if ((($stat_filter=='ALL')                 || (stristr($stat_filter,$a_status)          != false)) && 
+                       (($sev_filter=='ALL')                   || (stristr($sev_filter,$a_severity)         != false)) && 
+                       ((strcasecmp($productfilter,'ALL')===0) || (stristr($productfilter,$a_product)       != false)) &&
+                       (($myissues == ''   )                   || ($this->_find_myissues($issue, $user_grp) == true)))
+                    {   
+                        if ($y>=$step) break;
+                        if ((stripos($this->getConf('status_special'),$a_status) !== false) && (stripos($stat_filter,$this->getConf('status_special')) === false)) continue;                   
+                        $y=$y+1;
+                        // check if status image or text to be displayed
+                        if ($noStatIMG === false) {                    
+                            $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_status))).'.gif';
+//                          if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
+                            $status_img ='  class="it_center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16">';
+                        }                    
+                        else { $status_img = $style.$a_status; }
+                        // check if severity image or text to be displayed                                            
+                        if ($noSevIMG === false) {                    
+                            $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_severity))).'.gif';
+        
+//                          if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
+                            $severity_img ='  class="it_center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16">';
+                        }
+                        else { $severity_img = $style.$a_severity; }
+                        
+                        
+                        $it_issue_username = $this->_get_one_value($issue,'user_name');
+                        if(($this->getConf('multi_projects')!==false) && ($this->getConf('shw_project_col')!==false)) 
+                        {   $project = $this->_get_one_value($issue,'project');
+                            $td_project = '<td class="itl__td_standard">'.$project.'</td>';
+                        }
+                        // build parameter for $_GET method
+                            $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($this->_get_one_value($issue,'project')));
+                            $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a>';
+                        
+                        if($rowEven==="it_roweven") $rowEven="it_rowodd";
+                        else $rowEven="it_roweven";
+        
+                        $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.NL.
+                                  $td_project.NL.              
+                                 '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.NL.
+                                 '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.NL.
+                                 '<td class="itl__td_standard">'.$this->_get_one_value($issue,'product').'</td>'.NL.
+                                 '<td class="itl__td_standard">'.$this->_get_one_value($issue,'version').'</td>'.NL.
+                                 '<td'.$severity_img.'</td>'.NL.
+                                 '<td'.$status_img.'</td>'.NL.
+                                 '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$it_issue_username.'</a></td>'.NL. 
+                                 '<td class="canbreak itl__td_standard">'.$itl_item_title.'</td>'.NL;
+                                 
+                        // check how the assignee to be displayed: login, name or mail
+                        $a_display = $this->_get_assignee($issue,'assigned');
+                        $body .= '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$a_display.'</a></td>'.NL. 
+                                 '<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.NL.
+                                 '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.NL.
+                                 '</tr>'.NL;        
                     }
-                    else { $severity_img = $style.$a_severity; }
-                    
-                    // build parameter for $_GET method
-                        $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($this->_get_one_value($issue,'project')));
-                        $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a>';
-                    
-                    if($rowEven==="it_roweven") $rowEven="it_rowodd";
-                    else $rowEven="it_roweven";
-                    
-                    $it_issue_username = $this->_get_one_value($issue,'user_name');
-                    if(($this->getConf('multi_projects')!==false) && ($this->getConf('shw_project_col')!==false)) 
-                    {   $project = $this->_get_one_value($issue,'project');
-                        $td_project = '<td class="itl__td_standard">'.$project.'</td>';
-                    }
-                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.NL.
-                              $td_project.NL.              
-                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.NL.
-                             '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.NL.
-                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'product').'</td>'.NL.
-                             '<td class="itl__td_standard">'.$this->_get_one_value($issue,'version').'</td>'.NL.
-                             '<td'.$severity_img.'</td>'.NL.
-                             '<td'.$status_img.'</td>'.NL.
-                             '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'user_mail').'">'.$it_issue_username.'</a></td>'.NL. 
-                             '<td class="canbreak itl__td_standard">'.$itl_item_title.'</td>'.NL;
-                             
-                    // check how the assignee to be displayed: login, name or mail
-                    $a_display = $this->_get_assignee($issue,'assigned');
-                    $body .= '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$a_display.'</a></td>'.NL. 
-                             '<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.NL.
-                             '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.NL.
-                             '</tr>'.NL;        
                 }
             } 
             $body .= '</tbody></table></div>';
@@ -855,71 +858,75 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 
             //Build rows according settings
             $reduced_issues='';
+
             for ($i=$next_start-1;$i>=0;$i=$i-1)
             {   // check start and end of rows to be displayed
-                    $issue = $issues[$i];                    
-                    $a_status = strtoupper($this->_get_one_value($issue,'status'));
-                    $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
-                    $a_product = strtoupper($this->_get_one_value($issue,'product'));
-
-                if ((($stat_filter =='ALL')                 || (stristr($stat_filter,$a_status)   != false)) && 
-                    (($sev_filter  =='ALL')                 || (stristr($sev_filter,$a_severity)  != false)) && 
-                    ((strcasecmp($productfilter,'ALL')===0) || (stristr($productfilter,$a_product)!= false)) &&
-                    (($myissues    == '')                || ($this->_find_myissues($issue, $user_grp) == true)))
-                {   
-                    if ($y>=$step) break;
-                    if ((stripos($this->getConf('status_special'),$a_status) !== false) && (stripos($stat_filter,$this->getConf('status_special')) === false)) continue;
-                    $y=$y+1;
-                    
-                    if($rowEven==="it_roweven") $rowEven="it_rowodd";
-                    else $rowEven="it_roweven";
-                    
-                    $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.
-                                                      '<td'.$style.$this->_get_one_value($issue,'id').'</td>';
-                    foreach ($configs as $config)
-                    {
-                        $isval = $this->_get_one_value($issue,strtolower($config));
-                        // check if status image or text to be displayed
-                        if ($config == 'status')
+                if(count($issues)> $i) {
+                        $issue = $issues[$i];                    
+                        $a_status   = strtoupper($this->_get_one_value($issue,'status'));
+                        $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
+                        $a_product  = @strtoupper($this->_get_one_value($issue,'product'));
+    
+                    if ((($stat_filter =='ALL')                 || (stristr($stat_filter,$a_status)   != false)) && 
+                        (($sev_filter  =='ALL')                 || (stristr($sev_filter,$a_severity)  != false)) && 
+                        ((strcasecmp($productfilter,'ALL')===0) || (stristr($productfilter,$a_product)!= false)) &&
+                        (($myissues    == '')                || ($this->_find_myissues($issue, $user_grp) == true)))
+                    {   
+                        if ($y>=$step) break;
+                        if ((stripos($this->getConf('status_special'),$a_status) !== false) && (stripos($stat_filter,$this->getConf('status_special')) === false)) continue;
+                        $y=$y+1;
+                        
+                        if($rowEven==="it_roweven") $rowEven="it_rowodd";
+                        else $rowEven="it_roweven";
+                        
+                        $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.
+                                                          '<td'.$style.$this->_get_one_value($issue,'id').'</td>';
+                        foreach ($configs as $config)
                         {
-                            if ($noStatIMG === false) {                    
-                                $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
-                                $reduced_issues .='<td  class="it_center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"></td>';
+                            $isval = $this->_get_one_value($issue,strtolower($config));
+                            // check if status image or text to be displayed
+                            if ($config == 'status')
+                            {
+                                if ($noStatIMG === false) {                    
+                                    $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
+                                    $reduced_issues .='<td  class="it_center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"></td>';
+                                }
+                                else { $reduced_issues .= '<td'.$style.$isval; }
+                            }                                            
+                            // check if severity image or text to be displayed
+                            elseif ($config == 'severity')
+                            {
+                                if ($noSevIMG === false) {                    
+                                    $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
+                                    $reduced_issues .='<td  class="it_center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"></td>';
+                                }
+                                else { $reduced_issues .= '<td'.$style.$isval.'</td>'; }
                             }
-                            else { $reduced_issues .= '<td'.$style.$isval; }
-                        }                                            
-                        // check if severity image or text to be displayed
-                        elseif ($config == 'severity')
-                        {
-                            if ($noSevIMG === false) {                    
-                                $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
-                                $reduced_issues .='<td  class="it_center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"></td>';
+                            elseif ($config == 'title')
+                            {   // build parameter for $_GET method
+    //                            $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($this->_get_one_value($issue,'project')));
+                                $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), $project);
+                                $reduced_issues .='<td>'.
+                                                  '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$isval.'">'.$isval.'</a></td>';
                             }
-                            else { $reduced_issues .= '<td'.$style.$isval.'</td>'; }
+                            elseif ($config == 'created')
+                            {   $reduced_issues .='<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.NL;
+                            }
+                            elseif ($config == 'modified')
+                            {   $reduced_issues .='<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.NL;
+                            }
+                            elseif ($config == 'resolution')
+                            {   $reduced_issues .='<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.NL;
+                            }
+                            elseif ($config == 'description')
+                            {   $reduced_issues .='<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'description')).'</td>'.NL;
+                            }
+                            else 
+                            {   $reduced_issues .= '<td'.$style.$isval.'</td>';
+                            }
                         }
-                        elseif ($config == 'title')
-                        {   // build parameter for $_GET method
-                            $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($this->_get_one_value($issue,'project')));
-                            $reduced_issues .='<td>'.
-                                              '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$isval.'">'.$isval.'</a></td>';
-                        }
-                        elseif ($config == 'created')
-                        {   $reduced_issues .='<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.NL;
-                        }
-                        elseif ($config == 'modified')
-                        {   $reduced_issues .='<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.NL;
-                        }
-                        elseif ($config == 'resolution')
-                        {   $reduced_issues .='<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.NL;
-                        }
-                        elseif ($config == 'description')
-                        {   $reduced_issues .='<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'description')).'</td>'.NL;
-                        }
-                        else 
-                        {   $reduced_issues .= '<td'.$style.$isval.'</td>';
-                        }
+                            $reduced_issues .= '</tr>';
                     }
-                        $reduced_issues .= '</tr>';
                 }
             }
             
@@ -2350,9 +2357,9 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 /* pic-up a single value
 */
     function _get_one_value($issue, $key) {
-        if (array_key_exists($key,$issue))
-            return $issue[$key];
-        return '';
+//        echo $key. " => " . $issue . "<br />";
+        if (array_key_exists($key,$issue)) return $issue[$key];
+        else return '';
     }
 /******************************************************************************/
 /* elaborate the display string of assignee (login, name or mail)
@@ -2596,7 +2603,9 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 *******************************************************************************/
 /* -------------------------------------------------------------------------- */
   function handle_usermod_before(&$event, $param)
-	{   $filename = DOKU_INC . 'it_eventcheck.txt';
+	{   if($this->getConf('it_data')==false) $filename = DOKU_INC."data/meta/it_eventcheck.txt";
+      else $filename = DOKU_INC. $this->getConf('it_data').'it_eventcheck.txt';
+
       if (!$handle = fopen($filename, 'w')) {
           msg("IssueTracker: Failed to create the eventcheck file.",-1);
           return;    
@@ -2618,7 +2627,11 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
  }
 /* -------------------------------------------------------------------------- */
   function handle_usermod_after(&$event, $param)
-	{   $filename = DOKU_INC . 'it_eventcheck.txt';
+	{   //$filename = DOKU_INC . 'it_eventcheck.txt';
+      
+      if($this->getConf('it_data')==false) $filename = DOKU_INC."data/meta/it_eventcheck.txt";
+      else $filename = DOKU_INC. $this->getConf('it_data').'it_eventcheck.txt';
+      
       global $auth;
       $user = array();
       
@@ -2736,7 +2749,9 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
       }
       
       // provide user-feedback & log ---------------------------------
-      $filename = DOKU_INC . 'it_eventcheck.txt';
+      if($this->getConf('it_data')==false) $filename = DOKU_INC."data/meta/it_eventcheck.txt";
+      else $filename = DOKU_INC. $this->getConf('it_data').'it_eventcheck.txt';
+
       if (!$handle = fopen($filename, 'a')) {
           msg("IssueTracker: Failed to write into eventcheck file.",-1);
           return;    

@@ -52,8 +52,8 @@
                     $lang['issuemod_version'].$issue['version'].chr(10).
                     $lang['issuemod_severity'].$issue['severity'].chr(10).
                     $lang['issuemod_status'].$issue['status'].chr(10).
-                    $lang['issuemod_creator'].$issue['user_name'].chr(10).
-                    $lang['th_assigned'].$issue['assigned'].chr(10).                    
+                    $lang['issuemod_creator'].': '.$issue['user_name'].chr(10).
+                    $lang['th_assigned'].': '.$issue['assigned'].chr(10).                    
                     $lang['issuenew_descr'].$issue['description'].chr(10).
                     $lang['issuemod_see'].DOKU_URL.'doku.php?id='.$currentID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
                     $lang['issuemod_br'].chr(10).$lang['issuemod_end'];

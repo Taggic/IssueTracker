@@ -584,6 +584,12 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     }
                     else { $severity_img = $style.$a_severity; }
                     
+
+                    $it_issue_username = $this->_get_one_value($issue,'user_name');
+                    if(($this->getConf('multi_projects')!==false) && ($this->getConf('shw_project_col')!==false)) 
+                    {   $project = $this->_get_one_value($issue,'project');
+                        $td_project = '<td class="itl__td_standard">'.$project.'</td>';
+                    }
                     // build parameter for $_GET method
                         $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
                         $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a>'.NL;
@@ -591,11 +597,6 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                         if($rowEven==="it_roweven") $rowEven="it_rowodd";
                         else $rowEven="it_roweven";                    
 
-                    $it_issue_username = $this->_get_one_value($issue,'user_name');
-                    if(($this->getConf('multi_projects')!==false) && ($this->getConf('shw_project_col')!==false)) 
-                    {   $project = $this->_get_one_value($issue,'project');
-                        $td_project = '<td class="itl__td_standard">'.$project.'</td>';
-                    }
                     $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.NL.
                               $td_project.NL.              
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.NL.
