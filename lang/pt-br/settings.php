@@ -18,6 +18,7 @@ $lang['mail_templates']   = 'Usar modelos de email em HTML?';
 $lang['email_address']    = 'Qual endereço de email deve ser informado?';
 $lang['registered_users'] = 'Somente usuários registrados com permissão de edição no registro de ocorrências<br> têm permissão de criar relatórios e adicionar comentários?';
 $lang['auth_ad_overflow'] = 'Evitar sobrecarga AUTH:AD (ver documentação)?';
+$lang['profile_updt']     = 'Sincronize sobre as mudanças de perfil do usuário';
 $lang['userinfo_email']   = 'Informar por email o usuário sobre modificações em ocorrências? (tecla global)';
 $lang['mail_add_comment']         = 'Informar sobre novos comentários?';
 $lang['mail_modify_comment']      = 'Informar sobre modificações em comentários?';

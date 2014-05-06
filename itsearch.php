@@ -20,8 +20,8 @@
 //---------------------------------------------------------------------------------------
 //  0. handle multi_projects
     // detect the IssueTracker data store (path)
-    if($this->getConf('it_data')==false) $it_datastore = DOKU_INC."data/meta/";
-    else $it_datastore = DOKU_INC. $this->getConf('it_data');
+    if($this->getConf('it_data')==false) $it_datastore = DOKU_CONF."../data/meta/";
+    else $it_datastore = DOKU_CONF."../". $this->getConf('it_data');
     
     // check if last sign is a slash
     $i = strrchr ($it_datastore, chr(47));     // chr(47) = "/"
@@ -53,8 +53,8 @@
     }
     else {
     //  1. get issue file content                                                 
-        if($conf['plugin']['issuetracker']['it_data']==false) $pfile = DOKU_INC."data/meta/".$project.'.issues';
-        else $pfile = DOKU_INC. $conf['plugin']['issuetracker']['it_data'].$project.'.issues';   
+        if($conf['plugin']['issuetracker']['it_data']==false) $pfile = DOKU_CONF."../data/meta/".$project.'.issues';
+        else $pfile = DOKU_CONF."../". $conf['plugin']['issuetracker']['it_data'].$project.'.issues';   
         if (@file_exists($pfile))
             {  $issues  = unserialize(@file_get_contents($pfile));
                foreach($issues as &$issue) {
@@ -73,8 +73,8 @@
     foreach($issues as &$issue) {
        $issue_string = implode($issue);
 
-       if($conf['plugin']['issuetracker']['it_data']==false) $comments_file = DOKU_INC."data/meta/".$issue['project']."_".$issue['id']. '.cmnts';
-       else $comments_file = DOKU_INC. $conf['plugin']['issuetracker']['it_data'].$issue['project']."_".$issue['id']. '.cmnts';
+       if($conf['plugin']['issuetracker']['it_data']==false) $comments_file = DOKU_CONF."../data/meta/".$issue['project']."_".$issue['id']. '.cmnts';
+       else $comments_file = DOKU_CONF."../". $conf['plugin']['issuetracker']['it_data'].$issue['project']."_".$issue['id']. '.cmnts';
        $comments ='';
        if (@file_exists($comments_file))  {  $comments  = @file_get_contents($comments_file);  }
 
@@ -129,8 +129,8 @@
         }
         if($cnt_c_findings > -1) {
           foreach($ref_findings['comment'] as $item) {
-              if($conf['plugin']['issuetracker']['it_data']==false) $comments_file = DOKU_INC."data/meta/".$item['project']."_".$item['id']. '.cmnts';
-              else $comments_file = DOKU_INC. $conf['plugin']['issuetracker']['it_data'].$item['project']."_".$item['id']. '.cmnts';
+              if($conf['plugin']['issuetracker']['it_data']==false) $comments_file = DOKU_CONF."../data/meta/".$item['project']."_".$item['id']. '.cmnts';
+              else $comments_file = DOKU_CONF."../". $conf['plugin']['issuetracker']['it_data'].$item['project']."_".$item['id']. '.cmnts';
               $comments      = unserialize(@file_get_contents($comments_file));
               $link          = 'doku.php?id='.$ID.'&do=showcaselink&showid='.$item['id'].'&project='.$item['project'];
               $is_txt        = '<b>&raquo;</b> '.$this->getLang('search_Issue');

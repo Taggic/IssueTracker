@@ -24,10 +24,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2013-06-25',
+         'date'   => '2014-05-06',
          'name'   => 'Issue comments (action plugin component)',
-         'desc'   => 'to display comments of a dedicated issue.',
-         'url'    => 'http://www.dokuwiki.org/plugin:issuetracker',
+         'desc'   => 'to display details of a dedicated issue.',
+         'url'    => 'https://www.dokuwiki.org/plugin:issuetracker',
          );
   }
 /******************************************************************************
@@ -47,14 +47,65 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                           			'AFTER',
                           			$this,
                           			'handle_usermod_after',
-                          			array());                                    
+                          			array());
+          $controller->register_hook('TPL_METAHEADER_OUTPUT', 'BEFORE', $this, '_hookjs');                                    
      }
 
+/******************************************************************************/
+  /**
+   * Hook js script into page headers.
+   */
+  function _hookjs(&$event, $param) {
+    
+    $css=DOKU_URL."lib/plugins/issuetracker/datepick/jsDatePick_ltr.css";
+    $jquery=DOKU_URL."lib/plugins/issuetracker/datepick/jquery.1.4.2.js";
+    $datepicker=DOKU_URL."lib/plugins/issuetracker/datepick/jsDatePick.min.1.3.js";
+
+    
+    $event->data["link"][] = array (  
+                "rel" => "stylesheet",
+                "media" => "all",
+                "type" => "text/css",
+				        "href" =>  $css
+				        );
+
+
+
+    $event->data["script"][] = array (  "type" => "text/javascript",
+				        "charset" => "utf-8",
+				        "_data" => "",
+				        "src" =>  $jquery
+				        );
+
+    $event->data["script"][] = array (  "type" => "text/javascript",
+				        "charset" => "utf-8",
+				        "_data" => "",
+				        "src" =>  $datepicker
+				        );
+                
+    $event->data["script"][] = array (  "type" => "text/javascript",
+				        "charset" => "utf-8",
+				        "_data" => "
+                window.onload = function(){
+                      		new JsDatePick({
+                      			useMode:2,
+                      			target:'dev_start',
+                      			dateFormat:'%d.%M.%Y'
+                      		});
+                          new JsDatePick({
+                      			useMode:2,
+                      			target:'dev_deadline',
+                      			dateFormat:'%d.%M.%Y'
+                      		});
+                      	};",
+				        "src" =>  ""
+				        );
+  }
 /******************************************************************************
 **  Handle the action
 */
      function _handle_act(&$event, $param) {
-         if (($event->data === 'showcase') || ($event->data === 'store_resolution')){
+         if (($event->data === 'showcase') || ($event->data === 'store_resolution') || ($event->data === 'store_workaround')){
              $this->parameter  = $_POST['showid'];
              $this->project    = $_POST['project'];         
          }
@@ -67,6 +118,16 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $this->issue_ID    = $_POST['issue_ID'];
             $this->add_contact = $_POST['add_contact'];
          }
+         elseif($event->data === 'btn_upd_addinfo') {
+            $this->project       = $_POST['project'];
+            $this->parameter     = $_POST['issue_ID'];
+            $this->new_component = $_POST['new_component'];
+            $this->trgt_version  = $_POST['trgt_version'];
+            $this->itl_block     = $_POST['itl__block_filter'];
+            $this->dev_start     = $_POST['dev_start'];
+            $this->dev_deadline  = $_POST['dev_deadline'];
+            $this->dev_progress  = $_POST['dev_progress'];
+         }
          elseif ($event->data === 'it_search') {
             $this->parameter   = $_POST['it_str_search'];
             $this->project     = $_POST['project'];
@@ -76,44 +137,88 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $this->itl_step    = $_POST['itl_step'];
             $this->itl_next    = $_POST['itl_next'];
             $this->itl_pjct    = $_POST['itl_project'];
+            $this->itl_sort    = $_POST['it_glbl_sort'];
             $this->itl_stat    = $_POST['itl_stat_filter'];
             $this->itl_sev     = $_POST['itl_sev_filter'];
             $this->itl_prod    = $_POST['itl__prod_filter'];
+            $this->itl_vers    = $_POST['itl__vers_filter'];
+            $this->itl_comp    = $_POST['itl__comp_filter'];
+            $this->itl_block   = $_POST['itl__block_filter'];
+            $this->itl_assi    = $_POST['itl__assi_filter'];
+            $this->itl_reporter= $_POST['itl__user_filter'];
             $this->itl_myis    = $_POST['itl_myis_filter'];
+            $this->project     = $_POST['project'];
          }
          elseif ($event->data === 'issuelist_previous') {
             $this->itl_start   = $_POST['itl_start'];
             $this->itl_step    = $_POST['itl_step'];
             $this->itl_next    = $_POST['itl_next'];
             $this->itl_pjct    = $_POST['itl_project'];
+            $this->itl_sort    = $_POST['it_glbl_sort'];
             $this->itl_stat    = $_POST['itl_stat_filter'];
             $this->itl_sev     = $_POST['itl_sev_filter'];
             $this->itl_prod    = $_POST['itl__prod_filter'];
+            $this->itl_vers    = $_POST['itl__vers_filter'];
+            $this->itl_comp    = $_POST['itl__comp_filter'];
+            $this->itl_block   = $_POST['itl__block_filter'];
+            $this->itl_assi    = $_POST['itl__assi_filter'];
+            $this->itl_reporter= $_POST['itl__user_filter'];
             $this->itl_myis    = $_POST['itl_myis_filter'];
+            $this->project     = $_POST['project'];
          }
          elseif ($event->data === 'issuelist_filter') {
             $this->itl_start   = $_POST['itl_start'];
             $this->itl_step    = $_POST['itl_step'];
             $this->itl_next    = $_POST['itl_next'];
             $this->itl_pjct    = $_POST['itl_project'];
+            $this->itl_sort    = $_POST['it_glbl_sort'];
             $this->itl_stat    = $_POST['itl_stat_filter'];
             $this->itl_sev     = $_POST['itl_sev_filter'];
             $this->itl_prod    = $_POST['itl__prod_filter'];
+            $this->itl_vers    = $_POST['itl__vers_filter'];
+            $this->itl_comp    = $_POST['itl__comp_filter'];
+            $this->itl_block   = $_POST['itl__block_filter'];
+            $this->itl_assi    = $_POST['itl__assi_filter'];
+            $this->itl_reporter= $_POST['itl__user_filter'];
             $this->itl_myis    = $_POST['itl_myis_filter'];
+            $this->project     = $_POST['project'];
          }
          elseif ($event->data === 'issuelist_filterlink') {
             $this->itl_start   = $_GET['itl_start'];
             $this->itl_step    = $_GET['itl_step'];
             $this->itl_next    = $_GET['itl_next'];
             $this->itl_pjct    = $_GET['itl_project'];
+            $this->itl_sort    = $_GET['it_glbl_sort'];
             $this->itl_stat    = $_GET['itl_stat_filter'];
             $this->itl_sev     = $_GET['itl_sev_filter'];
             $this->itl_prod    = $_GET['itl__prod_filter'];
+            $this->itl_vers    = $_GET['itl__vers_filter'];
+            $this->itl_comp    = $_GET['itl__comp_filter'];
+            $this->itl_block   = $_GET['itl__block_filter'];
+            $this->itl_assi    = $_GET['itl__assi_filter'];
+            $this->itl_reporter= $_GET['itl__user_filter'];
             $this->itl_myis    = $_GET['itl_myis_filter'];
+            $this->project     = $_GET['project'];
          }
          elseif ($event->data === 'showmodlog') {
             $this->parameter   = $_GET['showid'];
             $this->project     = $_GET['project'];
+         }
+         elseif ($event->data === 'savecfgelement') {
+          $this->parameter     = "addcfgelement";
+          $this->elmnt_name    = $_POST['name1'];
+          $this->elmnt_type    = $_POST['type1'];
+         }
+         elseif ($event->data === 'savecfgmatrix') {
+          $this->parameter     = "cfgmatrix";
+          $this->elmnt_type    = $_POST['type2'];
+          $this->elmnt_name    = $_POST['name2'];
+          $this->elmnt_childs  = $_POST['childs2'];
+         }
+         elseif ($event->data === 'deletecfgelement') {
+          $this->parameter     = "deletecfgelement";
+          $this->elmnt_type    = $_POST['type3'];
+          $this->elmnt_name    = $_POST['name3'];
          }
          else return;
          
@@ -153,8 +258,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 */
     function output(&$data) {
              global $ID;
-         if (($data->data == 'showcase') || ($data->data == 'showcaselink') || ($data->data == 'store_resolution')) {
 
+         if (($data->data == 'showcase') || ($data->data == 'showcaselink') || ($data->data == 'store_resolution') || ($data->data == 'store_workaround')) {
              $data->preventDefault();
     //        if ($mode == 'xhtml'){            
                  $renderer->info['cache'] = false;         
@@ -163,8 +268,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                  $user_grp = pageinfo();        
                  $usr      = $user_grp['userinfo']['name'] ;  //to log issue mods
                  // get issues file contents
-                 if($this->getConf('it_data')==false) $pfile = DOKU_INC."data/meta/".$project.'.issues';
-                 else $pfile = DOKU_INC. $this->getConf('it_data').$project.'.issues';
+                 if($this->getConf('it_data')==false) $pfile = DOKU_CONF."../data/meta/".$project.'.issues';
+                 else $pfile = DOKU_CONF."../". $this->getConf('it_data').$project.'.issues';
    
                  if (@file_exists($pfile))
                 	 {  $issues  = unserialize(@file_get_contents($pfile));}
@@ -175,6 +280,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                  
                  $Generated_Header  = '';
                  $Generated_Message = '';
+
                  //If comment to be deleted
                  if ($_REQUEST['del_cmnt']==='TRUE') {
                      // check if captcha is to be used by issue tracker in general
@@ -183,8 +289,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                      if ($captcha_ok)
                      {    if (checkSecurityToken())
                           {  // get comment file contents
-                             if($this->getConf('it_data')==false) $comments_file = DOKU_INC."data/meta/".$project."_".$_REQUEST['comment_issue_ID'].'.cmnts';
-                             else $comments_file = DOKU_INC. $this->getConf('it_data').$project."_".$_REQUEST['comment_issue_ID'].'.cmnts';
+                             if($this->getConf('it_data')==false) $comments_file = DOKU_CONF."../data/meta/".$project."_".$_REQUEST['comment_issue_ID'].'.cmnts';
+                             else $comments_file = DOKU_CONF."../". $this->getConf('it_data').$project."_".$_REQUEST['comment_issue_ID'].'.cmnts';
                              if (@file_exists($comments_file))  {  $comments  = unserialize(@file_get_contents($comments_file));  }
                              else  {  $txt='Comments file does not exist.';  }
                              // delete fieldset from $comments array
@@ -194,18 +300,20 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                              // store comments to file
                              $xvalue = io_saveFile($comments_file,serialize($comments));
                              if($this->getConf('mail_modify_comment') ===1) $this->_emailForMod($_REQUEST['project'],$issues[$_REQUEST['comment_issue_ID']], $comments[$comment_id],'delete');
-                             msg($this->getLang('msg_commentdeltrue').$issue_id.'.',1);
+                             //sprintf($format, $num
+                             msg(sprintf($this->getLang('msg_commentdeltrue'),$comment_id),1);
 //                             $Generated_Header = '<div class="it__positive_feedback">'.sprintf($this->getLang('msg_commentdeltrue'),$comment_id).'</div><br />';
                           }
                       }
                  }
-                 //If comment to be added  or modified
+                 //Comment to be added  or modified
                  elseif ((isset($_REQUEST['comment'])) || (isset($_REQUEST['comment_id']))) 
                  {  if ((($_REQUEST['comment']) || (isset($_REQUEST['comment_id']))) && (isset($_REQUEST['comment_issue_ID'])))
                        {        
                        // check if captcha is to be used by issue tracker in general
                        if ($this->getConf('use_captcha') === 0) { $captcha_ok = 1;}
                        else { $captcha_ok = ($this->_captcha_ok());}
+
                        if (@file_exists($pfile))
                     	 {  $issues  = unserialize(@file_get_contents($pfile)); }
                         else
@@ -216,8 +324,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                              {                           
                                 if (checkSecurityToken())
                                 {  // get comment file contents
-                                   if($this->getConf('it_data')==false) $comments_file = DOKU_INC."data/meta/".$project."_".$_REQUEST['comment_issue_ID'].'.cmnts';
-                                   else $comments_file = DOKU_INC. $this->getConf('it_data').$project."_".$_REQUEST['comment_issue_ID'].'.cmnts';
+                                   if($this->getConf('it_data')==false) $comments_file = DOKU_CONF."../data/meta/".$project."_".$_REQUEST['comment_issue_ID'].'.cmnts';
+                                   else $comments_file = DOKU_CONF."../". $this->getConf('it_data').$project."_".$_REQUEST['comment_issue_ID'].'.cmnts';
             
                                    if (@file_exists($comments_file))  {  $comments  = unserialize(@file_get_contents($comments_file));  }
                                    else  {  $comments = array();  }
@@ -227,7 +335,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                    $comment_id=count($comments);
                                    // check if comment content already exist
                                    foreach ($comments as $value)
-                                       {  if ($value['id'] >= $comment_id) { $comment_id=$value['id'] + 1; } 
+                                       {  if ($value['id'] >= $comment_id) { $comment_id=$value['id'] + 1; }
                                           if ($_REQUEST['comment'] === $value['comment']) 
                                           {   msg($this->getLang('msg_commentfalse').'.',-1);
 //                                              $Generated_Header = '<div class="it__negative_feedback">'.$this->getLang('msg_commentfalse').'</div><br />';
@@ -243,7 +351,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                             $checkFlag=true; 
                                         }
                                      else
-                                     {  $cur_date = date('Y-m-d G:i:s');
+                                     {  $cur_date = date($this->getConf('d_format'));
                                         $comments[$comment_id]['mod_timestamp'] = $cur_date;
                                         $comments[$comment_id]['comment'] = htmlspecialchars(stripslashes($_REQUEST['comment_mod']));
 //                                        $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_commentmodtrue').$comment_id.'.</div><br />';
@@ -256,11 +364,9 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                    }
                                    //If comment to be added
                                    elseif ($checkFlag === false)
-                                   {   $comment_id=$value['id']+1;
-                                       $comments[$comment_id]['id'] = $comment_id;
-                                       
+                                   {   $comments[$comment_id]['id'] = $comment_id;
                                        $comments[$comment_id]['author'] = htmlspecialchars(stripslashes($_REQUEST['author']));
-                                       $cur_date = date('Y-m-d G:i:s');
+                                       $cur_date = date($this->getConf('d_format'));
                                        $comments[$comment_id]['timestamp'] = $cur_date;
                                        $comments[$comment_id]['comment'] = htmlspecialchars(stripslashes($_REQUEST['comment']));
                                        //Create comments file
@@ -273,7 +379,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                     if ($checkFlag === false)
                                     {   // inform user (or assignee) about update
                                         // update modified date
-                                        $cur_date = date('Y-m-d G:i:s');
+                                        $cur_date = date($this->getConf('d_format'));
                                         $issues[$_REQUEST['comment_issue_ID']]['modified'] = $cur_date; 
                                         $xvalue = io_saveFile($pfile,serialize($issues));
                                         // if($this->getConf('mail_modify_comment') ===1) $this->_emailForMod($_REQUEST['project'],$issues[$_REQUEST['comment_issue_ID']], $comments[$comment_id], 'modify');
@@ -283,7 +389,38 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                             }
                        }
                  }
-                 elseif (isset($_REQUEST['mod_description']))
+                 elseif (isset($_REQUEST['mod_add_data']))
+                 {
+                    $old_value = '<u>Planning info modified:</u><br />'.
+                                  'Component: '.$issues[$issue_id]['component'].'<br />'.
+                                  'Target version: '.$issues[$issue_id]['trgt_version'].'<br />'.
+                                  'Test blocking: '.$issues[$issue_id]['tblock'].'<br />'.
+                                  'Begin: '.$issues[$issue_id]['dev_start'].'<br />'.
+                                  'Deadline: '.$issues[$issue_id]['dev_deadline'].'<br />'.
+                                  'Progress: '.$issues[$issue_id]['dev_progress'];
+                    
+                    $issues[$issue_id]['component']     = $_REQUEST['new_component'];
+                    $issues[$issue_id]['trgt_version']  = $_REQUEST['trgt_version'];
+                    $issues[$issue_id]['tblock']        = $_REQUEST['itl__block_filter'];
+                    $issues[$issue_id]['dev_start']     = $_REQUEST['dev_start'];
+                    $issues[$issue_id]['dev_deadline']  = $_REQUEST['dev_deadline'];
+                    $issues[$issue_id]['dev_progress']  = $_REQUEST['dev_progress'];
+
+                    //save issue-file
+                    $xvalue = io_saveFile($pfile,serialize($issues));
+                    $new_value = '<u>Planning info modified:</u><br />'.
+                                  'Component: '.$issues[$issue_id]['component'].'<br />'.
+                                  'Target version: '.$issues[$issue_id]['trgt_version'].'<br />'.
+                                  'Test blocking: '.$issues[$issue_id]['tblock'].'<br />'.
+                                  'Begin: '.$issues[$issue_id]['dev_start'].'<br />'.
+                                  'Deadline: '.$issues[$issue_id]['dev_deadline'].'<br />'.
+                                  'Progress: '.$issues[$issue_id]['dev_progress'];
+                    
+//                    echo $issue_id.' ... '.$old_value.'<br>'.'<br>'.$new_value.'<br>';                    
+                    
+                    $this->_log_mods($project, $issues[$issue_id], $usr, 'planning data', $old_value, $new_value);
+                 }  
+                  elseif (isset($_REQUEST['mod_description']))
                  {  
                     // check if captcha is to be used by issue tracker in general
                     if ($this->getConf('use_captcha') === 0) { $captcha_ok = 1;}
@@ -309,7 +446,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                                   $xvalue = io_saveFile($pfile,serialize($issues));
                                   if(($this->getConf('mail_modify__description') ===1) && ($_REQUEST['minor_mod']!=="true")) $this->_emailForDscr($_REQUEST['project'], $issues[$issue_id]);
                                   $this->_log_mods($project, $issues[$issue_id], $usr, 'description mod', $old_value, $issues[$issue_id]['description']);
-                                  msg($this->getLang('msg_descrmodtrue').$issue_id.'.',1);
+                                  msg($this->getLang('msg_descrmodtrue'),1);
                       //            $Generated_Header = '<div class="it__positive_feedback">'.$this->getLang('msg_descrmodtrue').$issue_id.'</div>';
                               }
                               else { msg("Issue with ID: $issue_id not found.",-1); }
@@ -492,13 +629,58 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                         }
                     }
                  }
+/* Workaround to be stored ---------------------------------------------------*/
+                 elseif(isset($_REQUEST["mod_wround"]))
+                 {  // check if captcha is to be used by issue tracker in general
+                    if ($this->getConf('use_captcha') === 0) { $captcha_ok = 1;}
+                    else { $captcha_ok = ($this->_captcha_ok());}
+                    if ($captcha_ok)
+                    {   if (checkSecurityToken())
+                        {   // find issue and description
+                            if (@file_exists($pfile))
+                    	      {  $issues  = unserialize(@file_get_contents($pfile)); }
+                            else
+                    	      {  msg('Issue file not found !'.NL.$pfile,-1);
+                               return false; }
+        
+                             // get comment file contents
+                             if($this->getConf('it_data')==false) $comments_file = DOKU_CONF."../data/meta/".$project."_".$_REQUEST['comment_issue_ID'].'.cmnts';
+                             else $comments_file = DOKU_CONF."../". $this->getConf('it_data').$project."_".$_REQUEST['comment_issue_ID'].'.cmnts';
+        
+                             if (@file_exists($comments_file))  {  $comments  = unserialize(@file_get_contents($comments_file));  }
+                             else  {  $comments = array();  }
+                             $checkFlag=false;
+                             $comment_id = 0;
+                             $comments[$comment_id] = array();
+                             $comments[$comment_id]['id'] = "WA";
+                             $comments[$comment_id]['author'] = htmlspecialchars(stripslashes($_REQUEST['author']));
+                             $cur_date = date($this->getConf('d_format'));
+                             $comments[$comment_id]['timestamp'] = $cur_date;
+                             $comments[$comment_id]['wround_mod'] = htmlspecialchars(stripslashes($_REQUEST['wround_mod']));
+                             //Create comments file
+                             $xvalue = io_saveFile($comments_file,serialize($comments)); 
+                             if($this->getConf('mail_add_comment') ===1) $this->_emailForMod($_REQUEST['project'],$issues[$_REQUEST['wround_mod']], $comments[$comment_id], 'new');
+                             msg($this->getLang('msg_wroundtrue').'.',1);
+        
+                          // update issues modification date
+                          if ($checkFlag === false)
+                          {   // inform user (or assignee) about update
+                              // update modified date
+                              $cur_date = date($this->getConf('d_format'));
+                              $issues[$_REQUEST['comment_issue_ID']]['modified'] = $cur_date; 
+                              $xvalue = io_saveFile($pfile,serialize($issues));
+                              $anker_id = 'resolved_'. uniqid((double)microtime()*1000000,1);                                   
+                          }
+                        }
+                     }  
+                 }
+
                  // Render 
                                                         // Array  , project name
                  $Generated_Table = $this->_details_render($issues, $project);                 
                  //$data->doc .= $Generated_Header.$Generated_Table.$Generated_feedback;
-
         }
-        // scrolling next/previous issues 
+/* scrolling next/previous issues --------------------------------------------*/ 
         elseif (($data->data == 'issuelist_next') || ($data->data == 'issuelist_previous') || ($data->data == 'issuelist_filter') || ($data->data == 'issuelist_filterlink'))  {
                  $data->preventDefault();
                  $renderer->info['cache'] = false;         
@@ -512,6 +694,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                  // get issues file contents
                   $all = true;
                   $issues = $this->_get_issues($a, $all);
+                  
+                  // global sort of issues array
+                  $sort_key = $this->itl_sort;
+                  $issues = $this->_issues_globalsort($issues, $sort_key);
             
                  if ($data->data == 'issuelist_next') {
                     $start = $itl_next;
@@ -522,7 +708,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                       $next_start=count($issues);
                       $start = $next_start - $step;
                       if ($start<0) { $start='0'; }
-                      }                         
+                      }                              
 //                    echo 'start = '.$start.';  step = '.$step.';  next_start = '.$next_start.'<br />';
                  }
                  elseif ($data->data == 'issuelist_previous') {
@@ -536,21 +722,34 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     if ($next_start>count($issues)) { $next_start=count($issues); }                 
                  }
 
-                $stat_filter       = $this->itl_stat;
-                if ($stat_filter   == '') {$stat_filter='ALL';}
-                
-                $sev_filter        = $this->itl_sev;
-                if ($sev_filter    == '') {$sev_filter='ALL';}
-                
-                $productfilter     = $this->itl_prod;
-                if ($productfilter == '') {$productfilter='ALL';}
-                
-                $myissues          = $this->itl_myis;
-                if ($myissues      == '') {$myissues = false;}
-                else {$myissues = true;}
-                
+                $filter = array();
+                $filter['status']    = $this->itl_stat;
+                $filter['severity']  = $this->itl_sev;
+                $filter['product']   = $this->itl_prod;
+                $filter['version']   = $this->itl_vers;
+                $filter['component'] = $this->itl_comp;
+                $filter['tblock']    = $this->itl_block;
+                $filter['assignee']  = $this->itl_assi;
+                $filter['reporter']  = $this->itl_reporter;
+                $filter['myissues']  = $this->itl_myis;
+
+                if ($filter['severity']   == '') { $filter['severity']   = 'ALL' ;}
+                if ($filter['status']     == '') { $filter['status']     = 'ALL' ;}
+                if ($filter['product']    == '') { $filter['product']    = 'ALL' ;}
+                if ($filter['version']    == '') { $filter['version']    = 'ALL' ;}
+                if ($filter['component']  == '') { $filter['component']  = 'ALL' ;}
+                if ($filter['tblock']     == '') { $filter['tblock']     = false ;}
+                else { $filter['tblock']  = true ;}
+                if ($filter['assignee']   == '') { $filter['assignee']   = 'ALL' ;}
+                if ($filter['reporter']   == '') { $filter['reporter']   = 'ALL' ;}
+            	  if ($filter['myissues']   == '') { $filter['myissues']   = false ;}
+                else { $filter['myissues']= true ;}
+
+                if ($filter['myissues']      == '') {$filter['myissues'] = false;}
+                else {$filter['myissues'] = true;}                
+
                 $Generated_Header  = '';                       
-                $Generated_Table   = $this->_table_render($a,$step,$start,$next_start,$stat_filter,$sev_filter,$productfilter,$myissues,$all); 
+                $Generated_Table   = $this->_table_render($a,$step,$start,$next_start,$filter,$all); 
                 $Generated_Scripts = $this->_scripts_render();
         }
         elseif ($data->data == 'showmodlog'){
@@ -564,8 +763,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $Generated_Message = '';
 
             // get mod-log file contents
-            if($this->getConf('it_data')==false) $modfile = DOKU_INC."data/meta/".$project.'_'.$issue_id.'.mod-log';
-            else $modfile = DOKU_INC. $this->getConf('it_data').$project.'_'.$issue_id.'.mod-log';
+            if($this->getConf('it_data')==false) $modfile = DOKU_CONF."../data/meta/".$project.'_'.$issue_id.'.mod-log';
+            else $modfile = DOKU_CONF."../". $this->getConf('it_data').$project.'_'.$issue_id.'.mod-log';
             if (@file_exists($modfile))
                 {$mods  = unserialize(@file_get_contents($modfile));}
             else 
@@ -615,6 +814,71 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $data->preventDefault();
             include('itsearch.php');
         }
+/*        elseif ($data->data == 'savecfgelement'){
+          // add a new element to the config-matrix
+          $data->preventDefault();
+          $cfg_file = DOKU_PLUGIN."issuetracker/conf/it_matrix.cfg";
+          $new_element = array();
+          if (@file_exists($cfg_file)) { $new_element  = unserialize(@file_get_contents($cfg_file)); }    
+
+          // elmnt_type | elmnt_name | rel_childs
+          $new_element[]= array(
+                                'elmnt_type' => $_POST['type1'] , 
+                                'elmnt_name' => $_POST['name1'] , 
+                                'rel_childs' => "");
+
+          //save cfg-matrix file
+          asort($new_element);
+          $xvalue = io_saveFile($cfg_file,serialize($new_element));
+          if($xvalue>0) msg("New element added to the config matrix.",1);
+          else          msg("New element cannot be added to the config matrix.",-1);
+          $backlink = str_replace("&do=savecfgelement","",$ID);
+          echo '<a href="'.DOKU_URL.'doku.php?id='.$backlink.'">back</a> <br/>';
+        }
+        elseif ($data->data == 'savecfgmatrix'){
+          $data->preventDefault();
+          msg("implement code to store the newly added relation of an element and its childs",0);
+          echo 'elmnt_type: '  .$_POST['type2'].'<br />'; 
+          echo 'elmnt_name: '  .$_POST['name2'].'<br />';
+          echo 'elmnt_childs 1: '.$_POST['childs_1'].'<br />';
+          echo 'elmnt_childs 2: '.$_POST['childs_2'].'<br />';
+          echo 'elmnt_childs 3: '.$_POST['childs_3'].'<br />';
+          echo 'elmnt_childs 4: '.$_POST['childs_4'].'<br />';
+          echo 'elmnt_childs 5: '.$_POST['childs_5'].'<br />';
+        }
+        elseif ($data->data == 'deletecfgelement'){
+          $data->preventDefault();
+//          msg("implement code to delete an existing element and all its references",0);
+//          echo 'elmnt_type: '.$_POST['type3'].'<br />'; 
+//          echo 'elmnt_name: '.$_POST['name3'].'<br />';
+          // open cfg-matrix
+          $data->preventDefault();
+          $cfg_file = DOKU_PLUGIN."issuetracker/conf/it_matrix.cfg";
+          $elements = array();
+          if (@file_exists($cfg_file)) { $elements  = unserialize(@file_get_contents($cfg_file)); }
+          else return;    
+          // loop through matrix elements and delete all references + element themselves
+          foreach($elements as $key => &$item) {
+            if (($item['elmnt_type']===$_POST['type3']) & ($item['elmnt_name']===$_POST['name3'])) {
+                // delete completely from array
+                unset($elements[$key]);
+            }
+            if(stripos($item['rel_childs'],$_POST['name3'])!==false){
+              $temp = explode(",",$item['rel_childs']);
+              foreach($temp as $k => $i){
+                if($i===$_POST['name3']) unset($temp[$k]);
+              }
+              $item['rel_childs'] = implode(",",$temp);
+            }
+          }
+          //save cfg-matrix file
+          $xvalue = io_saveFile($cfg_file,serialize($elements));
+          if($xvalue>0) msg("Element completely deleted from config matrix.",1);
+          else          msg("Element cannot be deleted from config matrix.",-1);
+          $backlink = str_replace("&do=savecfgelement","",$ID);
+          echo '<a href="'.DOKU_URL.'doku.php?id='.$backlink.'">back</a> <br/>';
+        }
+*/
         else return;
         
         // Render            
@@ -699,7 +963,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 /******************************************************************************/
 /* Create list of next/previous Issues
 */
-    function _table_render($project,$step,$start,$next_start,$stat_filter,$sev_filter,$productfilter,$myissues,$all=false)
+    function _table_render($project,$step,$start,$next_start,$filter,$all=false)
     {
         global $ID;
         $imgBASE       = DOKU_BASE."lib/plugins/issuetracker/images/";
@@ -707,14 +971,15 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         $user_grp      = pageinfo();
         $noStatIMG     = $this->getConf('noStatIMG');
         $noSevIMG      = $this->getConf('noSevIMG');
-        $stat_filter   = strtoupper($stat_filter);
-        $sev_filter    = strtoupper($sev_filter);
-        $productfilter = strtoupper($productfilter);
         
         // get issues file contents
         $all = false;
         $issues = $this->_get_issues($project, $all);
-                                    
+
+        // global sort of issues array
+        $sort_key = $this->itl_sort;
+        $issues = $this->_issues_globalsort($issues, $sort_key);
+        
         if ($start>count($issues)) $start=count($issues)-$step;                
         if(array_key_exists('userinfo', $user_grp))
         {
@@ -746,6 +1011,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         {   // get issues file contents
             $all = true;
             $issues = $this->_get_issues($project, $all);
+
+            // global sort of issues array
+            $sort_key = $this->itl_sort;
+            $issues = $this->_issues_globalsort($issues, $sort_key);
                         
             $dynatable_id = "t_".uniqid((double)microtime()*1000000,1);
             if($this->getConf('multi_projects')!==false) { $th_project = "<th id='project'>".$this->getLang('th_project')."</th>"; }
@@ -753,39 +1022,49 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                     "<thead><tr>".NL.
                      $th_project.NL.
                     "<th class=\"sortfirstdesc\" id='id'>".$this->getLang('th_id')."</th>".NL.
-                    "<th id='created'>".$this->getLang('th_created')."</th>".NL.
-                    "<th id='product'>".$this->getLang('th_product')."</th>".NL.
-                    "<th id='version'>".$this->getLang('th_version')."</th>".NL.
-                    "<th id='severity'>".$this->getLang('th_severity')."</th>".NL.
-                    "<th id='status'>".$this->getLang('th_status')."</th>".NL.
-                    "<th id='user_name'>".$this->getLang('th_username')."</th>".NL.
-                    "<th id='title'>".$this->getLang('th_title')."</th>".NL.
-                    "<th id='assigned'>".$this->getLang('th_assigned')."</th>".NL. 
+                    "<th id='created'>"   .$this->getLang('th_created')   ."</th>".NL.
+                    "<th id='product'>"   .$this->getLang('th_product')   ."</th>".NL.
+                    "<th id='version'>"   .$this->getLang('th_version')   ."</th>".NL.
+                    "<th id='severity'>"  .$this->getLang('th_severity')  ."</th>".NL.
+                    "<th id='status'>"    .$this->getLang('th_status')    ."</th>".NL.
+                    "<th id='user_name'>" .$this->getLang('th_username')  ."</th>".NL.
+                    "<th id='title'>"     .$this->getLang('th_title')     ."</th>".NL.
+                    "<th id='assigned'>"  .$this->getLang('th_assigned')  ."</th>".NL. 
                     "<th id='resolution'>".$this->getLang('th_resolution')."</th>".NL.
-                    "<th id='modified'>".$this->getLang('th_modified')."</th>".NL.
+                    "<th id='modified'>"  .$this->getLang('th_modified')  ."</th>".NL.
                     "</tr></thead>".NL;        
             $body = '<tbody>'.NL;
         
             // Note: The checked attribute is a boolean attribute. 
             // It is enough if checked is mentioned to hook the checkbox !
-            if($myissues == false) { $myissues= ""; }
-            else { $myissues= "checked"; }
-
+            if($filter['myissues'] == '') { $filter['myissues'] = false; }
+            else { $filter['myissues'] = true; }
+            
             for ($i=$next_start-1;$i>=0;$i=$i-1)
             {   // check start and end of rows to be displayed
                 if(count($issues)> $i) {
                     $issue = $issues[$i];
-                    $a_status   = strtoupper($this->_get_one_value($issue,'status'));
-                    $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
-                    $a_product  = strtoupper($this->_get_one_value($issue,'product'));
-                    
-                    if ((($stat_filter=='ALL')                 || (stristr($stat_filter,$a_status)          != false)) && 
-                       (($sev_filter=='ALL')                   || (stristr($sev_filter,$a_severity)         != false)) && 
-                       ((strcasecmp($productfilter,'ALL')===0) || (stristr($productfilter,$a_product)       != false)) &&
-                       (($myissues == ''   )                   || ($this->_find_myissues($issue, $user_grp) == true)))
-                    {   
+                    $a_status     = strtoupper($this->_get_one_value($issue,'status'));
+                    $a_severity   = strtoupper($this->_get_one_value($issue,'severity'));
+                    $a_product    = strtoupper($this->_get_one_value($issue,'product'));
+                    $a_version    = strtoupper($this->_get_one_value($issue,'version'));
+                    $a_component  = strtoupper($this->_get_one_value($issue,'component'));
+                    $a_tblock     = strtoupper($this->_get_one_value($issue,'tblock'));
+                    $a_assignee   = strtoupper($this->_get_one_value($issue,'assignee'));
+                    $a_reporter   = strtoupper($this->_get_one_value($issue,'user_name'));
+
+                    if ((($filter['status']    =='ALL') || (stristr($filter['status'],$a_status)          != false)) && 
+                        (($filter['severity']  =='ALL') || (stristr($filter['severity'],$a_severity)      != false)) && 
+                        (($filter['product']   =='ALL') || (stristr($filter['product'],$a_product)        != false)) &&
+                        (($filter['version']   =='ALL') || (stristr($filter['version'],$a_version)        != false)) &&
+                        (($filter['component'] =='ALL') || (stristr($filter['component'],$a_component)    != false)) &&
+                        (($filter['assignee']  =='ALL') || (stristr($filter['assignee'],$a_assignee)      != false)) &&
+                        (($filter['reporter']  =='ALL') || (stristr($filter['reporter'],$a_reporter)      != false)) &&
+                        (($filter['tblock']  == false)   || (($a_tblock != false) && ($filter['tblock'] == true))) &&
+                        (($data['myissues']  == false  ) || ($this->_find_myissues($issue, $user_grp) == true)))
+                   {   
                         if ($y>=$step) break;
-                        if ((stripos($this->getConf('status_special'),$a_status) !== false) && (stripos($stat_filter,$this->getConf('status_special')) === false)) continue;                   
+                        if ((stripos($this->getConf('status_special'),$a_status) !== false) && (stripos($filter['status'],$this->getConf('status_special')) === false)) continue;                   
                         $y=$y+1;
                         // check if status image or text to be displayed
                         if ($noStatIMG === false) {                    
@@ -810,7 +1089,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                             $td_project = '<td class="itl__td_standard">'.$project.'</td>';
                         }
                         // build parameter for $_GET method
-                            $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($this->_get_one_value($issue,'project')));
+//                            $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($this->_get_one_value($issue,'project')));
+                            $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
                             $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a>';
                         
                         if($rowEven==="it_roweven") $rowEven="it_rowodd";
@@ -842,6 +1122,11 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         {   // get issues file contents
             $all = false;
             $issues = $this->_get_issues($project, $all);
+
+            // global sort of issues array
+            $sort_key = $this->itl_sort;
+            $issues = $this->_issues_globalsort($issues, $sort_key);
+
             $dynatable_id = "t_".uniqid((double)microtime()*1000000,1);
             //Build table header according settings
             $configs = explode(',', $this->getConf('shwtbl_usr')) ;
@@ -863,19 +1148,29 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             {   // check start and end of rows to be displayed
                 if(count($issues)> $i) {
                         $issue = $issues[$i];                    
-                        $a_status   = strtoupper($this->_get_one_value($issue,'status'));
-                        $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
-                        $a_product  = @strtoupper($this->_get_one_value($issue,'product'));
-    
-                    if ((($stat_filter =='ALL')                 || (stristr($stat_filter,$a_status)   != false)) && 
-                        (($sev_filter  =='ALL')                 || (stristr($sev_filter,$a_severity)  != false)) && 
-                        ((strcasecmp($productfilter,'ALL')===0) || (stristr($productfilter,$a_product)!= false)) &&
-                        (($myissues    == '')                || ($this->_find_myissues($issue, $user_grp) == true)))
+                        $a_status     = strtoupper($this->_get_one_value($issue,'status'))   ;
+                        $a_severity   = strtoupper($this->_get_one_value($issue,'severity')) ;
+                        $a_product    = strtoupper($this->_get_one_value($issue,'product'))  ;
+                        $a_version    = strtoupper($this->_get_one_value($issue,'version'))  ;
+                        $a_component  = strtoupper($this->_get_one_value($issue,'component'));
+                        $a_tblock     = strtoupper($this->_get_one_value($issue,'tblock'))   ;
+                        $a_assignee   = strtoupper($this->_get_one_value($issue,'assignee')) ;
+                        $a_reporter   = strtoupper($this->_get_one_value($issue,'user_name'));
+                        
+                    if ((($filter['status']    =='ALL') || (stristr($filter['status'],$a_status)          != false)) && 
+                        (($filter['severity']  =='ALL') || (stristr($filter['severity'],$a_severity)      != false)) && 
+                        (($filter['product']   =='ALL') || (stristr($filter['product'],$a_product)        != false)) &&
+                        (($filter['version']   =='ALL') || (stristr($filter['version'],$a_version)        != false)) &&
+                        (($filter['component'] =='ALL') || (stristr($filter['component'],$a_component)    != false)) &&
+                        (($filter['assignee']  =='ALL') || (stristr($filter['assignee'],$a_assignee)      != false)) &&
+                        (($filter['reporter']  =='ALL') || (stristr($filter['reporter'],$a_reporter)      != false)) &&
+                        (($filter['tblock']  == false)   || (($a_tblock != false) && ($filter['tblock'] == true))) &&
+                        (($data['myissues']  == false  ) || ($this->_find_myissues($issue, $user_grp) == true)))
                     {   
                         if ($y>=$step) break;
-                        if ((stripos($this->getConf('status_special'),$a_status) !== false) && (stripos($stat_filter,$this->getConf('status_special')) === false)) continue;
+                        if ((stripos($this->getConf('status_special'),$a_status) !== false) && (stripos($filter['status'],$this->getConf('status_special')) === false)) continue;
                         $y=$y+1;
-                        
+
                         if($rowEven==="it_roweven") $rowEven="it_rowodd";
                         else $rowEven="it_roweven";
                         
@@ -934,7 +1229,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
             $body = '<tbody>'.$reduced_issues.'</tbody></table></div>';          
         }
         
-        if ($productfilter==="") {$productfilter='ALL';}
+        if ($filter['product']==="") {$filter['product']='ALL';}
             
             if($i<=0) 
             {    $next_start = count($issues);
@@ -949,7 +1244,13 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 // -----------------------------------------------------------------------------
 // Control render        
         //$a,,$productfilter
-        $li_count = $this->_count_render($issues,$start,$step,$next_start,$stat_filter,$sev_filter,$productfilter,$project);
+        if($this->itl_myis==false) {$filter['myissues'] = "";}
+        else {$filter['myissues'] = "checked='true'";}                
+
+        if($this->itl_block==false) { $filter['tblock'] = ""; }
+        else $filter['tblock'] = "checked='true'";
+
+        $li_count = $this->_count_render($issues,$start,$step,$next_start,$filter,$project);
         $ret = '<div>'.NL.
                '<script  type="text/javascript">'.NL. 
                '        function changeAction(where) {'.NL. 
@@ -977,23 +1278,35 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                '   <td align ="left" valign="top" width="15%">'.NL.
                '     <p class="it__cir_projectlabel">'.'<label for="itl_step"         style="align:left;">'.$this->getLang('lbl_scroll').    '</label><br />'.NL.
                                                        '<label for="itl_sev_filter"   style="align:left;">'.$this->getLang('lbl_filtersev'). '</label><br />'.NL.
-                                                       '<label for="itl_stat_filter"  style="align:left;">'.$this->getLang('lbl_filterstat').'</label><br />'.NL.
-                                                       '<label for="itl__prod_filter" style="align:left;">'.$this->getLang('lbl_filterprod').'</label><br />'.NL.
-                                                       '<label for="itl_myis_filter"  style="align:left;">'.$this->getLang('cbx_myissues').  '</label></p>'.NL.
+                                                       '<label for="itl_stat_filter"  style="align:left;">'.$this->getLang('lbl_filterstat').'</label><br /></p>'.NL.
+               '    <p class="it__cir_projectlabel">'.'<label for="itl__prod_filter" style="align:left;">'.$this->getLang('lbl_filterprod').'</label><br />'.NL.
+                                                       '<label for="itl__vers_filter" style="align:left;">'.$this->getLang('lbl_filtervers').'</label><br />'.NL.
+                                                       '<label for="itl__comp_filter" style="align:left;">'.$this->getLang('lbl_filtercomp').'</label><br /></p>'.NL.
+               '    <p class="it__cir_projectlabel">'.'<label for="itl__block_filter" style="align:left;">'.$this->getLang('lbl_filterblock').'</label><br />'.NL.
+                                                       '<label for="itl__assi_filter" style="align:left;">'.$this->getLang('lbl_filterassi').'</label><br />'.NL.
+                                                       '<label for="itl__user_filter" style="align:left;">'.$this->getLang('lbl_filterreporter').'</label><br />'.NL.
+                                                       '<label for="itl_myis_filter"  style="align:left;">'.$this->getLang('cbx_myissues').  '</label><br />'.NL.
+                                                       '<label for="it_glbl_sort"     style="align:left;">'.$this->getLang('lbl_sort').'</label></p>'.NL.
                '   </td>'.NL.
                '   <td align ="left" valign="top" width="20%">'.NL.
                '    <form name="myForm" action="" method="post">'.NL.
-               '       <input                          type="hidden" name="itl_start"        id="itl_start"        value="'.$start.'"/>'.NL.
+               '    <p><input                          type="hidden" name="itl_start"        id="itl_start"        value="'.$start.'"/>'.NL.
                '       <input                          type="hidden" name="itl_step"         id="itl_step"         value="'.$step.'"/>'.NL.
                '       <input                          type="hidden" name="itl_next"         id="itl_next"         value="'.$next_start.'"/>'.NL.
                '       <input                          type="hidden" name="itl_project"      id="itl_project"      value="'.$project.'"/>'.NL.
                '       <input class="itl__buttons"     type="button" name="showprevious"                           value="'.$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>'.NL.
                '       <input class="itl__step_input"  type="text"   name="itl_step"         id="itl_step"         value="'.$step.'"/>'.NL.
                '       <input class="itl__buttons"     type="button" name="shownext"                               value="'.$this->getLang('btn_next').'"     title="'.$this->getLang('btn_next_title').'"     onClick="changeAction(2)"/><br />'.NL.
-               '       <input class="itl__sev_filter"  type="text"   name="itl_sev_filter"   id="itl_sev_filter"   value="'.$sev_filter.'"/><br />'.NL.                         
-               '       <input class="itl__stat_filter" type="text"   name="itl_stat_filter"  id="itl_stat_filter"  value="'.$stat_filter.'"/><br />'.NL.
-               '       <input class="itl__prod_filter" type="text"   name="itl__prod_filter" id="itl__prod_filter" value="'.$productfilter.'"/><br />'.NL.
-               '       <input                          type="checkbox" name="itl_myis_filter" id="itl_myis_filter" value="1" '.$myissues.' title="'.$this->getLang('cbx_myissues').'"/><br />'.NL.
+               '       <input class="itl__sev_filter"  type="text"   name="itl_sev_filter"   id="itl_sev_filter"   value="'.$filter['severity'].'"/><br />'.NL.                         
+               '       <input class="itl__stat_filter" type="text"   name="itl_stat_filter"  id="itl_stat_filter"  value="'.$filter['status'].'"/><br /></p>'.NL.
+               '    <p><input class="itl__prod_filter" type="text"   name="itl__prod_filter" id="itl__prod_filter" value="'.$filter['product'].'"/><br />'.NL.
+               '       <input class="itl__prod_filter" type="text"   name="itl__vers_filter" id="itl__vers_filter" value="'.$filter['version'].'"/><br />'.NL.
+               '       <input class="itl__prod_filter" type="text"   name="itl__comp_filter" id="itl__comp_filter" value="'.$filter['component'].'"/><br /></p>'.NL.
+               '    <p><input                          type="checkbox" name="itl__block_filter" id="itl__block_filter" '   .$filter['tblock'].' " /><br />'.NL.
+               '       <input class="itl__prod_filter" type="text"   name="itl__assi_filter" id="itl__assi_filter" value="'.$filter['assignee'].'"/><br />'.NL.
+               '       <input class="itl__prod_filter" type="text"   name="itl__user_filter" id="itl__user_filter" value="'.$filter['reporter'].'"/><br />'.NL.
+               '       <input                          type="checkbox" name="itl_myis_filter" id="itl_myis_filter" '.$filter['myissues'].' value="'.$filter['myissues'].'" title="'.$this->getLang('cbx_myissues').'"/><br />'.NL.
+               '       <input class="itl__sev_filter"  type="text"   name="it_glbl_sort"      id="it_glbl_sort"    value="'.$glbl_sort.'"/><br /></p>'.NL.
                '       <input class="itl__buttons"     type="button" name="go"                                     value="'.$this->getLang('btn_go').'"        title="'.$this->getLang('btn_go').'"            onClick="changeAction(3)"/><br />'.NL.
                '    </form>'.NL.                      
                '   </td>'.NL.
@@ -1003,9 +1316,9 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                '       <label class="it__searchlabel">'.$this->getLang('lbl_showid').'</label>'.NL.
                '       <input class="itl__sev_filter"    type="text"   name="showid"          id="showid"          value="0"/>'.NL.
                '       <input                            type="hidden" name="project"         id="project"         value="'.$project.'"/>'.NL.
-               '       <input                            type="hidden" name="itl_sev_filter"  id="itl_sev_filter"  value="'.$sev_filter.'"/>'.NL.
-               '       <input                            type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$stat_filter.'"/>'.NL.
-               '       <input                            type="hidden" name="itl_myis_filter" id="itl_myis_filter" value="1" '.$myissues.'/>'.NL.
+               '       <input                            type="hidden" name="itl_sev_filter"  id="itl_sev_filter"  value="'.$filter['severity'].'"/>'.NL.
+               '       <input                            type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$filter['status'].'"/>'.NL.
+               '       <input                            type="hidden" name="itl_myis_filter" id="itl_myis_filter" '.$filter['myissues'].' value="'.$filter['myissues'].'"/>'.NL.
                '       <input class="itl__showid_button" type="submit" name="showcase"        id="showcase"        value="'.$this->getLang('btn_showid').'"    title="'.$this->getLang('btn_showid_title').'"/>'.NL.
                '    </form><br />'.NL.
                '    <form  method="post" action="doku.php?id=' . $ID . '&do=it_search">'.NL.
@@ -1064,8 +1377,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
         if(!$issue) return false;	          
         
         // get detail information from issue comment file
-        if($this->getConf('it_data')==false) $cfile = DOKU_INC."data/meta/".$project."_".$issue_id.'.cmnts';
-        else $cfile = DOKU_INC. $this->getConf('it_data').$project."_".$issue_id.'.cmnts';
+        if($this->getConf('it_data')==false) $cfile = DOKU_CONF."../data/meta/".$project."_".$issue_id.'.cmnts';
+        else $cfile = DOKU_CONF."../". $this->getConf('it_data').$project."_".$issue_id.'.cmnts';
         if (@file_exists($cfile)) {$comments  = unserialize(@file_get_contents($cfile));}
         else {$comments = array();}
 
@@ -1092,22 +1405,33 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                 ($this->getConf('shw_mail_addr') === 1))
             {   $__assigened      = $this->_get_assignee($issue[$issue_id],'assigned');
                 $__assigenedaddr  = $issue[$issue_id]['assigned'];
-                $__reportedby     = $issue[$issue_id]['user_mail'];
+                $__reportedby     = $issue[$issue_id]['user_name'];
                 $__reportedbyaddr = $issue[$issue_id]['user_mail'];
                 $mail_allowed     = true;
             }
-            else 
+            elseif($user_mail['userinfo']['mail']  === $issue[$issue_id]['assigned'])
+            {   $__assigenedaddr = $user_mail['userinfo']['mail'];
+                $__assigened     = $user_mail['userinfo']['name'];
+                $__reportedby     = $issue[$issue_id]['user_name'];
+                $__reportedbyaddr = $issue[$issue_id]['user_mail'];
+                $mail_allowed    = true;
+            }
+            else
             {   foreach($target as $_assignee)
-                  { if($_assignee['mail'] === $issue[$issue_id]['assigned'])
+                  { if($_assignee['mail'] === $user_mail['userinfo']['mail'])
                     {   $__assigened     = $_assignee['name'];
-                        $__assigenedaddr = $_assignee['mail'];
-                        $mail_allowed    = true;
+                        $mail_allowed    = false;
+                        break;
+                    }
+                    if($_assignee['mail'] === $issue[$issue_id]['assigned'])
+                    {   $__assigened     = $_assignee['name'];
+                        $mail_allowed    = false;
                         break;
                     }
                   }
                 $__reportedby     = $issue[$issue_id]['user_name'];
                 $__reportedbyaddr = $issue[$issue_id]['user_mail'];
-            }
+            } 
         }
         else {  // auth_ad_overflow = true
                 $__assigened      = $this->_get_assignee($issue[$issue_id],'assigned');
@@ -1233,10 +1557,14 @@ $issue_edit_head .= '<span>
           		textarea.scrollLeft = scrollLeft;
            }
           }
+          function save_addinfo(){
+            var a=0;
+            
+          }
           </script></span>'.NL;
           
 $issue_edit_head .= '<span>
-         <script type="text/javascript">
+        <script type="text/javascript">
              function tab_open(blink_id, cell_ID) 
               {   if (document.getElementById(blink_id).style.display == "block")
                   {   document.getElementById(blink_id).style.display = "none";
@@ -1255,32 +1583,11 @@ $issue_edit_head .= '<span>
                   {   document.getElementById(blink_id).style.display = "block";
                   }
               } 
-
         </script></span>'.NL;
+               
 //--------------------------------------
 // Tables for the Issue details view:
 //--------------------------------------
-$issue_edit_head .= '<table class="itd__title">'.
-                   '<tr>
-                      <td colSpan="6" >
-                      <p>
-                        <font size="1"><i>&nbsp['.$issue[$issue_id]['id'].']&nbsp;&nbsp;</i></font>
-                        <font size="3" color=#00008f>'.
-                          '<b><i><h class="itd_formtitle">'.$issue[$issue_id]['title'].'</h></i></b>
-                        </FONT>
-                      </p>
-                      </td>
-                    </tr>'.                  
-                   '<tbody class="itd__details">'.                    
-                   '<tr class="itd_tr_standard">
-                      <td class="it__left_indent"></td>
-                      <td class="itd__col2">'.$this->getLang('lbl_issueid').'</td>
-                      <td class="itd__col3">'.$issue[$issue_id]['id'].'</td>
-                      <td class="itd__col4"></td>                   
-                      <td class="itd__col5">'.$this->getLang('lbl_project').'</td>
-                      <td class="itd__col6">'.$project.'</td>
-                    </tr>';
-
 $issue_edit_head .= '<script>
                       function updSeverity()
                       {   document.getElementById("severity").style.display="none";
@@ -1290,8 +1597,47 @@ $issue_edit_head .= '<script>
                       {   document.getElementById("status").style.display="none";
                           document.getElementById("frm_status").style.display="inline"; }
                     </script>';
-                   
-$issue_edit_head .= '<tr class="itd_tr_standard">
+                    
+$issue_edit_head .= '<table class="itd__title" style="margin-bottom:0;">'.
+                   '<tr>
+                      <td colSpan="6" >
+                      <p>
+                        <font size="1"><i>&nbsp['.$issue[$issue_id]['id'].']&nbsp;&nbsp;</i></font>
+                        <font size="3" color=#00008f>'.
+                          '<b><i><h class="itd_formtitle">'.$issue[$issue_id]['title'].'</h></i></b>
+                        </FONT>
+                      </p>
+                      </td>
+                    </tr>'.
+                                      
+                   '<tbody class="itd__details">'.                    
+
+                   '<tr class="itd_tr_standard">                      
+                      <td class="it__left_indent"></td>
+                      <td class="itd__col2">'.$this->getLang('lbl_reporter').'</td>'.NL;
+                      
+if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
+                        {$issue_edit_head .= '<td class="itd__col3"><a href="mailto:'.$__reportedbyaddr.'">'.$__reportedby.'</a></td>'.NL;}
+else{$issue_edit_head .= '<td class="itd__col3">'.$__reportedby.'</td>'.NL;}
+
+$issue_edit_head .= '<td class="itd__col4"></td>                                                                  
+                      <td class="itd__col5">'.$this->getLang('th_created').':</td>
+                      <td class="itd__col6">'.date($this->getConf('d_format'),strtotime($issue[$issue_id]['created'])).'</td>
+                    </tr>'.
+
+                    '<tr class="itd_tr_standard">                      
+                      <td class="it__left_indent"></td>
+                      <td class="itd__col2">'.$this->getLang('th_assigned').':</td>'.NL;
+if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) || (strpos($target2,$user_mail['userinfo']['mail']) != false) || ($this->getConf('auth_ad_overflow') !== false))
+                        {$issue_edit_head .= '<td class="itd__col3"><a href="mailto:'.$__assigenedaddr.'">'.$__assigened.'</a></td>'.NL;}
+else{$issue_edit_head .= '<td class="itd__col3">'.$__assigened.'</td>'.NL;}
+
+$issue_edit_head .= '<td class="itd__col4"></td>                                                                  
+                      <td class="itd__col5">'.$this->getLang('th_modified').':</td>
+                      <td class="itd__col6">'.date($this->getConf('d_format'),strtotime($issue[$issue_id]['modified'])).'</td>
+                    </tr>'.
+
+                   '<tr class="itd_tr_standard">
                       <td class="it__left_indent"></td>
                       <td class="itd__col2">'.$this->getLang('th_severity').':</td>
                       <td class="itd__col3"><span id="severity"';
@@ -1306,6 +1652,7 @@ $issue_edit_head .= ' onClick="updSeverity()">'.$severity_img.$issue[$issue_id][
                         {   $x_severity = trim($x_severity);
                             if(stripos($issue[$issue_id]['severity'],$x_severity) !==false) $x_severity_select = $x_severity_select . '<option selected="selected" style="color: blue;" value="'.$x_severity.'">'.$x_severity.'</option>'; 
                             else $x_severity_select = $x_severity_select . '<option value="'.$x_severity.'">'.$x_severity.'</option>'; }
+
                       // built hidden form with select box of configured severity values
 $issue_edit_head .= '<div class="frm_severity" id="frm_severity" style="display:none !important;">
                       <form method="post" accept-charset="'.$lang['encoding'].'>'.
@@ -1329,9 +1676,10 @@ $issue_edit_head .= '<input type="submit" class="button" id="btnmod_severity" na
                        
 $issue_edit_head .= ' </td>
                       <td class="itd__col4"></td>                   
-                      <td class="itd__col5">'.$this->getLang('th_product').':</td>
-                      <td class="itd__col6">'.$issue[$issue_id]['product'].'</td>
-                    </tr>'.NL;
+                      <td class="itd__col5">'.$this->getLang('lbl_project').'</td>
+                      <td class="itd__col6">'.$project.'</td>
+                    </tr>';
+
                    
 $issue_edit_head .= '<tr class="itd_tr_standard">
                       <td class="it__left_indent"></td>
@@ -1371,45 +1719,175 @@ $issue_edit_head .= '<input type="submit" class="button" id="btnmod_status" name
                        
 $issue_edit_head .= ' </td>
                       <td class="itd__col4"></td>                   
-                      <td class="itd__col5">'.$this->getLang('th_version').':</td>
-                      <td class="itd__col6">'.$issue[$issue_id]['version'].'</td>
-                    </tr>';
-
-$issue_edit_head .= '<tr class="itd_tr_standard">                      
-                      <td class="it__left_indent"></td>
-                      <td class="itd__col2">'.$this->getLang('lbl_reporter').'</td>'.NL;
-if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) or (strpos($target2,$user_mail['userinfo']['mail']) != false))
-                        {$issue_edit_head .= '<td class="itd__col3"><a href="mailto:'.$__reportedbyaddr.'">'.$__reportedby.'</a></td>'.NL;}
-else{$issue_edit_head .= '<td class="itd__col3">'.$__reportedby.'</td>'.NL;}
-
-$issue_edit_head .= ' <td class="itd__col4"></td>                   
-                      <td class="itd__col5">'.$this->getLang('th_created').':</td>
-                      <td class="itd__col6">'.date($this->getConf('d_format'),strtotime($issue[$issue_id]['created'])).'</td>
+                      <td class="itd__col5"></td>
+                      <td class="itd__col6"></td>
                     </tr>
-                   
                     <tr class="itd_tr_standard">
+                      <tr class="itd_tr_standard">
                       <td class="it__left_indent"></td>
-                      <td class="itd__col2">'.$this->getLang('th_assigned').':</td>'.NL;
-if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) || (strpos($target2,$user_mail['userinfo']['mail']) != false) || ($this->getConf('auth_ad_overflow') !== false))
-                        {$issue_edit_head .= '<td class="itd__col3"><a href="mailto:'.$__assigenedaddr.'">'.$__assigened.'</a></td>'.NL;}
-else{$issue_edit_head .= '<td class="itd__col3">'.$__assigened.'</td>'.NL;}
+                      <td class="itd__col2"></td>
+                      <td class="itd__col3"></td>
+                      <td class="itd__col4"></td>                   
+                      <td class="itd__col5"></td>
+                      <td class="itd__col6"></td>
+                    </tr>
+                    </tbody></table>'.NL;
 
-$issue_edit_head .= '<td class="itd__col4"></td>                   
-                      <td class="itd__col5">'.$this->getLang('th_modified').':</td>
-                      <td class="itd__col6">'.date($this->getConf('d_format'),strtotime($issue[$issue_id]['modified'])).'</td>
-                    </tr>'.NL;
+if($mail_allowed === true) {                    
+      $issue_edit_head .= '<form name="form77" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
+      $issue_edit_head .= formSecurityToken(false).
+                           '<input type="hidden" name="project" value="'.$project.'" />        
+                            <input type="hidden" name="issue_ID" value="'.$issue[$issue_id]['id'].'" />
+                            <input type="hidden" name="mod_add_data" value="1" />';
+
+      if($issue[$issue_id]['dev_start']   !="") $dev_start = date('d.M.Y',strtotime($issue[$issue_id]['dev_start']));
+      if($issue[$issue_id]['dev_deadline']!="") $deadline  = date('d.M.Y',strtotime($issue[$issue_id]['dev_deadline']));
+                                                
+      $issue_edit_head .= '<table class="itd__title" style="margin:0;padding-top: 1px;"><tbody class="itd__details">
+                          <tr class="itd_tr_standard">
+                            <td class="it__left_indent" style="margin-top: 3px;"></td>
+                            <td class="itd__col2" style="padding-top: 3px;">'.$this->getLang('th_product').':</td>
+                            <td class="itd__col3" style="padding-top: 3px;">'.$issue[$issue_id]['product'].'</td>
+                            <td class="itd__col4" style="padding-top: 3px;"></td>                   
+                            <td class="itd__col5" style="padding-top: 3px;">'.$this->getLang('th_begin').':</td>
+                            <td class="itd__col6" style="padding-top: 3px;"><input type="text" class="itdtls_txt" name="dev_start" id="dev_start" value="'.$dev_start.'" /></td>
+                          </tr>';
+      
+      $issue_edit_head .= '<tr class="itd_tr_standard">                      
+                            <td class="it__left_indent"></td>
+                            <td class="itd__col2">'.$this->getLang('th_version').':</td>
+                            <td class="itd__col3">'.$issue[$issue_id]['version'].'</td>
+                            <td class="itd__col4"></td>                                                                  
+                            <td class="itd__col5">'.$this->getLang('th_deadline').':</td>
+                            <td class="itd__col6"><input type="text" class="itdtls_txt" name="dev_deadline" id="dev_deadline" value="'.$deadline.'" /></td>
+                          </tr>';
+      
+      $issue_edit_head .= '<tr class="itd_tr_standard">
+                            <td class="it__left_indent"></td>'.NL;
+      
+                  /*--------------------------------------------------------------------*/
+                  // load set of components defined by admin
+                  /*--------------------------------------------------------------------*/
+                  $STR_COMPONENTS = "";
+                  $components = explode(',', $this->getConf('components')) ;
+                  foreach ($components as $_component)
+                  {
+                      $_component = trim($_component);
+                      if($issue[$issue_id]['component'] !== $_component) {
+                          $STR_COMPONENTS .= '<option value="'.$_component.'" >'.$_component."</option>".NL;
+                      }
+                      else {
+                          $STR_COMPONENTS .= '<option value="'.$_component.'" selected="selected" >'.$_component."</option>".NL;
+                      }
+                  }
+                  $STR_COMPONENTS = '<option value=""></option>' .NL. $STR_COMPONENTS;
+                  
+      $issue_edit_head .= '                   
+                            <td class="itd__col2">Component:</td>
+                            <td class="itd__col3"><select name="new_component" id="new_component" class="itdtls_select" style="width:17em;font-size:95%">'.$STR_COMPONENTS.'</select></td>
+                            <td class="itd__col4"></td>
+                            <td class="itd__col5">'.$this->getLang('th_progress').':</td>
+                            <td class="itd__col6"><input type="text" class="itdtls_txt" name="dev_progress" id="dev_progress" value="'.$issue[$issue_id]['dev_progress'].'" /></td>
+                          </tr>'.NL;
+      
+                          if($issue[$issue_id]['tblock']==false) { $cbx_tblock = ""; }
+                          else $cbx_tblock = "checked='true'";
+      
+      $issue_edit_head .= '<tr class="itd_tr_standard">
+                            <td class="it__left_indent"></td>
+                            <td class="itd__col2">'.$this->getLang('th_tversion').':</td>
+                            <td class="itd__col3"><input type="text" class="itdtls_txt" name="trgt_version" id="trgt_version" value="'.$issue[$issue_id]['trgt_version'].'"  /></td>
+                            <td class="itd__col4"></td>                   
+                            <td class="itd__col5"></td>
+                            <td class="itd__col6"></td>
+                           </tr>'.NL;
+      $issue_edit_head .= '<tr class="itd_tr_standard">
+                            <td class="it__left_indent"></td>
+                            <td class="itd__col2">'.$this->getLang('th_tblock').':</td>
+                            <td class="itd__col3"><input type="checkbox" name="itl__block_filter" id="itl__block_filter" '.$cbx_tblock.' />&nbsp</td>
+                            <td class="itd__col4"></td>                   
+                            <td class="itd__col5">
+                                <input class ="button" 
+                                 style ="font-size:8pt;" 
+                                 id    ="btn_upd_addinfo" 
+                                 name  ="btn_upd_addinfo"
+                                 type  ="submit" 
+                                 value ="'.$this->getLang('btn_upd_addinfo').'" 
+                                 title ="'.$this->getLang('btn_upd_addinfo').'" />
+                            </td>
+                            <td class="itd__col6"></td>
+                           </tr>
+                           </table>'.NL;                      
+      $issue_edit_head .= '
+                           </form>'.NL;
+}
+else {  // user not allowed to modify the planning data
+      if($issue[$issue_id]['dev_start']   !="") $dev_start = date('d.M.Y',strtotime($issue[$issue_id]['dev_start']));
+      if($issue[$issue_id]['dev_deadline']!="") $deadline  = date('d.M.Y',strtotime($issue[$issue_id]['dev_deadline']));
+
+        $issue_edit_head .= '<table class="itd__title" style="margin:0;padding-top: 1px;"><tbody class="itd__details">
+                            <tr class="itd_tr_standard">
+                              <td class="it__left_indent" style="margin-top: 3px;"></td>
+                              <td class="itd__col2" style="padding-top: 3px;">'.$this->getLang('th_product').':</td>
+                              <td class="itd__col3" style="padding-top: 3px;">'.$issue[$issue_id]['product'].'</td>
+                              <td class="itd__col4" style="padding-top: 3px;"></td>                   
+                              <td class="itd__col5" style="padding-top: 3px;">'.$this->getLang('th_begin').':</td>
+                              <td class="itd__col6" style="padding-top: 3px;">'.$dev_start.'</td>
+                            </tr>';
+        
+        $issue_edit_head .= '<tr class="itd_tr_standard">                      
+                              <td class="it__left_indent"></td>
+                              <td class="itd__col2">'.$this->getLang('th_version').':</td>
+                              <td class="itd__col3">'.$issue[$issue_id]['version'].'</td>
+                              <td class="itd__col4"></td>                                                                  
+                              <td class="itd__col5">'.$this->getLang('th_deadline').':</td>
+                              <td class="itd__col6">'.$issue[$issue_id]['dev_deadline'].'</td>
+                            </tr>';
+        
+        $issue_edit_head .= '<tr class="itd_tr_standard">
+                              <td class="it__left_indent"></td>
+                              <td class="itd__col2">'.$this->getLang('th_components').':</td>
+                              <td class="itd__col3">'.$deadline.'</td>
+                              <td class="itd__col4"></td>
+                              <td class="itd__col5">'.$this->getLang('th_progress').':</td>
+                              <td class="itd__col6">'.$issue[$issue_id]['dev_progress'].'</td>
+                            </tr>'.NL;
+        
+                            if($issue[$issue_id]['tblock']!==false) { $cbx_tblock = $this->getLang('yes'); }
+                            else $cbx_tblock = false;
+        
+        $issue_edit_head .= '<tr class="itd_tr_standard">
+                              <td class="it__left_indent"></td>
+                              <td class="itd__col2">'.$this->getLang('th_tversion').':</td>
+                              <td class="itd__col3">'.$issue[$issue_id]['trgt_version'].'</td>
+                              <td class="itd__col4"></td>                   
+                              <td class="itd__col5"></td>
+                              <td class="itd__col6"></td>
+                             </tr>'.NL;
+        $issue_edit_head .= '<tr class="itd_tr_standard">
+                              <td class="it__left_indent"></td>
+                              <td class="itd__col2">'.$this->getLang('th_tblock').':</td>
+                              <td class="itd__col3">'.$cbx_tblock.'</td>
+                              <td class="itd__col4"></td>                   
+                              <td class="itd__col5"></td>
+                              <td class="itd__col6"></td>
+                             </tr>
+                             </table>'.NL;                      
+}
+                   
 /*------------------------------------------------------------------------------
   #60: to view mod-log
 ------------------------------------------------------------------------------*/
-            if($this->getConf('it_data')==false) $modfile = DOKU_INC."data/meta/".$project.'_'.$issue[$issue_id]['id'].'.mod-log';
-            else $modfile = DOKU_INC. $this->getConf('it_data').$project.'_'.$issue[$issue_id]['id'].'.mod-log';
+            if($this->getConf('it_data')==false) $modfile = DOKU_CONF."../data/meta/".$project.'_'.$issue[$issue_id]['id'].'.mod-log';
+            else $modfile = DOKU_CONF."../". $this->getConf('it_data').$project.'_'.$issue[$issue_id]['id'].'.mod-log';
             if (@file_exists($modfile)) {  
               $pstring = sprintf("showid=%s&amp;project=%s", urlencode($issue[$issue_id]['id']), urlencode($project));
-              $modlog_link = '<a href="doku.php?id='.$ID.'&do=showmodlog&'.$pstring.'" title="'.$this->getLang('th_showmodlog').'">'.$this->getLang('th_showmodlog').'</a>';
-              $issue_edit_head .= '<tr><td class="itd__modlog_link" colspan="6">['.$modlog_link.']</td></tr>'.NL;                    
-              $issue_edit_head .= '</tbody></table>'.NL;
+              $modlog_link = '<a style="font-size:8pt;" href="doku.php?id='.$ID.'&do=showmodlog&'.$pstring.'" title="'.$this->getLang('th_showmodlog').'">'.$this->getLang('th_showmodlog').'</a>';
+              $issue_edit_head .= '<table class="itd__title"><tr><td class="itd__modlog_link" style="width:100%;font-size:10pt !important;align:right;">['.$modlog_link.']</td></tr>'.NL;                    
+              $issue_edit_head .= '</table>'.NL;
             }
 /*----------------------------------------------------------------------------*/
+
                   $alink_id++;
                   $blink_id = 'statanker_'.$alink_id;
                   $anker_id = 'anker_'.$alink_id;
@@ -1520,7 +1998,7 @@ $issue_client_details .= '</tbody><tr>'.NL.'
  * hook-in to provide possibility of modifing the initial description
 ------------------------------------------------------------------------------*/
         // retrive some basic information
-        $cur_date = date('Y-m-d G:i:s');
+        $cur_date = date($this->getConf('d_format'));
         if($user_mail['userinfo']['mail']=='') {$u_mail_check ='unknown';}
         else {$u_mail_check = $user_mail['userinfo']['mail'];}
         $user_check = $this->getConf('registered_users');
@@ -1669,7 +2147,75 @@ if((strpos($this->getConf('ltdReport'),'Symptom link 1')===false) || ($this->get
   $issue_attachments .='</tbody></table>'.NL;
 }
 /* END mod for edit description by ticket owner ----------------------------------*/  
-          
+
+/* Workaround description --------------------------------------------------------*/
+$issue_workaround ='<table class="itd__tables"><tbody>
+                      <tr>
+                        <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_workaround').'</td>
+                      </tr>'.NL;
+$issue_workaround .= '<tr  class="itd__tables_tr">
+                          <td class="itd_comment_tr">'.NL;
+                      // output workaround content
+                      $x_id = "WA";
+                      $x_workaround = $comments[0]['wround_mod'];
+                      $x_workaround = $this->convertlabel($x_workaround);
+$issue_workaround .= $this->xs_format($x_workaround).NL.'</td></tr>'.NL;
+
+//create output for followers on registered users only
+if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) || (strpos($target2,$user_mail['userinfo']['mail']) != false)) 
+{                   // add hidden edit toolbar and textarea
+                      $alink_id++;
+                      $blink_id = 'statanker_'.$alink_id;
+                      $anker_id = 'anker_'.$alink_id;
+        
+                    $issue_workaround .= '   <tr class="itd_edit_tr">
+                                                 <td class="itd_edit_tr" colSpan="2" style="display : none;" id="'.$blink_id.'">';
+                    
+                    $issue_workaround .= $this->it_edit_toolbar('wround_mod_'.$alink_id);
+                    
+                    $issue_workaround .= '<form name="wround_form" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
+                                          
+                    $issue_workaround .= formSecurityToken(false). 
+                                         '<input type="hidden" name="mod_wround" value="1" />'.NL.        
+                                         '<input type="hidden" name="project" value="'.$project.'" />'.NL.
+                                         '<input type="hidden" name="comment_file" value="'.$cfile.'" />'.NL.
+                                         '<input type="hidden" name="comment_issue_ID" value="'.$issue[$issue_id]['id'].'" />'.NL.
+                                         '<input type="hidden" name="author" value="'.$user_mail['userinfo']['mail'].'" />'.NL.        
+                                         '<input type="hidden" name="timestamp" value="'.$cur_date.'" />'.NL.
+                                         '<textarea class="itd_textarea" id="wround_mod_'.$alink_id.'" name="wround_mod" type="text" cols="106" rows="7" value="">'.strip_tags($x_workaround).'</textarea><br />
+                                          <span class="reply_close_link">
+                                            <a href="javascript:resizeBoxId(\'wround_mod_'.$alink_id.'\', -20)"><img src="'.$imgBASE.'reduce.png" title="reduce textarea" style="float:right;" /></a>
+                                            <a href="javascript:resizeBoxId(\'wround_mod_'.$alink_id.'\', +20)"><img src="'.$imgBASE.'enlarge.png" title="enlarge textarea" style="float:right;" /></a>
+                                          </span>'.NL;
+        
+                    if ($this->getConf('use_captcha')==1) 
+                    {   $helper = null;
+            		        if(@is_dir(DOKU_PLUGIN.'captcha'))
+            			         $helper = plugin_load('helper','captcha');
+            			         
+            		        if(!is_null($helper) && $helper->isEnabled())
+            			      {  $issue_workaround .= '<p>'.$helper->getHTML().'</p>'; }
+                    }
+                    $cell_ID = 'img_tab_open_comment'.$blink_id;
+                    
+$issue_workaround .= '<input  type="hidden" class="showid__option" name="showid" id="showid" size="10" value="'.$this->parameter.'"/>'.
+                       '<fieldset class="minor_mod">'.
+                               '<span style="float:left;"  title="'.$this->getLang('minor_mod_cbx_title').'"><input type="checkbox" name="minor_mod" value="true" />&nbsp;&nbsp;'.$this->getLang('minor_mod').'</span>'.
+                               '<input style="float:right;" type="submit" class="button" id="store_workaround" name="store_workaround"  value="'.$this->getLang('btn_mod').'" title="'.$this->getLang('btn_mod_title').'");/>'.
+                       '</fieldset>'.
+                       '</form>'.NL.'</td>'.NL.'</tr>'.NL.
+                       '<tr>'.NL.'
+                           <td colspan="2" class="img_tab_open_comment" id="'.$cell_ID.'">'.NL.'
+                               <div class="lnk_tab_open_comment" id="'.$cell_ID.'">
+                                 <a id="'.$anker_id.'" onClick="tab_open(\''.$blink_id.'\',\''.$cell_ID.'\')">'.$this->getLang('descr_tab_mod').'</a>
+                               </div>'.NL.'
+                           </td>'.NL.'
+                        </tr>'.NL;
+}
+$issue_workaround .='</tbody></table>'.NL; 
+                             
+/* END of Workaround description --------------------------------------------------------*/
+
 $issue_comments_log ='<table class="itd__tables"><tbody>
                       <tr>
                         <td class="itd_tables_tdh" colSpan="2" >'.$this->getLang('lbl_cmts_wlog').'</td>
@@ -1677,7 +2223,7 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
               // loop through the comments
               if ($comments!=false) {              
                   foreach ($comments as $a_comment)
-                  {
+                  {     if($this->_get_one_value($a_comment,'id') === 'WA') continue;
                         $x_id = $this->_get_one_value($a_comment,'id');
                         $x_comment = $this->_get_one_value($a_comment,'comment');
                         $x_comment = $this->convertlabel($x_comment);
@@ -1759,7 +2305,7 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
         // only admin/assignees and reporter are allowed to add comments if only user edit option is set
         //--------------------------------------------------------------------------------------------------------------
         // retrive some basic information
-        $cur_date = date('Y-m-d G:i:s');
+        $cur_date = date($this->getConf('d_format'));
         if($user_mail['userinfo']['mail']=='') {$u_mail_check ='unknown';}
         elseif($this->getConf('shw_mail_addr')===0) {$u_mail_check =$user_mail['userinfo']['name'];}
         else {$u_mail_check = $user_mail['userinfo']['mail'];}
@@ -1805,7 +2351,7 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
                     }
                     $cell_ID = 'img_tab_open_comment'.$blink_id;
                     // check if only registered users are allowed to modify comments
-                    // ¦ perm — the user's permissions related to the current page ($ID)
+                    // Ã‚Â¦ perm Ã¢â‚¬â€ the user's permissions related to the current page ($ID)
 $issue_comments_log .= '<input  type="hidden" class="showid__option" name="showid" id="showid" size="10" value="'.$this->parameter.'"/>'.
                        '<fieldset class="minor_mod">'.
                                '<span style="float:left;"  title="'.$this->getLang('minor_mod_cbx_title').'"><input type="checkbox" name="minor_mod" value="true" />&nbsp;&nbsp;'.$this->getLang('minor_mod').'</span>'.
@@ -1831,7 +2377,7 @@ $issue_comments_log .= '<input  type="hidden" class="showid__option" name="showi
         // only admin/assignees and reporter are allowed to add comments if only user edit option is set
         //--------------------------------------------------------------------------------------------------------------
         // retrive some basic information
-        $cur_date = date('Y-m-d G:i:s');
+        $cur_date = date($this->getConf('d_format'));
         if(strlen($user_mail['userinfo']['mail']) == 0) {$u_mail_check ='unknown';}
         else {$u_mail_check = $user_mail['userinfo']['mail'];}
         $user_check = $this->getConf('registered_users');
@@ -1888,7 +2434,7 @@ $issue_add_comment .= formSecurityToken(false).
                       }
                       $cell_ID = 'img_tab_open_comment'.$blink_id;
                       // check if only registered users are allowed to add comments
-                      // ¦ perm — the user's permissions related to the current page ($ID)
+                      // Ã‚Â¦ perm Ã¢â‚¬â€ the user's permissions related to the current page ($ID)
                       $issue_add_comment .= '<input  type="hidden" class="showid__option" name="showid" id="showid" size="10" value="'.$this->parameter.'"/>'.NL.
                                             '<input class="button" id="showcase" type="submit" name="showcase" value="'.$this->getLang('btn_add').'" title="'.$this->getLang('btn_add_title').'");/>'.NL.
                                             '</form>'.NL.'</td>'.NL.'</tr>'.NL.
@@ -1994,7 +2540,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
         //2011-12-02: bwenz code proposal (Issue 11)                                   
 //        $ret = $issue_edit_head . $issue_client_details . $issue_initial_description . $issue_attachments . $issue_comments_log . $issue_add_comment;
         $usr = '<span style="display:none;" id="currentuser">'.$user_grp['userinfo']['name'].'</span>' ;  //to log issue mods
-        $ret = $usr.$issue_edit_head . $issue_client_details . $issue_initial_description . $issue_attachments . $issue_comments_log . $issue_add_comment . $issue_edit_resolution;
+        $ret = $usr.$issue_edit_head . $issue_client_details . $issue_initial_description . $issue_attachments . $issue_workaround . $issue_comments_log . $issue_add_comment . $issue_edit_resolution;
 
         return $ret;
     }
@@ -2066,7 +2612,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
                 $comment["field"]     = $column;
                 $comment["old_value"] = $old_value;
                 $comment["new_value"] = $new_value;
-                $comment["timestamp"] = date('Y-m-d G:i:s');
+                $comment["timestamp"] = date($this->getConf('d_format'));
                 $user_mail            = pageinfo();
                 $comment["author"]    = $user_mail['userinfo']['mail'];
             }
@@ -2358,7 +2904,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 */
     function _get_one_value($issue, $key) {
 //        echo $key. " => " . $issue . "<br />";
-        if (array_key_exists($key,$issue)) return $issue[$key];
+        if (@array_key_exists($key,$issue)) return $issue[$key];
         else return '';
     }
 /******************************************************************************/
@@ -2404,12 +2950,12 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 /******************************************************************************/
 /* Create count output
 */
-    function _count_render($issues,$start,$step,$next_start,$stat_filter,$sev_filter,$productfilter,$project)
+    function _count_render($issues,$start,$step,$next_start,$filter,$project)
     {   global $ID;
         $count = array();
         foreach ($issues as $issue)
         {
-            if ((strcasecmp($productfilter,'ALL')===0) || (stristr($productfilter,$this->_get_one_value($issue,'product'))!= false))
+            if ((strcasecmp($filter['product'],'ALL')===0) || (stristr($filter['product'],$this->_get_one_value($issue,'product'))!= false))
             {
                 $status = trim($this->_get_one_value($issue,'status'));
                 if (($status != '') && (stripos($this->getConf('status_special'),$status)===false))
@@ -2424,7 +2970,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
         {
             //http://www.fristercons.de/fcon/doku.php?id=issuetracker:issuelist&do=showcaselink&showid=19&project=fcon_project
             // $ID.'&do=issuelist_filter&itl_sev_filter='.$value[1]
-            $rendered_count .= '<tr><td><a href="'.DOKU_URL.'doku.php?id='.$ID.'&do=issuelist_filterlink'.'&itl_start='.$start.'&itl_step='.$step.'&itl_next='.$next_start.'&itl_stat_filter='.$value[1].'&itl_sev_filter='.$sev_filter.'&itl__prod_filter='.$productfilter.'&itl_project='.$project.'" >'.$value[1].'</a>&nbsp;</td><td>&nbsp;'.$value[0].'</td></tr>';
+            $rendered_count .= '<tr><td><a href="'.DOKU_URL.'doku.php?id='.$ID.'&do=issuelist_filterlink'.'&itl_start='.$start.'&itl_step='.$step.'&itl_next='.$next_start.'&itl_stat_filter='.$value[1].'&itl_sev_filter='.$filter['severity'].'&itl__prod_filter='.$filter['product'].'&itl_project='.$project.'" >'.$value[1].'</a>&nbsp;</td><td>&nbsp;'.$value[0].'</td></tr>';
         }
         $rendered_count .= '</table></div>';
         return $rendered_count;
@@ -2532,8 +3078,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
     }
 /******************************************************************************/
     function get_issues_file_contents($project, $issue_id) {
-        if($this->getConf('it_data')==false) $pfile = DOKU_INC."data/meta/".$project.'.issues';
-        else $pfile = DOKU_INC. $this->getConf('it_data').$project.'.issues';   
+        if($this->getConf('it_data')==false) $pfile = DOKU_CONF."../data/meta/".$project.'.issues';
+        else $pfile = DOKU_CONF."../". $this->getConf('it_data').$project.'.issues';   
         if (@file_exists($pfile))
         	{  $issue  = unserialize(@file_get_contents($pfile));
              // check if ID exist
@@ -2560,6 +3106,19 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
           }
     }
 /******************************************************************************/
+/* sort the issues array according the selected key                           */                                          
+    function _issues_globalsort($issues, $sort_key) {
+/*        $tmp = Array(); 
+        foreach($issues as &$ma)  $tmp[] = &$ma[$sort_key]; 
+        array_multisort($tmp, $issues);                          */
+        foreach ($issues as $key => $row) {
+            $down[$key]    = $row['id'];
+            $up[$key]      = $row[$sort_key];
+        }
+        array_multisort($up, SORT_DESC, $down, SORT_ASC, $issues);
+        return $issues;
+    }
+/******************************************************************************/
 /* log issue modificaions
  * who changed what and when per issue
 */                                          
@@ -2567,13 +3126,13 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
     {     global $conf;
           // get mod-log file contents
           $issue_id = $issue['id'];
-          if($this->getConf('it_data')==false) $modfile = DOKU_INC."data/meta/".$project.'_'.$issue_id.'.mod-log';
-          else $modfile = DOKU_INC. $this->getConf('it_data').$project.'_'.$issue_id.'.mod-log';
+          if($this->getConf('it_data')==false) $modfile = DOKU_CONF."../data/meta/".$project.'_'.$issue_id.'.mod-log';
+          else $modfile = DOKU_CONF."../". $this->getConf('it_data').$project.'_'.$issue_id.'.mod-log';
           if (@file_exists($modfile))
               {$mods  = unserialize(@file_get_contents($modfile));}
           else 
               {$mods = array();}
-          $cur_date = date('Y-m-d G:i:s');
+          $cur_date = date($this->getConf('d_format'));
           $mod_id = count($mods);
           if($new_value=='') $new_value = $this->getLang('mod_valempty');
           $mods[$mod_id]['timestamp'] = $cur_date;
@@ -2603,8 +3162,9 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 *******************************************************************************/
 /* -------------------------------------------------------------------------- */
   function handle_usermod_before(&$event, $param)
-	{   if($this->getConf('it_data')==false) $filename = DOKU_INC."data/meta/it_eventcheck.txt";
-      else $filename = DOKU_INC. $this->getConf('it_data').'it_eventcheck.txt';
+	{   if($this->getConf('profile_updt')==false) return;
+      if($this->getConf('it_data')==false) $filename = DOKU_CONF."../data/meta/it_eventcheck.txt";
+      else $filename = DOKU_CONF."../". $this->getConf('it_data').'it_eventcheck.txt';
 
       if (!$handle = fopen($filename, 'w')) {
           msg("IssueTracker: Failed to create the eventcheck file.",-1);
@@ -2621,32 +3181,32 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
       $user['mail'] = $usr_info['mail'];
 
       fwrite($handle, serialize($user));
-      fwrite($handle, $eve);
+//      fwrite($handle, $eve);
       
       fclose($handle);
  }
 /* -------------------------------------------------------------------------- */
   function handle_usermod_after(&$event, $param)
 	{   //$filename = DOKU_INC . 'it_eventcheck.txt';
-      
-      if($this->getConf('it_data')==false) $filename = DOKU_INC."data/meta/it_eventcheck.txt";
-      else $filename = DOKU_INC. $this->getConf('it_data').'it_eventcheck.txt';
+      if($this->getConf('profile_updt')==false) return;
+      if($this->getConf('it_data')==false) $filename = DOKU_CONF."../data/meta/it_eventcheck.txt";
+      else $filename = DOKU_CONF."../". $this->getConf('it_data').'it_eventcheck.txt';
       
       global $auth;
-      $user = array();
-      
+      $result .= "* function handle_usermod_after".chr(10);
+      $user = array();      
       $user['client'] = $event->data['params'][0];
       $usr_info       = $auth->getUserData($user['client']);
       $user['name']   = $usr_info['name'];
       $user['mail']   = $usr_info['mail'];
 
       $user_before    = unserialize(@file_get_contents($filename));
-      $result         = ' --- BEFORE --- | --- AFTER ---'.chr(10);
+      $result        .= ' --- BEFORE --- | --- AFTER ---'.chr(10);
       $result        .= $user_before['client'].' <= ? => '. $user['client'].chr(10);
       $result        .= $user_before['name']  .' <= ? => '. $user['name'].chr(10);
       $result        .= $user_before['mail']  .' <= ? => '. $user['mail'].chr(10);
 
-      if($user_before['mail'] !== $user['mail']) {
+      if(($user_before['mail'] !== false) && ($user_before['mail'] !== $user['mail'])) {
           $result  .= 'DIFF in mail => update issues, comments and modlog'.chr(10);
           $this->_update_it_files($user_before, $user);
           // finally the eventcheck will contain the values and resulting action info
@@ -2660,126 +3220,144 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
           fclose($handle);
           if($perf>0) msg($perf,0);
       }
-      else $result .= chr(10).'NO diff in mail => do nothing'.chr(10);
+      else $result .= chr(10).chr(10).'NO diff in mail => do nothing';
+      
+      $handle = fopen($filename, 'a');
+      fwrite($handle, $result);
+      fclose($handle);
 
  }
 /* -------------------------------------------------------------------------- */
 // replace user mail address after modification of user profile
   function _update_it_files($user_before, $user) {
+      global $conf;
+      
+      if($this->getConf('profile_updt')==false) return;
+      //$filename = DOKU_INC . 'it_eventcheck.txt';
+      if($this->getConf('it_data')==false) $filename = DOKU_CONF."../data/meta/it_eventcheck.txt";
+      else $filename = DOKU_CONF."../". $this->getConf('it_data').'it_eventcheck.txt';
       // create array of related files
-      if($this->getConf('it_data')==false) $path = DOKU_INC."data/meta/";
-      else $path = DOKU_INC.$this->getConf('it_data');
+      if($this->getConf('it_data')==false) $path = DOKU_CONF."../data/meta/";
+      else $path = DOKU_CONF."../".$this->getConf('it_data');
       $file_array = $this->_file_list($path, '.issues.cmnts.mod-log');
 
-      if((strlen($user_before['mail'])<1) && ($this->getConf('allowdebug')!==false)) {
-          msg("Can't update IssueTracker records due to missing old mail value. \nThis may lead into troubles for the just updated user. \nBetter to turn back the changes same way (except on passwords) and use the Update Profile action of your template.",-1);
-          return;
+      $result .= "* function _update_it_files".chr(10);
+
+      if((strlen($user_before['mail'])<1) ) {
+          $result  .= "Can't update IssueTracker records due to missing old mail value. \nThis may lead into troubles for the just updated user. \nBetter to turn back the changes same way (except on passwords) and use the Update Profile action of your template.";
       }
       elseif(strlen($user['mail'])<1) {
-          msg("Can't update IssueTracker records due to missing new user mail value. \nThis may lead into troubles for the just updated user. \nBetter to turn back the changes same way (except on passwords or user deletion) and use the Update Profile action of your template.",-1);
-          return;
+          $result  .= "Can't update IssueTracker records due to missing new user mail value. \nThis may lead into troubles for the just updated user. \nBetter to turn back the changes same way (except on passwords or user deletion) and use the Update Profile action of your template.";
       }
-      $result = chr(10).chr(10);
-      // loop through all files
-      foreach($file_array as $file) {
-          $parts = explode(".", $file);
-          $extension = end($parts);
-          $pfile = $path.'/'.$file;
-
-          if (@file_exists($pfile)) {
-              switch ($extension) {
-                case "issues":
-                    // get issues file contents
-                    $issues  = unserialize(@file_get_contents($pfile));
-                    foreach($issues as &$issue) {
-                        // search for old_mail and replace by new_mail
-                        if($issue['user_mail'] == $user_before['mail']) {
-                            $issue['user_name'] = $user['name'];
-                            $issue['user_mail'] = $user['mail'];
-                            $result .= 'Issue ID '.$issue['id'].': author field successfully updated'.chr(10);
-                            $upd_issues++;
+      else {
+          $result = chr(10).chr(10)."Loop thorugh IssueTracker data files.".chr(10);
+          // loop through all files
+          foreach($file_array as $file) {
+              $parts = explode(".", $file);
+              $extension = end($parts);
+              $pfile = $path.'/'.$file;
+    
+              if (@file_exists($pfile)) {
+                  switch ($extension) {
+                    case "issues":
+                        // get issues file contents
+                        $issues  = unserialize(@file_get_contents($pfile));
+                        foreach($issues as &$issue) {
+                            // search for old_mail and replace by new_mail
+                            if($issue['user_mail'] == $user_before['mail']) {
+                                $issue['user_name'] = $user['name'];
+                                $issue['user_mail'] = $user['mail'];
+                                $result .= 'Issue ID '.$issue['id'].': author field successfully updated'.chr(10);
+                                $upd_issues++;
+                            }
+                            // delete mail address from followers
+                            if((stripos($issue['add_user_mail'],$user_before['mail']) !== false)) {
+                                      $tmp = explode(',', $issues[$issue_id]['add_user_mail']);
+                                      foreach($tmp as $email) {
+                                          if (stripos($email,$user_before['mail']) === false) $ret_mails .= $email.',';
+                                          else {
+                                              $ret_mails .= $user['mail'].',';
+                                              $result .= 'Issue ID '.$issue['id'].': follower field successfully updated.'.chr(10);
+                                              $upd_folllowers++;
+                                          }
+                                      } 
+                            }
+                            if($issue['assigned']==$user_before['mail']) { 
+                                $issue['assigned'] = $user['mail'];
+                                $result .= 'Issue ID '.$issue['id'].': assignee field successfully updated.'.chr(10); 
+                                $upd_assignments++;
+                            }
                         }
-                        // delete mail address from followers
-                        if((stripos($issue['add_user_mail'],$user_before['mail']) !== false)) {
-                                  $tmp = explode(',', $issues[$issue_id]['add_user_mail']);
-                                  foreach($tmp as $email) {
-                                      if (stripos($email,$user_before['mail']) === false) $ret_mails .= $email.',';
-                                      else {
-                                          $ret_mails .= $user['mail'].',';
-                                          $result .= 'Issue ID '.$issue['id'].': follower field successfully updated.'.chr(10);
-                                          $upd_folllowers++;
-                                      }
-                                  } 
+                        // store issue file
+                        $xvalue = io_saveFile($pfile,serialize($issues));                   
+                        
+                    case "cmnts":
+                        // get comments file contents
+                        $comments  = unserialize(@file_get_contents($pfile));
+                        foreach($comments as &$comment) {
+                            if($comment['author'] == $user_before['mail'])  {
+                                $comment['author'] = $user['mail']; // search for old_mail and replace by new_mail
+                                $result .= '('.$file.') Comment #'.$comment['id'].': author field successfully updated.'.chr(10);
+                                $upd_comments++;
+                            }
                         }
-                        if($issue['assigned']==$user_before['mail']) { 
-                            $issue['assigned'] = $user['mail'];
-                            $result .= 'Issue ID '.$issue['id'].': assignee field successfully updated.'.chr(10); 
-                            $upd_assignments++;
+                        $xvalue = io_saveFile($pfile,serialize($comments));
+                      
+                    case "mod-log":
+                        // loop through all mod-log files
+                        $mods  = unserialize(@file_get_contents($pfile));
+                        foreach($mods as &$mod) {
+                            if($mod['new_value'] == $user_before['mail']) {
+                                $mod['new_value'] = $user['mail']; // search for old_mail and replace by new_mail
+                                $result .= '('.$file.') modification logfile successfully updated.'.chr(10);
+                                $upd_modlog_entries++;
+                            }
                         }
-                    }
-                    // store issue file
-                    $xvalue = io_saveFile($pfile,serialize($issues));                   
-                    
-                case "cmnts":
-                    // get comments file contents
-                    $comments  = unserialize(@file_get_contents($pfile));
-                    foreach($comments as &$comment) {
-                        if($comment['author'] == $user_before['mail'])  {
-                            $comment['author'] = $user['mail']; // search for old_mail and replace by new_mail
-                            $result .= '('.$file.') Comment #'.$comment['id'].': author field successfully updated.'.chr(10);
-                            $upd_comments++;
-                        }
-                    }
-                    $xvalue = io_saveFile($pfile,serialize($comments));
-                  
-                case "mod-log":
-                    // loop through all mod-log files
-                    $mods  = unserialize(@file_get_contents($pfile));
-                    foreach($mods as &$mod) {
-                        if($mod['new_value'] == $user_before['mail']) {
-                            $mod['new_value'] = $user['mail']; // search for old_mail and replace by new_mail
-                            $result .= '('.$file.') modification logfile successfully updated.'.chr(10);
-                            $upd_modlog_entries++;
-                        }
-                    }
-                    $xvalue = io_saveFile($pfile,serialize($mods));
+                        $xvalue = io_saveFile($pfile,serialize($mods));
+                  }
               }
+              else msg('File: '.$pfile.'does not exist',-1);
           }
-          else msg('File: '.$pfile.'does not exist',-1);
       }
-      
+
       // provide user-feedback & log ---------------------------------
-      if($this->getConf('it_data')==false) $filename = DOKU_INC."data/meta/it_eventcheck.txt";
-      else $filename = DOKU_INC. $this->getConf('it_data').'it_eventcheck.txt';
+      if($this->getConf('it_data')==false) $filename = DOKU_CONF."../data/meta/it_eventcheck.txt";
+      else $filename = DOKU_CONF."../". $this->getConf('it_data').'it_eventcheck.txt';
 
       if (!$handle = fopen($filename, 'a')) {
           msg("IssueTracker: Failed to write into eventcheck file.",-1);
           return;    
       }
       
-      $result  .= chr(10).chr(10);
-      if($upd_issues>0) {
+      if(($upd_issues>0) && ($conf['allowdebug']!= false)) {
           msg('IssueTracker: '.$upd_issues." issue creator entries updated",0);
-          $result  .= 'IssueTracker: '.$upd_issues." issue creator entries updated".chr(10);
       }
-      if($upd_folllowers>0) {
-          msg('IssueTracker: '.$upd_folllowers." follower entries updated",0);
-          $result .= 'IssueTracker: '.$upd_folllowers." follower entries updated".chr(10);
-      }
-      if($upd_assignments>0) {
-          msg('IssueTracker: '.$upd_assignments." assignments updated",0);
-          $result .= 'IssueTracker: '.$upd_assignments." assignments updated".chr(10);
-      }
-      if($upd_comments>0)    {
-          msg('IssueTracker: '.$upd_comments." comment author entries updated",0);
-          $result .= 'IssueTracker: '.$upd_comments." comment author entries updated".chr(10);
-      }
-      if($upd_modlog_entries>0) {
-          msg('IssueTracker: '.$upd_modlog_entries." mod-log entries updated",0);
-          $result .= 'IssueTracker: '.$upd_modlog_entries." mod-log entries updated".chr(10);
-      }
-      $result  .= chr(10).chr(10);
+      $result  .= chr(10).'IssueTracker: '.intval($upd_issues)." issue creator entries updated".chr(10);
       
+      if(($upd_folllowers>0) && ($conf['allowdebug']!= false)) {
+          msg('IssueTracker: '.$upd_folllowers." follower entries updated",0);
+      }
+      $result .= 'IssueTracker: '.intval($upd_folllowers)." follower entries updated".chr(10);
+      
+      if(($upd_assignments>0) && ($conf['allowdebug']!= false))  {
+          msg('IssueTracker: '.$upd_assignments." assignments updated",0);
+      }
+      $result .= 'IssueTracker: '.intval($upd_assignments)." assignments updated".chr(10);
+      
+      if(($upd_comments>0) && ($conf['allowdebug']!= false))    {
+          msg('IssueTracker: '.$upd_comments." comment author entries updated",0);
+      }
+      $result .= 'IssueTracker: '.intval($upd_comments)." comment author entries updated".chr(10);
+      
+      if(($upd_modlog_entries>0) && ($conf['allowdebug']!= false))  {
+          msg('IssueTracker: '.$upd_modlog_entries." mod-log entries updated",0);
+      }
+      $result .= 'IssueTracker: '.intval($upd_modlog_entries)." mod-log entries updated".chr(10);
+      $result  .= chr(10).chr(10);
+      if($conf['allowdebug']!= false)   $result  .= 'allowdebug = true'.chr(10);
+      else $result  .= 'allowdebug = false'.chr(10);
+      
+      $handle = fopen($filename, 'a');
       fwrite($handle, $result);
       fclose($handle);
 
@@ -2817,7 +3395,7 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
       else $target_path = $this->getConf('it_data');
       $ip_block_path = $target_path."ipblock";
       $target_path .= 'symptoms/';
-      if(!is_dir(DOKU_INC.$target_path)) { mkdir(DOKU_INC.$target_path, 0777); }                                                                                
+      if(!is_dir(DOKU_CONF."../".$target_path)) { mkdir(DOKU_CONF."../".$target_path, 0777); }                                                                                
 
       // delete existing symptom file
       if($issues[$issue_id]['attachment1'] !== false) {
@@ -2995,8 +3573,8 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
  
   function _get_issues($project, $all = false) {
     // detect the IssueTracker data store (path)
-    if($this->getConf('it_data')==false) $it_datastore = DOKU_INC."data/meta/";
-    else $it_datastore = DOKU_INC. $this->getConf('it_data');
+    if($this->getConf('it_data')==false) $it_datastore = DOKU_CONF."../data/meta/";
+    else $it_datastore = DOKU_CONF."../". $this->getConf('it_data');
     
     // check if last sign is a slash
     $i = strrchr ($it_datastore, chr(47));     // chr(47) = "/"

@@ -531,3 +531,8 @@ div.frm_status input, div.frm_status span, div.frm_severity input, div.frm_sever
 	border:      1px solid #CED2DB;
 	border-radius:             3px;
 }
+
+
+div.frm_status#btnmod_status, div.frm_severity#btnmod_severity, .itl__showid_button, .itl__buttons, .itl__search_button, tr.itd_edit_tr, .it_edittoolbar, .itr_edittoolbar, .img_tab_open_comment, .lnk_tab_open_comment, .xseditor_button, .xseditor_button:hover, .frm_report_manager .button, .button {
+  visibility:hidden;
+}

@@ -17,6 +17,7 @@ $meta['mail_templates']   = array('onoff');   // Send html email off by default
 $meta['email_address']    = array('string');  // Who will be informed about new issues ? 
 $meta['registered_users'] = array('onoff');   // only registered users with edit permission on issue tracker page are allowed to create reports and add comments     
 $meta['auth_ad_overflow'] = array('onoff');
+$meta['profile_updt']     = array('onoff');   // Sync on user profile changes
 $meta['userinfo_email']           = array('onoff');   // Send email off by default
 $meta['mail_add_comment']         = array('onoff');
 $meta['mail_modify_comment']      = array('onoff');
@@ -31,9 +32,10 @@ $meta['severity']       = array('string');  // Configure allowed severities
 $meta['status']         = array('string');  // Configure allowed status info
 $meta['status_special'] = array('string');  // hidden issues, only single status value allowed !
 $meta['products']       = array('string');  // Configure Products coverd by one project
+$meta['components']     = array('string');  // Configure list of components
 $meta['assign']         = array('string');  // Configure groups usable for issue asignments
 $meta['noStatIMG']      = array('onoff');   // define if status text instead of pictures will be displayed at Issue list
 $meta['noSevIMG']       = array('onoff');   // define if severity text instead of pictures will be displayed at Issue list
-$meta['ltdReport']      = array('multicheckbox', '_choices' => array('Version', 'User phone', 'Add contact', 'Severity', 'Symptom link 1', 'Symptom link 2', 'Symptom link 3')); // default = false or a comma separated list of controls to be hidden
+$meta['ltdReport']      = array('multicheckbox', '_choices' => array('Version', 'Components', 'Test blocking', 'User phone', 'Add contact', 'Severity', 'Symptom link 1', 'Symptom link 2', 'Symptom link 3')); // default = false or a comma separated list of controls to be hidden
 $meta['multi_projects']	= array('onoff');   // global switch to tell IssueTracker that syntax parameter "project" to be ignored. However, the syntax has to contain the parameter.
 $meta['shw_project_col']= array('onoff');   // show an additional column for the project name per issue on ListView

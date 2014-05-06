@@ -52,7 +52,7 @@
                     $lang['issuemod_version'].$issue['version'].chr(10).
                     $lang['issuemod_severity'].$issue['severity'].chr(10).
                     $lang['issuemod_status'].$issue['status'].chr(10).
-                    $lang['issuemod_creator'].': '.$issue['user_name'].chr(10).
+                    $lang['issuemod_creator'].$issue['user_name'].chr(10).
                     $lang['th_assigned'].': '.$issue['assigned'].chr(10).                    
                     $lang['issuenew_descr'].$issue['description'].chr(10).
                     $lang['issuemod_see'].DOKU_URL.'doku.php?id='.$currentID.'&do=showcaselink&'.$pstring.chr(10).chr(10).
@@ -318,8 +318,8 @@
     function _log_mods($project, $issue, $usr, $column, $old_value, $new_value)
     {     global $conf;
           // get mod-log file contents
-          if($conf['plugin']['issuetracker']['it_data']==false) $modfile = DOKU_INC."data/meta/".$project.'_'.$issue['id'].'.mod-log';
-          else $modfile = DOKU_INC. $conf['plugin']['issuetracker']['it_data'].$project.'_'.$issue['id'].'.mod-log';
+          if($conf['plugin']['issuetracker']['it_data']==false) $modfile = DOKU_CONF."../data/meta/".$project.'_'.$issue['id'].'.mod-log';
+          else $modfile = DOKU_CONF."../". $conf['plugin']['issuetracker']['it_data'].$project.'_'.$issue['id'].'.mod-log';
           if (@file_exists($modfile))
               {$mods  = unserialize(@file_get_contents($modfile));}
           else 
@@ -377,8 +377,8 @@
     $cur_date  = date('Y-m-d G:i:s');
      
     // get issues file contents
-    if($conf['plugin']['issuetracker']['it_data']==false) $pfile = DOKU_INC."data/meta/".$project.'.issues';
-    else $pfile = DOKU_INC. $conf['plugin']['issuetracker']['it_data'].$project.'.issues';
+    if($conf['plugin']['issuetracker']['it_data']==false) $pfile = DOKU_CONF."../data/meta/".$project.'.issues';
+    else $pfile = DOKU_CONF."../". $conf['plugin']['issuetracker']['it_data'].$project.'.issues';
     if (@file_exists($pfile))
         {$issues  = unserialize(@file_get_contents($pfile));}
     else 

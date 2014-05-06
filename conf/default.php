@@ -3,6 +3,9 @@
  * Options for the issuetracker plugin
  */
 
+
+
+
 $conf['d_format']          = 'Y-m-d G:i:s';
 $conf['it_data']           = '';                       // issue tracker data folder (empty = metaFN)
 $conf['upload']            = 0;                        // allow symptom file uploads
@@ -14,6 +17,7 @@ $conf['mail_templates']    = 0;                        // Send html email off by
 $conf['email_address']     = 'email@yourdomain.com';   // Who will be informed about new issues ?
 $conf['registered_users']  = 1;                        // only registered users with edit permission on issue tracker page are allowed to create reports and add comments
 $conf['auth_ad_overflow']  = 0;
+$conf['profile_updt']      = 1;                        // Sync on user profile changes
 $conf['userinfo_email']              = 1;              // Global mail switch 
 $conf['mail_add_comment']            = 1;
 $conf['mail_modify_comment']         = 1;
@@ -28,6 +32,7 @@ $conf['severity']          = 'Query,Minor,Medium,Major,Critical,Feature Request,
 $conf['status']            = 'New,Assigned,External Pending,In Progress,Solved,Canceled,Double,Deleted'; // Configure allowed status info
 $conf['status_special']    = 'Deleted';                // hidden issues, only single status value allowed !
 $conf['products']          = 'ProdA, ProdB';           // Configure Products coverd by one project
+$conf['components']        = 'tbd';                    // List of components
 $conf['assign']            = 'admin';                  // Configure groups usable for issue asignments
 $conf['noStatIMG']         = false;                    // define if status text instead of pictures will be displayed at Issue list
 $conf['noSevIMG']          = false;                    // define if severity text instead of pictures will be displayed at Issue list

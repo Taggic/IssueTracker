@@ -48,73 +48,30 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $data = array();
         $params = explode('|',$match);
         
-        //Default Value
-        $data['display']    = 'ISSUES';
-        $data['product']    = 'ALL';
-        $data['status']     = 'ALL';
-        $data['severity']   = 'ALL';
-        $data['view']       = '10';
-        $data['controls']   = 'ON';
-        $data['prod_limit'] = 'OFF';
-        $data['myissues']   = false;
-        
-        foreach($params as $param){            
+        foreach($params as $param) {            
             $splitparam = explode('=',$param);
             if ($splitparam[1] != '')
-                {
-                if ($splitparam[0]=='project')
-                	{$data['project'] = strtolower($splitparam[1]);
-                    /*continue;*/}
-
-                if ($splitparam[0]=='product')   
-                	{$data['product']  = strtoupper($splitparam[1]);
-                   if ($data['product'] == '') {$data['product'] = 'ALL';}
-                    /*continue;*/}
-
-                if ($splitparam[0]=='status')   
-                	{$data['status'] = strtoupper($splitparam[1]);
-                	 if ($data['status'] == '') {$data['status'] = 'ALL';}
-                    /*continue;*/}
-                    
-                if ($splitparam[0]=='severity')   
-                	{$data['severity'] = strtoupper($splitparam[1]);
-                	 if ($data['severity'] == '') {$data['severity'] = 'ALL';}
-                    /*continue;*/}
-                    
-                if ($splitparam[0]=='display')
-                	{$data['display'] = strtoupper($splitparam[1]);
-                	 if ($data['display'] == '') {$data['display'] = 'ISSUES';}
-                   /*continue;*/}  
-                                                    
-                if ($splitparam[0]=='view')
-                	{$data['view'] = strtoupper($splitparam[1]);
-                	 if ($data['view'] == '') {$data['view'] = '10';}
-                   /*continue;*/}
-                   
-                 if ($splitparam[0]=='controls')
-                	{$data['controls'] = strtoupper($splitparam[1]);
-                	 if ($data['controls'] == '') {$data['controls'] = 'ON';}
-                   /*continue;*/
-                  }
-
-                 if ($splitparam[0]=='prod_limit')
-                	{$data['prod_limit'] = strtoupper($splitparam[1]);
-                	 if ($data['prod_limit'] == '') {$data['prod_limit'] = 'OFF';}
-                   /*continue;*/
-                  }
-                  
-                 if ($splitparam[0]=='id')
-                	{$data['id'] = strtoupper($splitparam[1]);
-                	 if ($data['id'] == '') {$data['id'] = '0';}
-                   /*continue;*/
-                  }
-                                                      
-/*                 if ($splitparam[0]=='myissues')
-                	{$data['myissues'] = strtoupper($splitparam[1]);
-                	 if ($data['myissues'] == '') {$data['myissues'] = false;}
-                   /*continue;}        */                           
-                }
+            {
+                if ($splitparam[0]=='project')    { $data['project']   = trim(strtolower($splitparam[1])) ;}
+                if ($splitparam[0]=='product')    { $data['product']    = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='status')     { $data['status']     = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='severity')   { $data['severity']   = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='display')    { $data['display']    = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='view')       { $data['view']       = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='controls')   { $data['controls']   = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='prod_limit') { $data['prod_limit'] = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='id')         { $data['id']         = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='version')    { $data['version']    = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='component')  { $data['component']  = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='tblock')     { $data['tblock']     = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='assignee')   { $data['assignee']   = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='reporter')   { $data['reporter']   = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='myissues')   { $data['myissues']   = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='config')     { $data['config']     = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='sort')       { $data['sort']       = trim(strtoupper($splitparam[1])) ;}
+            }
         }
+               
         return $data;
     }
 
@@ -145,10 +102,30 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             
             $renderer->info['cache'] = false;     
                
-            $Generated_Header = '';
-            $Generated_Table = '';
+            $Generated_Header  = '';
+            $Generated_Table   = '';
             $Generated_Scripts = '';
-            $Generated_Report = '';
+            $Generated_Report  = '';
+
+            if ($data['display']    == '') {$data['display']    = 'ISSUES';}
+            if ($data['view']       == '') {$data['view']       = '10';}
+            if ($data['controls']   == '') {$data['controls']   = 'ON';}
+            if ($data['prod_limit'] == '') {$data['prod_limit'] = 'OFF';}
+            if ($data['id']         == '') {$data['id'] = '0';}
+            if ($data['severity']   == '') {$data['severity']   = 'ALL';}
+            if ($data['status']     == '') {$data['status']     = 'ALL';}
+            if ($data['product']    == '') {$data['product']    = 'ALL';}
+            if ($data['version']    == '') {$data['version']    = 'ALL';}
+            if ($data['component']  == '') {$data['component']  = 'ALL';}
+            if ($data['tblock']     == '') {$data['tblock']     = false;}
+            else { $data['tblock']  = true; }
+            if ($data['assignee']   == '') {$data['assignee']   = 'ALL';}
+            if ($data['reporter']   == '') {$data['reporter']   = 'ALL';}
+        	  if ($data['myissues']   == '') {$data['myissues']   = false;}
+            else { $data['myissues']= true; }
+            if ($data['config']     == '') {$data['config']     = false;}
+            else { $data['config']  = true; }                   
+
 
             if (stristr($data['display'],'FORM')!= false) 
             {
@@ -176,6 +153,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                     $issues[$issue_id]['id'] = $issue_id;    
                                     $issues[$issue_id]['product'] = htmlspecialchars(stripslashes($_REQUEST['product']));
                                     $issues[$issue_id]['version'] = htmlspecialchars(stripslashes($_REQUEST['version']));
+                                    $issues[$issue_id]['component'] = htmlspecialchars(stripslashes($_REQUEST['component']));
+                                    $issues[$issue_id]['tblock'] = htmlspecialchars(stripslashes($_REQUEST['tblock']));
                                     $issues[$issue_id]['severity'] = htmlspecialchars(stripslashes($_REQUEST['severity']));
                                     $issues[$issue_id]['created'] = htmlspecialchars(stripslashes($_REQUEST['created']));
                                     $status = explode(',', $this->getConf('status')) ;
@@ -210,8 +189,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                     if ( ($valid_umail == true) && ((stripos($xdescription, " ") > 0) || (strlen($xdescription)>5)) && (strlen($issues[$issue_id]['version']) >0))
                                     {                                
                                           // assemble the path to IssueTracker data store & file
-                                          if($this->getConf('it_data')==false) $pfile = DOKU_INC."data/meta/".$data['project'].'.issues';
-                                          else $pfile = DOKU_INC. $this->getConf('it_data').$data['project'].'.issues';
+                                          if($this->getConf('it_data')==false) $pfile = DOKU_CONF."../data/meta/".$data['project'].'.issues';
+                                          else $pfile = DOKU_CONF."../". $this->getConf('it_data').$data['project'].'.issues';
                                 
                                           //save issue-file
                                           $xvalue = io_saveFile($pfile,serialize($issues)); 
@@ -248,11 +227,17 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 else
                 {$Generated_Report = $this->_report_render($data);}
             }
+
             // Create issue list            
             elseif (stristr($data['display'],'ISSUES')!= false)
             {   // get issues file contents
                 $all = true;
                 $issues = $this->_get_issues($data, $all);
+
+                // global sort of issues array
+                $sort_key = $data['sort'];
+                $issues = $this->_issues_globalsort($issues, $sort_key);
+
                 $step = $data['view'];
                 $Generated_Table = $this->_table_render($issues,$data,$step,$start); 
                 if (strtolower($data['controls'])==='on') {
@@ -266,88 +251,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 $issues = $this->_get_issues($data, $all);
                 $Generated_Table = $this->_count_render($issues,$start,$step,$next_start,$data);                
             }            
-            // display the Report Manager form
-            elseif (stristr($data['display'],'REPORTING')!= false)
-            {   // msg('REPORT GUI',0);
-                /*----------------------------------------------------------------------------*/
-                /*    REPORT GUI                                                              */
-                /*----------------------------------------------------------------------------*/
-                // Build string to load projects select
-                if($this->getConf('it_data')==false) $path = DOKU_INC."data/meta/";
-                else $path = DOKU_INC. $this->getConf('it_data');   
-                $xprojects = $this->__find_projects($path);
-                $x_projects = explode(',',$xprojects);
-                foreach ($x_projects as $project)
-                {   $project = trim($project);
-                    if(strlen($project)>1) $x_projects_select .= '<option value="'.$project.'">'.$project.'</option>';
-                }
-                $x_projects_select .= '<option value="" selected="selected"></option>';
-                
-                // Build string to load products select
-                $xproducts = explode(',', $this->getConf('products')) ;
-                foreach ($xproducts as $x_products)
-                {   $x_products = trim($x_products);
-                    if(strlen($x_products)>1) $x_products_select .= '<option value="'.$x_products.'">'.$x_products.'</option>';
-                }
-                $x_products_select .= '<option value="" selected="selected"></option>';
-              
-                // Build string to load severity select
-                $xseverity = explode(',', $this->getConf('severity')) ;
-                foreach ($xseverity as $x_severity)
-                {   $x_severity = trim($x_severity);
-                    if(strlen($x_severity)>1) $x_severity_select .= '<option value="'.$x_severity.'">'.$x_severity.'</option>';
-                } 
-                $x_severity_select .= '<option value="" selected="selected"></option>';
-                
-                // Build string to load status select
-                $xstatus = explode(',', $this->getConf('status')) ;
-                foreach ($xstatus as $x_status)
-                {   $x_status = trim($x_status);
-                    if(strlen($x_status)>1) $x_status_select .= '<option value="'.$x_status.'">'.$x_status.'</option>';
-                }
-                $x_status_select .= '<option value="" selected="selected"></option>';
-                
-                // build string to load date-frame select
-                $x_date_frame_select .= '<option value="days" selected="selected">days</option>'.NL.
-                                        '<option value="weeks">weeks</option>'.NL.
-                                        '<option value="months">months</option>'.NL;
-                
-                // assemble the form output
-                $Generated_Header = '<br /><hr><div class="div_report_manager">
-                                      <form class="frm_report_manager" method="post" accept-charset="'.$lang['encoding'].'">
-                                        <table><tr>
-                                        <td><span class="description" for="projects">Project </span></td>
-                                        <td><span class="description" for="products">Product </span></td>
-                                        <td><span class="description" for="severity">Severity </span></td>
-                                        <td><span class="description" for="status"  >Status </span></td>
-                                        <td colspan="2"><span class="description" for="date_range">The last </span></td>
-                                        </tr>
-                                        <tr>
-                                        <td><select name="projects">'  .$x_projects_select  .'</select></td>
-                                        <td><select name="products">'  .$x_products_select  .'</select></td>
-                                        <td><select name="severity">'  .$x_severity_select  .'</select></td>
-                                        <td><select name="status">'    .$x_status_select    .'</select></td>
-                                        <td><input  name="date_range" value="" /></td>
-                                        <td><select name="date_frame">'.$x_date_frame_select.'</select></td>
-                                        </tr>
-                                        <tr class="last">
-                                        <td colspan="6" class="other_controls">
-                                        '.NL;
-                                        if ($this->getConf('use_captcha')==1) 
-                                        {   $helper = null;
-                                		        if(@is_dir(DOKU_PLUGIN.'captcha'))
-                                			         $helper = plugin_load('helper','captcha');
-                                			         
-                                		        if(!is_null($helper) && $helper->isEnabled())
-                                			      {  $Generated_Header .= '<span class="captcha">'.$helper->getHTML().'</span>'; }
-                                        }
-
-                $Generated_Header .= '<input type="submit" class="button" id="it_btn_rprt_mngr" name="it_btn_rprt_mngr" value="'.$this->getLang('it_btn_rprt_mngr').'" title="'.$this->getLang('it_btn_rprt_mngr').'");/>'.NL.
-                                          formSecurityToken(false).'
-                                    </td></tr></table></form>
-                                </div><br /><hr>';
-            }
-                        // display the Report Manager form
+            // syntax to display a single issue inside wiki text
             elseif (stristr($data['display'],'single_issue')!= false)
             {   // retrieve issue details
                 $all      = false;
@@ -365,8 +269,91 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 $Generated_Scripts = "";
                 $Generated_Report  = "";                 
             }
+// *****************************************************************************
+// Show configuration
+// *****************************************************************************            
+            elseif (stristr($data['display'],'config')!= false)
+            {   /* 1. load the defined elements per type
+                   - the related config file (it_matrix.cfg) is stored to the plugin folder
+                   - the matrix structure is as follows
+                     elmnt_type | elmnt_name | rel_childs
+                   - type project has childs of type product
+                   - type product has at least one relative parent or is just newly created
+                */
+/*                $cfg_file = DOKU_PLUGIN."issuetracker/conf/it_matrix.cfg";
+                $it_cfg = array();
+                if (@file_exists($cfg_file)) { $it_cfg  = unserialize(@file_get_contents($cfg_file)); }    
+                echo "<pre style='font:italic 11px/15px Arial, serif;'>".print_r($it_cfg, true)."</pre>";
+
+                // 2. replace the placeholder with config values
+                  // a) loop through the matrix and collect all defined projects
+                  //    initially we start with projects
+                  //    string to be built according: <option value="strtolower($name)" >$name</option>
+                  $itm_counter = 0;
+                  $itm_counter2 = 0;
+                  foreach($it_cfg as $item) {
+                    if ($item['elmnt_type']=="project") {
+                      $itm_counter++;
+                      if($itm_counter===1){
+                        $name2  .= '<option value="'.$item['elmnt_name'].'" selected="selected">'.$item['elmnt_name'].'</option>'.NL;
+                        $sel_prod = $item['elmnt_name'];
+                      }
+                      else {
+                        $name2  .= '<option value="'.$item['elmnt_name'].'" >'.$item['elmnt_name'].'</option>'.NL;
+                      }
+                    }
+                    
+                    // list all potential childs and check the already related items
+                    elseif ($item['elmnt_type']=="product") {
+                      $itm_counter2++;
+                      if (stripos($item['rel_childs'],$sel_prod)!== false) {
+                        $cfgelements .= '<input id="childs_'.$itm_counter2.'" name="childs_'.$itm_counter2.'" class="element checkbox" type="checkbox" checked />
+                                       <label class="choice" for="childs_'.$itm_counter2.'">'.$item['elmnt_name'].'</label> <br />'.NL;
+                      }
+                      else {
+                        $cfgelements .= '<input id="childs_'.$itm_counter2.'" name="childs_'.$itm_counter2.'" class="element checkbox" type="checkbox" />
+                                       <label class="choice" for="childs_'.$itm_counter2.'">'.$item['elmnt_name'].'</label> <br />'.NL;
+                      }
+                    }
+                  }
+
+                  $type1 = '<option value="project" selected="selected">Project</option>
+                            <option value="product" >Product</option>
+                            <option value="component" >Component</option>'.NL;
+*/               
+/*                  $name2  = ' <option value="" selected="selected"></option>
+                              <option value="1" >First element</option>
+                              <option value="2" >Second element</option>
+                              <option value="3" >Third element</option>'.NL;
+                
+                  $cfgelements = '<input id="element_6_1" name="element_6_1" class="element checkbox" type="checkbox" value="1" />
+                                 <label class="choice" for="element_6_1">First option</label> <br />
+                                  <input id="element_6_2" name="element_6_2" class="element checkbox" type="checkbox" value="1" />
+                                  <label class="choice" for="element_6_2">Second option</label> <br />
+                                  <input id="element_6_3" name="element_6_3" class="element checkbox" type="checkbox" value="1" />
+                                  <label class="choice" for="element_6_3">Third option</label>  <br />'.NL;
+*/                  
+/*                // 3. load html-skeleton
+                  $html_skeleton = DOKU_PLUGIN."issuetracker/cfg_skeleton.html";
+                  if (@file_exists($html_skeleton)) { $Generated_config  = @file_get_contents($html_skeleton); }
+                  else { msg("The file 'cfg_skeleton.html' was not found at plugin directory.",-1); return;}
+                  
+                // 4. replace placeholders at html-skeleton
+                  $Generated_config = str_ireplace("%%ID%%",$ID,$Generated_config);
+                  $Generated_config = str_ireplace("%%type1%%",$type1,$Generated_config);
+                  $Generated_config = str_ireplace("%%name2%%",$name2,$Generated_config);
+                  $Generated_config = str_ireplace("%%cfgelements%%",$cfgelements,$Generated_config);
+
+                // 5. load the script to assemble the element childs for submit to action.php
+                  $it_script = DOKU_PLUGIN."issuetracker/it_matrix.script";
+                  if (@file_exists($it_script)) { $it_cfg_script  = @file_get_contents($it_script); }
+                  else { msg("The file 'it_matrix.script' was not found at plugin directory.",-1); }
+                  $Generated_config = $it_cfg_script .NL. $Generated_config;
+                
+*/            }
+
             // Render            
-            $renderer->doc .= $Generated_Header.$Generated_Table.$Generated_Scripts.$Generated_Report;
+            $renderer->doc .= $Generated_Header.$Generated_Table.$Generated_Scripts.$Generated_Report.$Generated_config;
 
         }
     }
@@ -490,7 +477,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         if ($start==0) $start=count($issues)-$step+1;
         $next_start  = $start + $step + 1;
         if ($next_start>count($issues)) $next_start=count($issues);
-
+        
         $imgBASE     = DOKU_BASE."lib/plugins/issuetracker/images/";
         $style       =' style="text-align:left; white-space:pre-wrap;">';
 //        $date_style =' style="text-align:center; white-space:pre;">';
@@ -498,10 +485,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $noStatIMG   = $this->getConf('noStatIMG');
         $noSevIMG    = $this->getConf('noSevIMG');
         $project     = $data['project'];
-        $prod_filter = $data['product'];
+
+/*        $prod_filter = $data['product'];
         $stat_filter = $data['status'];
         $sev_filter  = $data['severity'];
-                
+*/                
         if(array_key_exists('userinfo', $user_grp))
         {   foreach ($user_grp['userinfo']['grps'] as $ugrp)
             {  $user_grps = $user_grps . $ugrp;  }
@@ -535,36 +523,44 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     "<thead><tr>".NL.
                      $th_project.NL.
                     "<th class=\"sortfirstdesc\" id='id'>".$this->getLang('th_id')."</th>".NL.
-                    "<th id='created'>".$this->getLang('th_created')."</th>".NL.
-                    "<th id='product'>".$this->getLang('th_product')."</th>".NL.
-                    "<th id='version'>".$this->getLang('th_version')."</th>".NL.
-                    "<th id='severity'>".$this->getLang('th_severity')."</th>".NL.
-                    "<th id='status'>".$this->getLang('th_status')."</th>".NL.
-                    "<th id='user_name'>".$this->getLang('th_username')."</th>".NL.
-                    "<th id='title'>".$this->getLang('th_title')."</th>".NL.
-                    "<th id='assigned'>".$this->getLang('th_assigned')."</th>".NL. 
+                    "<th id='created'>"   .$this->getLang('th_created')   ."</th>".NL.
+                    "<th id='product'>"   .$this->getLang('th_product')   ."</th>".NL.
+                    "<th id='version'>"   .$this->getLang('th_version')   ."</th>".NL.
+                    "<th id='severity'>"  .$this->getLang('th_severity')  ."</th>".NL.
+                    "<th id='status'>"    .$this->getLang('th_status')    ."</th>".NL.
+                    "<th id='user_name'>" .$this->getLang('th_username')  ."</th>".NL.
+                    "<th id='title'>"     .$this->getLang('th_title')     ."</th>".NL.
+                    "<th id='assigned'>"  .$this->getLang('th_assigned')  ."</th>".NL. 
                     "<th id='resolution'>".$this->getLang('th_resolution')."</th>".NL.
-                    "<th id='modified'>".$this->getLang('th_modified')."</th>".NL.
+                    "<th id='modified'>"  .$this->getLang('th_modified')  ."</th>".NL.
                     "</tr></thead>".NL;        
             $body = '<tbody>'.NL;
 
             // Note: The checked attribute is a boolean attribute. 
-            // It is enough if checked is mentioned to hook the checkbox !
-            if($data['myissues'] == false) { $data['myissues']= ""; }
-            else { $data['myissues']= "checked"; }
+            if($data['myissues'] == '') { $data['myissues']= false; }
+            else { $data['myissues']= true; }
             
             
             for ($i=$next_start-1;$i>=0;$i=$i-1)
             {   // check start and end of rows to be displayed
                 $issue = $issues[$i];                    
-                $a_status   = strtoupper($this->_get_one_value($issue,'status'));
-                $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
-                $a_product  = strtoupper($this->_get_one_value($issue,'product'));
-                    
-                if ((($data['status']   =='ALL') || (stristr($data['status'],$a_status)       != false)) && 
-                    (($data['severity'] =='ALL') || (stristr($data['severity'],$a_severity)   != false)) && 
-                    (($data['product']  =='ALL') || (stristr($data['product'],$a_product)     != false)) &&
-                    (($data['myissues'] == ''  ) || ($this->_find_myissues($issue, $user_grp) == true)))
+                $a_status     = strtoupper($this->_get_one_value($issue,'status'));
+                $a_severity   = strtoupper($this->_get_one_value($issue,'severity'));
+                $a_product    = strtoupper($this->_get_one_value($issue,'product'));
+                $a_version    = strtoupper($this->_get_one_value($issue,'version'));
+                $a_component  = strtoupper($this->_get_one_value($issue,'component'));
+                $a_tblock     = strtoupper($this->_get_one_value($issue,'tblock'));
+                $a_assignee   = strtoupper($this->_get_one_value($issue,'assignee'));
+                $a_reporter   = strtoupper($this->_get_one_value($issue,'user_name'));
+                                    
+                if ((($data['status']    =='ALL') || (stristr($data['status'],$a_status)          != false)) && 
+                    (($data['severity']  =='ALL') || (stristr($data['severity'],$a_severity)      != false)) && 
+                    (($data['product']   =='ALL') || (stristr($data['product'],$a_product)        != false)) &&
+                    (($data['version']   =='ALL') || (stristr($data['version'],$a_version)        != false)) &&
+                    (($data['component'] =='ALL') || (stristr($data['component'],$a_component)    != false)) &&
+                    (($data['assignee']  =='ALL') || (stristr($data['assignee'],$a_assignee)      != false)) &&
+                    (($data['reporter']  =='ALL') || (stristr($data['reporter'],$a_reporter)      != false)) &&
+                    (($data['myissues']  == false  ) || ($this->_find_myissues($issue, $user_grp) == true)))
                 {   
                     if ($y>=$step) break;
                     if (stripos($this->getConf('status_special'),$a_status) !== false) continue;
@@ -639,15 +635,24 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $reduced_issues='';
             for ($i=$next_start-1;$i>=0;$i=$i-1)
             {   // check start and end of rows to be displayed
-                $issue      = $issues[$i];                    
-                $a_status   = strtoupper($this->_get_one_value($issue,'status'));
-                $a_severity = strtoupper($this->_get_one_value($issue,'severity'));
-                $a_product  = strtoupper($this->_get_one_value($issue,'product'));
-                                                 
-                if ((($data['status']   =='ALL') || (stristr($data['status'],$a_status)       != false)) && 
-                    (($data['severity'] =='ALL') || (stristr($data['severity'],$a_severity)   != false)) && 
-                    (($data['product']  =='ALL') || (stristr($data['product'],$a_product)     != false)) &&
-                    (($data['myissues'] == ''  ) || ($this->_find_myissues($issue, $user_grp) == true)))
+                $issue = $issues[$i];
+                $a_status     = strtoupper($this->_get_one_value($issue,'status'));
+                $a_severity   = strtoupper($this->_get_one_value($issue,'severity'));
+                $a_product    = strtoupper($this->_get_one_value($issue,'product'));
+                $a_version    = strtoupper($this->_get_one_value($issue,'version'));
+                $a_component  = strtoupper($this->_get_one_value($issue,'component'));
+                $a_tblock     = strtoupper($this->_get_one_value($issue,'tblock'));
+                $a_assignee   = strtoupper($this->_get_one_value($issue,'assignee'));
+                $a_reporter   = strtoupper($this->_get_one_value($issue,'user_name'));
+                                    
+                if ((($data['status']    =='ALL') || (stristr($data['status'],$a_status)          != false)) && 
+                    (($data['severity']  =='ALL') || (stristr($data['severity'],$a_severity)      != false)) && 
+                    (($data['product']   =='ALL') || (stristr($data['product'],$a_product)        != false)) &&
+                    (($data['version']   =='ALL') || (stristr($data['version'],$a_version)        != false)) &&
+                    (($data['component'] =='ALL') || (stristr($data['component'],$a_component)    != false)) &&
+                    (($data['assignee']  =='ALL') || (stristr($data['assignee'],$a_assignee)      != false)) &&
+                    (($data['reporter']  =='ALL') || (stristr($data['reporter'],$a_reporter)      != false)) &&
+                    (($data['myissues']  == false  ) || ($this->_find_myissues($issue, $user_grp) == true)))
                {   
                     if ($y>=$step) break;
                     if (stripos($this->getConf('status_special'),$a_status) !== false) continue;
@@ -709,6 +714,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         }
 // -----------------------------------------------------------------------------
 // Control render        
+        if($data['myissues']==false) {$data['myissues'] = "";}
+        else {$data['myissues'] = "checked='true'";}                
+        
         if (strtolower($data['controls'])==='on') {
           $li_count = $this->_count_render($issues,$start,$step,$next_start,$data);
         $ret = '<div>'.NL.
@@ -728,19 +736,25 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                '     </script>'.NL.
                '<table class="itl__t1"><tbody>'.NL.
                '<tr class="itd__tables_tr">'.NL.
-                  '<td colspan="4" align="left" valign="middle" height="30">'.NL.
-                      '<label class="it__cir_projectlabel">'.sprintf($this->getLang('lbl_issueqty'),$project).count($issues).'</label>'.NL.
-                  '</td>'.NL.
-                  '<td class="itl__showdtls" rowspan="2" width="30%">'.$li_count.'</td>'.NL.
+               '   <td colspan="4" align="left" valign="middle" height="30">'.NL.
+               '       <label class="it__cir_projectlabel">'.sprintf($this->getLang('lbl_issueqty'),$project).count($issues).'</label>'.NL.
+               '   </td>'.NL.
+               '   <td class="itl__showdtls" rowspan="2" width="30%">'.$li_count.'</td>'.NL.
                '</tr>'.NL.
 
                '<tr class="itd__tables_tr">'.NL.
                '   <td align ="left" valign="top" width="15%">'.NL.
                '     <p class="it__cir_projectlabel">'.'<label for="itl_step"         style="align:left;">'.$this->getLang('lbl_scroll').    '</label><br />'.NL.
                                                        '<label for="itl_sev_filter"   style="align:left;">'.$this->getLang('lbl_filtersev'). '</label><br />'.NL.
-                                                       '<label for="itl_stat_filter"  style="align:left;">'.$this->getLang('lbl_filterstat').'</label><br />'.NL.
-                                                       '<label for="itl__prod_filter" style="align:left;">'.$this->getLang('lbl_filterprod').'</label><br />'.NL.
-                                                       '<label for="itl_myis_filter"  style="align:left;">'.$this->getLang('cbx_myissues').  '</label></p>'.NL.
+                                                       '<label for="itl_stat_filter"  style="align:left;">'.$this->getLang('lbl_filterstat').'</label><br /></p>'.NL.
+               '    <p class="it__cir_projectlabel">'.'<label for="itl__prod_filter" style="align:left;">'.$this->getLang('lbl_filterprod').'</label><br />'.NL.
+                                                       '<label for="itl__vers_filter" style="align:left;">'.$this->getLang('lbl_filtervers').'</label><br />'.NL.
+                                                       '<label for="itl__comp_filter" style="align:left;">'.$this->getLang('lbl_filtercomp').'</label><br /></p>'.NL.
+               '    <p class="it__cir_projectlabel">'.'<label for="itl__block_filter" style="align:left;">'.$this->getLang('lbl_filterblock').'</label><br />'.NL.
+                                                       '<label for="itl__assi_filter" style="align:left;">'.$this->getLang('lbl_filterassi').'</label><br />'.NL.
+                                                       '<label for="itl__user_filter" style="align:left;">'.$this->getLang('lbl_filterreporter').'</label><br />'.NL.
+                                                       '<label for="itl_myis_filter"  style="align:left;">'.$this->getLang('cbx_myissues').  '</label><br />'.NL.
+                                                       '<label for="it_glbl_sort"     style="align:left;">'.$this->getLang('lbl_sort').'</label></p>'.NL.
                '   </td>'.NL.
                '   <td align ="left" valign="top" width="25%">'.NL.
                '    <form name="myForm" action="" method="post">'.NL.
@@ -748,13 +762,19 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                '       <input                          type="hidden" name="itl_step"         id="itl_step"         value="'.$step.'"/>'.NL.
                '       <input                          type="hidden" name="itl_next"         id="itl_next"         value="'.$next_start.'"/>'.NL.
                '       <input                          type="hidden" name="itl_project"      id="itl_project"      value="'.$project.'"/>'.NL.
-               '       <input class="itl__buttons"     type="button" name="showprevious"                           value="'.$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>'.NL.
+               '    <input class="itl__buttons"     type="button" name="showprevious"                           value="'   .$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>'.NL.
                '       <input class="itl__step_input"  type="text"   name="itl_step"         id="itl_step"         value="'.$step.'"/>'.NL.
                '       <input class="itl__buttons"     type="button" name="shownext"                               value="'.$this->getLang('btn_next').'"     title="'.$this->getLang('btn_next_title').'"     onClick="changeAction(2)"/><br />'.NL.
-               '       <input class="itl__sev_filter"  type="text"   name="itl_sev_filter"   id="itl_sev_filter"   value="'.$sev_filter.'"/><br />'.NL.                         
-               '       <input class="itl__stat_filter" type="text"   name="itl_stat_filter"  id="itl_stat_filter"  value="'.$stat_filter.'"/><br />'.NL.
-               '       <input class="itl__prod_filter" type="text"   name="itl__prod_filter" id="itl__prod_filter" value="'.$data['product'].'"/><br />'.NL.
-               '       <input                          type="checkbox" name="itl_myis_filter" id="itl_myis_filter" value="1" '.$data['myissues'].' title="'.$this->getLang('cbx_myissues').'"/><br />'.NL.
+               '       <input class="itl__sev_filter"  type="text"   name="itl_sev_filter"   id="itl_sev_filter"   value="'.$data['severity'].'"/><br />'.NL.                         
+               '       <input class="itl__stat_filter" type="text"   name="itl_stat_filter"  id="itl_stat_filter"  value="'.$data['status'].'"/><br /></p>'.NL.
+               '    <p><input class="itl__prod_filter" type="text"   name="itl__prod_filter" id="itl__prod_filter" value="'.$data['product'].'"/><br />'.NL.
+               '       <input class="itl__prod_filter" type="text"   name="itl__vers_filter" id="itl__vers_filter" value="'.$data['version'].'"/><br />'.NL.
+               '       <input class="itl__prod_filter" type="text"   name="itl__comp_filter" id="itl__comp_filter" value="'.$data['component'].'"/><br /></p>'.NL.
+               '    <p><input                          type="checkbox" name="itl__block_filter" id="itl__block_filter" '   .$data['tblock'].'/><br />'.NL.
+               '       <input class="itl__prod_filter" type="text"   name="itl__assi_filter" id="itl__assi_filter" value="'.$data['assignee'].'"/><br />'.NL.
+               '       <input class="itl__prod_filter" type="text"   name="itl__user_filter" id="itl__user_filter" value="'.$data['reporter'].'"/><br />'.NL.
+               '       <input                          type="checkbox" name="itl_myis_filter" id="itl_myis_filter" '       .$data['myissues'].' title="'.$this->getLang('cbx_myissues').'" /><br />'.NL.
+               '       <input class="itl__sev_filter"  type="text"   name="it_glbl_sort"      id="it_glbl_sort"    value="'.$data['sort'].'"/><br /></p>'.NL.
                '       <input class="itl__buttons"     type="button" name="go"                                     value="'.$this->getLang('btn_go').'"        title="'.$this->getLang('btn_go').'"            onClick="changeAction(3)"/><br />'.NL.
                '    </form>'.NL.                      
                '   </td>'.NL.
@@ -764,9 +784,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                '       <label class="it__searchlabel">'.$this->getLang('lbl_showid').'</label>'.NL.
                '       <input class="itl__sev_filter"    type="text"   name="showid"          id="showid"          value="0"/>'.NL.
                '       <input                            type="hidden" name="project"         id="project"         value="'.$project.'"/>'.NL.
-               '       <input                            type="hidden" name="itl_sev_filter"  id="itl_sev_filter"  value="'.$sev_filter.'"/>'.NL.
-               '       <input                            type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$stat_filter.'"/>'.NL.
-               '       <input                            type="hidden" name="itl_myis_filter" id="itl_myis_filter" value="1" '.$data['myissues'].'/>'.NL.
+               '       <input                            type="hidden" name="itl_sev_filter"  id="itl_sev_filter"  value="'.$data['severity'].'"/>'.NL.
+               '       <input                            type="hidden" name="itl_stat_filter" id="itl_stat_filter" value="'.$data['status'].'"/>'.NL.
+               '       <input                            type="hidden" name="itl_myis_filter" id="itl_myis_filter" '       .$data['myissues'].' />'.NL.
                '       <input class="itl__showid_button" type="submit" name="showcase"        id="showcase"        value="'.$this->getLang('btn_showid').'"    title="'.$this->getLang('btn_showid_title').'"/>'.NL.
                '    </form><br />'.NL.
                '    <form  method="post" action="doku.php?id=' . $ID . '&do=it_search">'.NL.
@@ -779,6 +799,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                '</tr>'.NL.'</tbody>'.NL.'</table>'.NL.'</div>'.NL;
          }
 
+
          $usr  = '<span style="display:none;" id="currentuser">'.$user_grp['userinfo']['name'].'</span>' ;   //to log issue mods            
          $usr .= '<span style="display:none;" id="currentID">'.urlencode($ID).'</span>' ; // to log issue mods
          $a_lang  = '<span style="display:none;" name="table_kit_OK" id="table_kit_OK">'.$this->getLang('table_kit_OK').'</span>'; // for tablekit.js
@@ -790,7 +811,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 /* pic-up a single value
 */
     function _get_one_value($issue, $key) {
-        if (array_key_exists($key,$issue))
+        if (@array_key_exists($key,$issue))
             return $issue[$key];
         return '';
     }
@@ -799,6 +820,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 /* elaborate the display string of assignee (login, name or mail)
 */
     function _get_assignee($issue, $key) {
+        if(!$issue) return;
         if (array_key_exists($key,$issue)) {
             global $auth;
             global $conf;
@@ -987,7 +1009,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $project = $data['project'];
         // retrive some basic information
         $user_mail = pageinfo();  //to get mail address of reporter
-        $cur_date = date('Y-m-d G:i:s');
+        $cur_date = date($this->getConf('d_format'));
         $user_check = $this->getConf('registered_users');
 
         $_cFlag = false;
@@ -1029,6 +1051,18 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 $STR_PRODUCTS = $STR_PRODUCTS . $option_param .$_products."</option>".NL;
             }
             
+            /*--------------------------------------------------------------------*/
+            // load set of components defined by admin
+            /*--------------------------------------------------------------------*/
+            $STR_COMPONENTS = "";
+            $components = explode(',', $this->getConf('components')) ;
+            $STR_COMPONENTS = '<option value="" ></option>'.NL;
+            foreach ($components as $_component)
+            {
+                $_component = trim($_component);
+                $STR_COMPONENTS .= '<option value="'.$_component.'" >'.$_component."</option>".NL;
+            }
+
             /*--------------------------------------------------------------------*/
             // load set of severity values defined by admin
             /*--------------------------------------------------------------------*/
@@ -1110,8 +1144,29 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                       $ret .= ' <td>'.$this->getLang('th_version').'</td>
                                 <td><input class="it__cir_input" name="version" value="'.$STR_VERSIONS.'"/></td>';
                   }             
-        $ret .= '</tr>'.NL.
-             '<tr><td colspan=2>&nbsp;</td></tr>'.NL.
+        
+        $ret .= '</tr><tr>'.NL;
+                   //Check config if hidden
+                  if(strpos($this->getConf('ltdReport'),'components')!==false){
+                      $STR_COMPONENTS = ' ';
+                      $ret .= '<input type="hidden" class="it__cir_input" name="version" value="'.$STR_COMPONENTS.'"/>';
+                  } 
+                  else {
+                      $ret .='<td>'.$this->getLang('th_components').'</td>
+                              <td><select class="element select small it__cir_select" name="component">'.$STR_COMPONENTS.'</select></td>'.NL;
+                  }
+        $ret .= '</tr><tr>'.NL;
+                
+                   //Check config if hidden
+                  if(strpos($this->getConf('ltdReport'),'tblock')!==false){
+                      $ret .= '<input type="hidden" name="tblock" value="false">';
+                  } 
+                  else {
+                      $ret .='<td>'.$this->getLang('th_tblock').'</td>
+                              <td><input class="it__cir_cbx" type="checkbox" name="tblock"></td>'.NL;
+                  }
+        
+        $ret .= '</tr><tr><td colspan=2>&nbsp;</td></tr>'.NL.
              '<tr>
                 <td>'.$this->getLang('th_username').'</td>
                 <td><input class="it__cir_input" name="user_name" value="'.$user_mail['userinfo']['name'].'"/></td>
@@ -1583,8 +1638,8 @@ address format and the domain exists.
     function _log_mods($project, $issue, $usr, $column, $new_value)
     {     global $conf;
           // get mod-log file contents
-          if($this->getConf('it_data')==false) $modfile = DOKU_INC."data/meta/".$project.'_'.$issue_id.'.mod-log';
-          else $modfile = DOKU_INC. $this->getConf('it_data').$project.'_'.$issue_id.'.mod-log';
+          if($this->getConf('it_data')==false) $modfile = DOKU_CONF."../data/meta/".$project.'_'.$issue_id.'.mod-log';
+          else $modfile = DOKU_CONF."../". $this->getConf('it_data').$project.'_'.$issue_id.'.mod-log';
           if (@file_exists($modfile))
               {$mods  = unserialize(@file_get_contents($modfile));}
           else 
@@ -1592,7 +1647,7 @@ address format and the domain exists.
           
           $mod_id = count($mods);
           
-          $mods[$mod_id]['timestamp'] = date ('Y-m-d G:i:s');
+          $mods[$mod_id]['timestamp'] = date ($this->getConf('d_format'));
           $mods[$mod_id]['user'] = $usr;
           $mods[$mod_id]['field'] = $column;
           $mods[$mod_id]['old_value'] = $old_value;
@@ -1622,7 +1677,7 @@ address format and the domain exists.
       else $target_path = $this->getConf('it_data');
       $ip_block_path = $target_path."ipblock";
       $target_path .= 'symptoms/';
-      if(!is_dir(DOKU_INC.$target_path)) { mkdir(DOKU_INC.$target_path, 0777); }                                                                                
+      if(!is_dir(DOKU_CONF."../".$target_path)) { mkdir(DOKU_CONF."../".$target_path, 0777); }                                                                                
 
       $valid_file_extensions = array();
       $valid_mimetypes = array(); 
@@ -1706,8 +1761,10 @@ address format and the domain exists.
       $target_path = $target_path . $issue_id . '_sympt_' . $safe_filename; 
       if(move_uploaded_file($_FILES['uploadedfile']['tmp_name'], DOKU_INC.$target_path)) {
           $issues[$issue_id]['attachment1'] = DOKU_URL.$target_path;
-//                                            msg("The file ".$safe_filename." has been successfully uploaded.",1);
+//          msg("The file ".$safe_filename." has been successfully uploaded to ".DOKU_URL.$target_path,1);
+          msg("The file ".$safe_filename." has been successfully uploaded.",1);
       } else{
+//          msg("There was an error uploading the file to ".DOKU_URL.$target_path." \n, please try again!",-1);
           msg("There was an error uploading the file, please try again!",-1);
       }
 // -----------------------------------------------------------------------------
@@ -1791,8 +1848,8 @@ address format and the domain exists.
  
   function _get_issues($data, $all = false) {
     // detect the IssueTracker data store (path)
-    if($this->getConf('it_data')==false) $it_datastore = DOKU_INC."data/meta/";
-    else $it_datastore = DOKU_INC. $this->getConf('it_data');
+    if($this->getConf('it_data')==false) $it_datastore = DOKU_CONF."../data/meta/";
+    else $it_datastore = DOKU_CONF."../". $this->getConf('it_data');
     
     // check if last sign is a slash
     $i = strrchr ($it_datastore, chr(47));     // chr(47) = "/"
@@ -1834,5 +1891,17 @@ address format and the domain exists.
     return $issues;
   }
 /******************************************************************************/
+/* sort the issues array according the selected key                           */                                          
+    function _issues_globalsort($issues, $sort_key) {
+/*        $tmp = Array(); 
+        foreach($issues as &$ma)  $tmp[] = &$ma[$sort_key]; 
+        array_multisort($tmp, $issues);                          */
+        foreach ($issues as $key => $row) {
+            $down[$key]    = $row['id'];
+            $up[$key]      = $row[$sort_key];
+        }
+        array_multisort($up, SORT_DESC, $down, SORT_ASC, $issues);
+        return $issues;
+    }
+/******************************************************************************/
 }
-?>

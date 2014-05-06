@@ -28,6 +28,12 @@ $lang['lbl_scroll']             = 'Scroll Issue List: &nbsp;';
 $lang['lbl_filtersev']          = 'Filter Severity:&nbsp;';
 $lang['lbl_filterstat']         = 'Filter Status:&nbsp;';
 $lang['lbl_filterprod']         = 'Filter Product:&nbsp;';
+$lang['lbl_filtervers']         = 'Filter Version:&nbsp;';
+$lang['lbl_filtercomp']         = 'Filter Component:&nbsp;';
+$lang['lbl_filterblock']        = 'Filter Test blocking:&nbsp;';
+$lang['lbl_filterassi']         = 'Filter Assignee:&nbsp;';
+$lang['lbl_filterassi']         = 'Filter Assignee:&nbsp;';
+$lang['lbl_filterreporter']     = 'Filter Reporter:&nbsp;';
 $lang['cbx_myissues']           = 'MyIssues:&nbsp;';
 $lang['btn_go']                 = 'Go';
 
@@ -40,8 +46,13 @@ $lang['lbl_showid']             = 'Show details of Issue:';
 $lang['btn_showid']             = 'Show';
 $lang['btn_showid_title']       = 'Show';
 
+$lang['lbl_sort']               = 'Sort by:';
+$lang['btn_sort']               = 'Sort';
+$lang['btn_sort_title']         = 'Sort the issue list globally by array key.';
+
 $lang['msg_commentfalse']       = 'This comment does already exist and was not added again.';
 $lang['msg_commenttrue']        = 'Your comment has been successfully stored with ID #';
+$lang['msg_wroundtrue']         = 'Your workaround has been successfully stored';
 $lang['msg_commentmodtrue']     = 'Your comment was successfully modified as ID #';
 $lang['msg_commentdeltrue']     = 'Your comment #%s successfully deleted.';
 $lang['msg_commentmodfalse']    = 'No diff of comment ID #';
@@ -78,11 +89,18 @@ $lang['del_title']              = 'Delete this comment';
 $lang['lbl_signin']             = 'Sign in</a> if you want to add a comment or resolution note.'; // </a> necessary to close the link tag
 $lang['lbl_please']             = 'Please ';
 $lang['lbl_lessPermission']     = 'Your permission level is to low. Please contact the admin.';
+$lang['lbl_workaround']         = 'Workaround';
 
 $lang['th_project']             = 'Project';
 $lang['th_id']                  = 'Id';
 $lang['th_created']             = 'Created';
 $lang['th_product']             = 'Product';
+$lang['th_components']          = 'Component';
+$lang['th_tblock']              = 'Test blocking';
+$lang['th_tversion']            = 'Target version';
+$lang['th_begin']               = 'Begin';
+$lang['th_deadline']            = 'Deadline';
+$lang['th_progress']            = 'Progress in %';
 $lang['th_version']             = 'Version';
 $lang['th_severity']            = 'Severity';
 $lang['th_status']              = 'Status';
@@ -138,6 +156,7 @@ $lang['issuemod_br']            = 'best regards';
 $lang['issuemod_end']           = ' Issue Tracker';    // project name placed before this
 $lang['issuedescrmod_subject']  = 'Issue #%s on %s: initial description modified'; // $issue['id'], $project
 $lang['issuemod_changes']       = 'The issue changed on %s from %s to %s.'; //$column, $old_value, $new_value
+$lang['btn_upd_addinfo']        = 'Save';
 /******************************************************************************/
 /* send an e-mail to user due to issue set to resolved on details
 /* _emailForResolutionMod
@@ -183,7 +202,9 @@ $lang['search_Subject']         = 'Subject';
 /******************************************************************************/
 $lang['table_kit_OK']           = 'OK';
 $lang['table_kit_Cancel']       = ' Cancel';
+$lang['yes']                    = ' YES';
+$lang['no']                    = ' NO';
 
 /******************************************************************************/
 // Report Manager
-$lang['it_btn_rprt_mngr']         = 'Create Report';
+$lang['it_btn_rprt_mngr']       = 'Create Report';
