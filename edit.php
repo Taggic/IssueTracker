@@ -155,8 +155,8 @@
       $header  = trim($header);
      
 
-      $body = mail_quotedprintable_encode($body);
-      $bodyhtml = mail_quotedprintable_encode($bodyhtml);
+      $body = mail_quotedprintable_encode($body,0);
+      $bodyhtml = mail_quotedprintable_encode($bodyhtml,0);
 
       $message =	"--PHP-alt-".$random_hash."\r\n".
     				"Content-Type: text/plain; charset=UTF-8"."\n".
@@ -200,6 +200,7 @@
         $bodyhtml = str_ireplace("%%severity%%",$issue['severity'],$bodyhtml);
         $bodyhtml = str_ireplace("%%issuemod_creator%%",$lang['issuemod_creator'],$bodyhtml);
         $bodyhtml = str_ireplace("%%creator%%",$issue['user_name'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%CREATOR_MAIL%%",$issue['user_mail'],$bodyhtml);
         $bodyhtml = str_ireplace("%%th_assigned%%",$lang['th_assigned'],$bodyhtml);
         $bodyhtml = str_ireplace("%%assigned%%",$issue['assigned'],$bodyhtml);
         $bodyhtml = str_ireplace("%%th_created%%",$lang['th_created'],$bodyhtml);
@@ -340,26 +341,10 @@
           fclose($fh);
     }
 /******************************************************************************/
-/* improved implode needed
-
-    function array_implode($arrays, &$target = array()) 
-    {         
-         foreach ($arrays as $item) {
-             if (is_array($item)) {
-                 $this->array_implode($item, $target);
-             } else {
-                 $target[] = $item;
-             }
-         }
-         return $target;
-    }
-*/
-/******************************************************************************/
-/******************************************************************************/
     global $ID;
     global $lang;
     global $conf;
-    
+
     // Include the language file
     if ($conf['lang']=='') $conf['lang']=='en'; 
     if ($conf['lang']!=='') {
@@ -375,7 +360,7 @@
     $usr       = $_POST['usr'];    
     $currentID = $_POST['currentID'];
     $cur_date  = date('Y-m-d G:i:s');
-     
+ 
     // get issues file contents
     if($conf['plugin']['issuetracker']['it_data']==false) $pfile = DOKU_CONF."../data/meta/".$project.'.issues';
     else $pfile = DOKU_CONF."../". $conf['plugin']['issuetracker']['it_data'].$project.'.issues';

@@ -61,7 +61,7 @@
                   $issue['project'] = $project;
                }
             }
-        else
+        elseif(strlen($project)>1)
         	  {// promt error message that project file does not exist
                msg(sprintf($this->getLang('msg_pfilemissing'), $pfile),-1); }
     }

@@ -14,7 +14,7 @@
 if(!defined('DOKU_INC')) define('DOKU_INC',realpath(dirname(__FILE__).'/../../').'/');
 if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 require_once(DOKU_PLUGIN.'syntax.php');  
-    
+require_once(DOKU_PLUGIN.'issuetracker/assilist.php');    
 /******************************************************************************
 * All DokuWiki plugins to extend the parser/rendering mechanism
 * need to inherit from this class
@@ -47,7 +47,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         //handle params
         $data = array();
         $params = explode('|',$match);
-        
+
         foreach($params as $param) {            
             $splitparam = explode('=',$param);
             if ($splitparam[1] != '')
@@ -69,6 +69,10 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 if ($splitparam[0]=='myissues')   { $data['myissues']   = trim(strtoupper($splitparam[1])) ;}
                 if ($splitparam[0]=='config')     { $data['config']     = trim(strtoupper($splitparam[1])) ;}
                 if ($splitparam[0]=='sort')       { $data['sort']       = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='columns')    { $data['columns']    = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='asympupl')   { $data['asympupl']    = trim(strtoupper($splitparam[1])) ;}
+                if ($splitparam[0]=='email_address') {$data['email_address'] = trim(strtolower($splitparam[1])) ;}
+                   /*continue;*/
             }
         }
                
@@ -100,32 +104,38 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         
         if ($mode == 'xhtml'){
             
-            $renderer->info['cache'] = false;     
-               
-            $Generated_Header  = '';
-            $Generated_Table   = '';
-            $Generated_Scripts = '';
-            $Generated_Report  = '';
-
-            if ($data['display']    == '') {$data['display']    = 'ISSUES';}
-            if ($data['view']       == '') {$data['view']       = '10';}
-            if ($data['controls']   == '') {$data['controls']   = 'ON';}
-            if ($data['prod_limit'] == '') {$data['prod_limit'] = 'OFF';}
-            if ($data['id']         == '') {$data['id'] = '0';}
-            if ($data['severity']   == '') {$data['severity']   = 'ALL';}
-            if ($data['status']     == '') {$data['status']     = 'ALL';}
-            if ($data['product']    == '') {$data['product']    = 'ALL';}
-            if ($data['version']    == '') {$data['version']    = 'ALL';}
-            if ($data['component']  == '') {$data['component']  = 'ALL';}
-            if ($data['tblock']     == '') {$data['tblock']     = false;}
-            else { $data['tblock']  = true; }
-            if ($data['assignee']   == '') {$data['assignee']   = 'ALL';}
-            if ($data['reporter']   == '') {$data['reporter']   = 'ALL';}
-        	  if ($data['myissues']   == '') {$data['myissues']   = false;}
-            else { $data['myissues']= true; }
-            if ($data['config']     == '') {$data['config']     = false;}
-            else { $data['config']  = true; }                   
-
+              $renderer->info['cache'] = false;     
+                 
+              $Generated_Header  = '';
+              $Generated_Table   = '';
+              $Generated_Scripts = '';
+              $Generated_Report  = '';
+  
+              if ($data['display']    == '') {$data['display']    = 'ISSUES';}
+              if ($data['view']       == '') {$data['view']       = '10';}
+              if ($data['controls']   == '') {$data['controls']   = 'ON';}
+              if ($data['prod_limit'] == '') {$data['prod_limit'] = 'OFF';}
+              if ($data['id']         == '') {$data['id'] = '0';}
+              if ($data['severity']   == '') {$data['severity']   = 'ALL';}
+              if ($data['status']     == '') {$data['status']     = 'ALL';}
+              if ($data['product']    == '') {$data['product']    = 'ALL';}
+              if ($data['version']    == '') {$data['version']    = 'ALL';}
+              if ($data['component']  == '') {$data['component']  = 'ALL';}
+              if ($data['tblock']     == '') {$data['tblock']     = false;}
+              else { $data['tblock']  = true; }
+              if ($data['assignee']   == '') {$data['assignee']   = 'ALL';}
+              if ($data['reporter']   == '') {$data['reporter']   = 'ALL';}
+          	  if ($data['myissues']   == '') {$data['myissues']   = false;}
+              else { $data['myissues']= true; }
+              if ($data['config']     == '') {$data['config']     = false;}
+              else { $data['config']  = true; }
+              if($data['asympupl']    == '') {$data['asympupl']=false;}
+              else{$data['asympupl']=true;}
+              
+              if ($this->validEmail($data['email_address'])===false ) { 
+                  if($data['email_address']!='') { msg("invalid mail given by syntax",-1);}
+                  $data['email_address'] = $this->getConf('email_address');
+              }
 
             if (stristr($data['display'],'FORM')!= false) 
             {
@@ -163,8 +173,10 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                     $issues[$issue_id]['user_mail'] = trim(htmlspecialchars(stripslashes($_REQUEST['user_mail'])));
                                     $issues[$issue_id]['user_phone'] = htmlspecialchars(stripslashes($_REQUEST['user_phone']));
                                     $issues[$issue_id]['add_user_mail'] = htmlspecialchars(stripslashes($_REQUEST['add_user_mail']));
-                                    $issues[$issue_id]['title'] = htmlspecialchars(stripslashes($_REQUEST['title']));
-                                    $issues[$issue_id]['description'] = htmlspecialchars(stripslashes($_REQUEST['description']));
+//                                    $issues[$issue_id]['title'] = htmlspecialchars(stripslashes($_REQUEST['title']));
+                                    $issues[$issue_id]['title'] = htmlspecialchars($_REQUEST['title']);
+//                                    $issues[$issue_id]['description'] = htmlspecialchars(stripslashes($_REQUEST['description']));
+                                    $issues[$issue_id]['description'] = htmlspecialchars($_REQUEST['description']);
                                     $issues[$issue_id]['attachment1'] = htmlspecialchars(stripslashes($_REQUEST['attachment1']));
                                     $issues[$issue_id]['attachment2'] = htmlspecialchars(stripslashes($_REQUEST['attachment2']));
                                     $issues[$issue_id]['attachment3'] = htmlspecialchars(stripslashes($_REQUEST['attachment3']));
@@ -179,9 +191,35 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 // *****************************************************************************
 // upload a symptom file
 // *****************************************************************************
-                                    $mime_type = $_FILES['uploadedfile']['type'];
-                                    if(($this->getConf('upload')> 0) && (strlen($mime_type)>1)) {
-                                      $Generated_Header = $this->_symptom_file_upload($issues,$issue_id);
+                                    // check if current user is admin/assignee
+                                    // check if syntax parameter asympupl is switched on
+                                    $user_grp    = pageinfo();
+                                    if(array_key_exists('userinfo', $user_grp))
+                                    {   foreach ($user_grp['userinfo']['grps'] as $ugrp)
+                                        {  $user_grps = $user_grps . $ugrp;  }
+                                    }
+                                    else
+                                    {   $user_grps = 'all';  }
+                                    $allowed_users = explode('|', $this->getConf('assign'));
+                                    $cFlag = false;
+                                    foreach ($allowed_users as $w) 
+                                    {   // check if one of the assigned user roles does match with current user roles
+                                        if (strpos($user_grps,$w)!== false)
+                                        {   $cFlag = true;
+                                            break;  } 
+                                    }      
+  
+                                    $mime_type1 = $_FILES['attachment1']['type'];
+                                    if((($this->getConf('upload')> 0) ||(($cFlag === true) && ($data['asympupl']=true)) || ($this->getConf('registered_users')== 0)) && (strlen($mime_type1)>1)) {
+                                      $Generated_Header = $this->_symptom_file_upload($issues,$issue_id,'attachment1');
+                                    }
+                                    $mime_type2 = $_FILES['attachment2']['type'];
+                                    if(($this->getConf('upload')> 0) && (strlen($mime_type2)>1)) {
+                                      $Generated_Header = $this->_symptom_file_upload($issues,$issue_id,'attachment2');
+                                    }
+                                    $mime_type3 = $_FILES['attachment3']['type'];
+                                    if(($this->getConf('upload')> 0) && (strlen($mime_type3)>1)) {
+                                      $Generated_Header = $this->_symptom_file_upload($issues,$issue_id,'attachment3');
                                     }
 
                                     //check user mail address, necessary for further clarification of the issue
@@ -200,7 +238,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                                           $tmp_link = '<a href="'.DOKU_URL.'doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" >'.$issue_id.'</a>';
                                           
                                           $Generated_Header .= '<div class="it__positive_feedback">'.$this->getLang('msg_reporttrue').$tmp_link.'</div>';
-                                          $this->_emailForNewIssue($data['project'],$issues[$issue_id]);
+                                          $this->_emailForNewIssue($data['project'],$issues[$issue_id],$data['email_address']);
                                           $_REQUEST['description'] = '';
                                     }
                                 
@@ -235,13 +273,13 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 $issues = $this->_get_issues($data, $all);
 
                 // global sort of issues array
+                if($data['sort']='') $data['sort']='id';
                 $sort_key = $data['sort'];
                 $issues = $this->_issues_globalsort($issues, $sort_key);
-
                 $step = $data['view'];
-                $Generated_Table = $this->_table_render($issues,$data,$step,$start); 
+                $Generated_Table = $this->_table_render($data['project'],$issues,$data,$step,$start); 
                 if (strtolower($data['controls'])==='on') {
-                    $Generated_Scripts = $this->_scripts_render();
+                    $Generated_Scripts = $this->_scripts_render($project);
                 }
             }
             // Count only ...        
@@ -249,7 +287,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             {   // get issues file contents
                 $all = true;
                 $issues = $this->_get_issues($data, $all);
-                $Generated_Table = $this->_count_render($issues,$start,$step,$next_start,$data);                
+                $a_result = $this->_count_render($issues,$start,$step,$next_start,$data,$project);
+                $Generated_Table =$a_result[1];
+                $count = $a_result[0];                
             }            
             // syntax to display a single issue inside wiki text
             elseif (stristr($data['display'],'single_issue')!= false)
@@ -361,21 +401,25 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 /******************************************************************************/
 /* Create count output
 */
-    function _count_render($issues,$start,$step,$next_start,$data)
+    function _count_render($issues,$start,$step,$next_start,$data, $project)
     {   global $ID;
         $count = array();
         $productfilter=$data['product'];
 
         foreach ($issues as $issue)
         {
-            if ((strcasecmp($productfilter,'ALL')===0) || (stristr($productfilter,$this->_get_one_value($issue,'product'))!= false))
-            {
-                $status = trim($this->_get_one_value($issue,'status'));
+            if(($issue['project'] !== $project) && ($this->getConf('multi_projects')==0)) {
+              continue;
+            }
+            elseif((strcasecmp($productfilter,'ALL')===0) || (stristr($productfilter,$this->_get_one_value($issue,'product'))!= false))
+            {   $status = trim($this->_get_one_value($issue,'status'));
+                $a_count = $a_count + 1;
                 if (($status != '') && (stripos($this->getConf('status_special'),$status)===false))
-                    if ($this->_get_one_value($count,$status)=='')
-                        {$count[$status] = array(1,$status);}
+                {    if ($this->_get_one_value($count,strtoupper($status))=='')
+                        {$count[strtoupper($status)] = array(1,$status);}
                     else
-                        {$count[$status][0] += 1;}
+                        {$count[strtoupper($status)][0] += 1;}
+                }
             }                                
         }
         $rendered_count = '<div class="itl__count_div">'.'<table class="itl__count_tbl">';
@@ -386,13 +430,14 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $rendered_count .= '<tr><td><a href="'.DOKU_URL.'doku.php?id='.$ID.'&do=issuelist_filterlink'.'&itl_start='.$start.'&itl_step='.$step.'&itl_next='.$next_start.'&itl_stat_filter='.$value[1].'&itl_sev_filter='.$data['severity'].'&itl__prod_filter='.$data['product'].'&itl_project='.$data['project'].'" >'.$value[1].'</a>&nbsp;</td><td>&nbsp;'.$value[0].'</td></tr>';
         }
         $rendered_count .= '</table></div>';
-        return $rendered_count;
+        $ret_array = array($a_count,$rendered_count);
+        return $ret_array;
     }
    
 /******************************************************************************/
 /* Create table scripts
 */
-    function _scripts_render()
+    function _scripts_render($project)
     {
         // load status values from config into select control
         $s_counter = 0;
@@ -432,11 +477,22 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $target          = $auth->retrieveUsers(0,0,$filter); 
             $shw_assignee_as = trim($this->getConf('shw_assignee_as'));
             if(stripos("login, mail, name",$shw_assignee_as) === false) $shw_assignee_as = "login";
-            foreach ($target as $key => $x_umail)
-            {       // show assignee by login, name, mail
-                    if($shw_assignee_as=='login') $x_umail_select = $x_umail_select . "['".$key."','".$x_umail['mail']."'],";
-                    else $x_umail_select = $x_umail_select . "['".$x_umail[$shw_assignee_as]."','".$x_umail['mail']."'],";
-            }      
+//--------------------------------------------------------------------------------------------
+// Build 'assign to' list from a simple textfile
+        	  // 1. check if file exist else use configuration 
+        	  if($this->getConf('assgnee_list')==="") {
+                foreach ($target as $key => $x_umail)
+                {       // show assignee by login, name, mail
+                        if($shw_assignee_as=='login') $x_umail_select = $x_umail_select . "['".$key."','".$x_umail['mail']."'],";
+                        else $x_umail_select = $x_umail_select . "['".$x_umail[$shw_assignee_as]."','".$x_umail['mail']."'],";
+                }      
+            }
+            else{
+                $fileextension = $this->getConf('assgnee_list');
+                $x_umail_select = __get_assignees_from_files($fileextension);                	 
+              }
+//--------------------------------------------------------------------------------------------
+
             $x_umail_select .= "['',''],";
             $authAD_selector = "TableKit.Editable.selectInput('assigned',{}, [".$x_umail_select."]);";
         }
@@ -469,7 +525,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 /******************************************************************************/
 /* Create list of Issues
 */
-    function _table_render($issues,$data,$step,$start)
+    function _table_render($project,$issues,$data,$step,$start)
     {
         global $ID;
         global $lang;
@@ -479,17 +535,13 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         if ($next_start>count($issues)) $next_start=count($issues);
         
         $imgBASE     = DOKU_BASE."lib/plugins/issuetracker/images/";
-        $style       =' style="text-align:left; white-space:pre-wrap;">';
+        $style       =' style="text-align:center; white-space:pre-wrap;">';
 //        $date_style =' style="text-align:center; white-space:pre;">';
         $user_grp    = pageinfo();
         $noStatIMG   = $this->getConf('noStatIMG');
         $noSevIMG    = $this->getConf('noSevIMG');
-        $project     = $data['project'];
+        $a_project     = $data['project'];
 
-/*        $prod_filter = $data['product'];
-        $stat_filter = $data['status'];
-        $sev_filter  = $data['severity'];
-*/                
         if(array_key_exists('userinfo', $user_grp))
         {   foreach ($user_grp['userinfo']['grps'] as $ugrp)
             {  $user_grps = $user_grps . $ugrp;  }
@@ -513,22 +565,21 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         }      
                 
         // members of defined groups $user_grps allowed to change issue contents 
-        if ($cFlag === true)       
+        if (($cFlag === true) || ($this->getConf('registered_users')== 0))       
         {   $dynatable_id = "t_".uniqid((double)microtime()*1000000,1);
-            
-            if(($this->getConf('multi_projects')!==false) && ($this->getConf('shw_project_col')!==false)) 
+            if(($this->getConf('multi_projects')!==0) && ($this->getConf('shw_project_col')!==0)) 
                 { $th_project = "<th id='project'>".$this->getLang('th_project')."</th>"; }
                 
             $head = "<div class='itl__table'><table id='".$dynatable_id."' class='sortable editable resizable inline' width='100%'>".NL.
                     "<thead><tr>".NL.
                      $th_project.NL.
-                    "<th class=\"sortfirstdesc\" id='id'>".$this->getLang('th_id')."</th>".NL.
+                    "<th class='".$this->getConf('listview_sort')."' id='id'>".$this->getLang('th_id')."</th>".NL.
                     "<th id='created'>"   .$this->getLang('th_created')   ."</th>".NL.
                     "<th id='product'>"   .$this->getLang('th_product')   ."</th>".NL.
                     "<th id='version'>"   .$this->getLang('th_version')   ."</th>".NL.
                     "<th id='severity'>"  .$this->getLang('th_severity')  ."</th>".NL.
                     "<th id='status'>"    .$this->getLang('th_status')    ."</th>".NL.
-                    "<th id='user_name'>" .$this->getLang('th_username')  ."</th>".NL.
+                    "<th id='user_name'>" .$this->getLang('th_user_name')  ."</th>".NL.
                     "<th id='title'>"     .$this->getLang('th_title')     ."</th>".NL.
                     "<th id='assigned'>"  .$this->getLang('th_assigned')  ."</th>".NL. 
                     "<th id='resolution'>".$this->getLang('th_resolution')."</th>".NL.
@@ -540,12 +591,13 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             if($data['myissues'] == '') { $data['myissues']= false; }
             else { $data['myissues']= true; }
             
-            
             for ($i=$next_start-1;$i>=0;$i=$i-1)
-            {   // check start and end of rows to be displayed
+            {   // check start and end of rows to be displayed            
+                if($i>count($issues)) break;  // prevent the php-warning
                 $issue = $issues[$i];                    
-                $a_status     = strtoupper($this->_get_one_value($issue,'status'));
-                $a_severity   = strtoupper($this->_get_one_value($issue,'severity'));
+
+                $a_status     = strtolower($this->_get_one_value($issue,'status'));
+                $a_severity   = strtolower($this->_get_one_value($issue,'severity'));
                 $a_product    = strtoupper($this->_get_one_value($issue,'product'));
                 $a_version    = strtoupper($this->_get_one_value($issue,'version'));
                 $a_component  = strtoupper($this->_get_one_value($issue,'component'));
@@ -566,14 +618,14 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     if (stripos($this->getConf('status_special'),$a_status) !== false) continue;
                     $y=$y+1;
                     // check if status image or text to be displayed
-                    if ($noStatIMG === false) {                    
+                    if ($noStatIMG == false) {                    
                         $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_status))).'.gif';
 //                                if(!file_exists(str_replace("//", "/", DOKU_INC.$status_img)))  { $status_img = $imgBASE . 'status.gif' ;}
                         $status_img ='  class="it_center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$a_status.'" title="'.$a_status.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/>'.NL;
                     }                    
                     else { $status_img = $style.$a_status; }
                     // check if severity image or text to be displayed                                            
-                    if ($noSevIMG === false) {                    
+                    if ($noSevIMG == false) {                    
                         $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($a_severity))).'.gif';
 //                                if(!file_exists(str_replace("//", "/", DOKU_INC.$severity_img)))  { $severity_img = $imgBASE . 'status.gif' ;}
                         $severity_img ='  class="it_center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$a_severity.'" title="'.$a_severity.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/>'.NL;
@@ -582,18 +634,20 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     
 
                     $it_issue_username = $this->_get_one_value($issue,'user_name');
-                    if(($this->getConf('multi_projects')!==false) && ($this->getConf('shw_project_col')!==false)) 
-                    {   $project = $this->_get_one_value($issue,'project');
-                        $td_project = '<td class="itl__td_standard">'.$project.'</td>';
+                    $a_project = $this->_get_one_value($issue,'project');
+                    if(($this->getConf('multi_projects')!==0) && ($this->getConf('shw_project_col')!==0)) 
+                    {   $td_project = '<td class="itl__td_standard">'.$a_project.'</td>';
                     }
+                       
                     // build parameter for $_GET method
-                        $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
+                        $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($a_project));
                         $itl_item_title = '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$this->_get_one_value($issue,'title').'">'.$this->_get_one_value($issue,'title').'</a>'.NL;
 
-                        if($rowEven==="it_roweven") $rowEven="it_rowodd";
-                        else $rowEven="it_roweven";                    
-
-                    $body .= '<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.NL.
+                                            
+                    if((($this->getConf('multi_projects')!==0) && ($this->getConf('shw_project_col')!==0)) || $project == $a_project  )
+                    { if($rowEven==="it_roweven") $rowEven="it_rowodd";
+                      else $rowEven="it_roweven";
+                      $body .= '<tr id = "'.$a_project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.NL.
                               $td_project.NL.              
                              '<td class="itl__td_standard">'.$this->_get_one_value($issue,'id').'</td>'.NL.
                              '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.NL.
@@ -609,7 +663,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     $body .= '<td class="canbreak itl__td_standard"><a href="mailto:'.$this->_get_one_value($issue,'assigned').'">'.$a_display.'</a></td>'.NL. 
                              '<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.NL.
                              '<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.NL.
-                             '</tr>'.NL;        
+                             '</tr>'.NL;
+                    }        
                 }
             } 
             $body .= '</tbody></table></div>'.NL;          
@@ -618,11 +673,21 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         else       
         {   //$head = "<div class='issuetracker_div' ".$hdr_style."><table id='".$project."' class=\"sortable resizable inline\"><thead><thead><tr><th class=\"sortfirstdesc\" id='id'>Id</th><th id='Status'>Status</th><th id='Severity'>Severity</th><th id='Created'>Created</th><th id='Version'>Version</th><th id='User'>User</th><th id='Description'>Description</th><th id='assigned'>assigned</th><th id='Resolution'>Resolution</th><th id='Modified'>Modified</th></tr></thead>";        
             $dynatable_id = "t_".uniqid((double)microtime()*1000000,1);
-            //Build table header according settings
-            $configs = explode(',', $this->getConf('shwtbl_usr')) ;
+            //Build table header according settings or syntax
+            if(strlen($data['columns'])>0) {
+              $configs = explode(',', strtolower($data['columns']));
+            }
+            else {
+              $configs = explode(',', $this->getConf('shwtbl_usr')) ;
+            }
+
+           
+            if(($this->getConf('multi_projects')!==0) && ($this->getConf('shw_project_col')!==0)) 
+            { $th_project = "<th id='project'>".$this->getLang('th_project')."</th>"; }
+
             $reduced_header ='';
             $reduced_header = "<div class='itl__table'><table id='".$dynatable_id."' class='sortable resizable inline' width='100%'>".NL.
-                    "<thead><tr>".NL."<th class='sortfirstdesc' id='id'>".$this->getLang('th_id')."</th>".NL;
+                    "<thead><tr>".NL.$th_project.NL."<th class='".$this->getConf('listview_sort')."' id='id'>".$this->getLang('th_id')."</th>".NL;
 
             foreach ($configs as $config)
             {
@@ -635,9 +700,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $reduced_issues='';
             for ($i=$next_start-1;$i>=0;$i=$i-1)
             {   // check start and end of rows to be displayed
+                if($i>count($issues)) break;  // prevent the php-warning
                 $issue = $issues[$i];
-                $a_status     = strtoupper($this->_get_one_value($issue,'status'));
-                $a_severity   = strtoupper($this->_get_one_value($issue,'severity'));
+                $a_project      = strtolower($this->_get_one_value($issue,'project'));
+                $a_status     = strtolower($this->_get_one_value($issue,'status'));
+                $a_severity   = strtolower($this->_get_one_value($issue,'severity'));
                 $a_product    = strtoupper($this->_get_one_value($issue,'product'));
                 $a_version    = strtoupper($this->_get_one_value($issue,'version'));
                 $a_component  = strtoupper($this->_get_one_value($issue,'component'));
@@ -654,60 +721,70 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                     (($data['reporter']  =='ALL') || (stristr($data['reporter'],$a_reporter)      != false)) &&
                     (($data['myissues']  == false  ) || ($this->_find_myissues($issue, $user_grp) == true)))
                {   
-                    if ($y>=$step) break;
+                    
                     if (stripos($this->getConf('status_special'),$a_status) !== false) continue;
-                    $y=$y+1;
+                    if((($this->getConf('multi_projects')!==0) && ($this->getConf('shw_project_col')!==0)) || $project == $a_project  )
+                    {   if ($y>=$step) break;
+                        $y=$y+1;
+    
+                        if($rowEven==="it_roweven") $rowEven="it_rowodd";
+                        else $rowEven="it_roweven";
+    
+                        if(($this->getConf('multi_projects')!==0) && ($this->getConf('shw_project_col')!==0)) 
+                        {   $a_project = $this->_get_one_value($issue,'project');
+                            $td_project = '<td class="itl__td_standard">'.$a_project.'</td>';
+                        }
+                        else{$td_project="";}
 
-                    if($rowEven==="it_roweven") $rowEven="it_rowodd";
-                    else $rowEven="it_roweven";
-
-                    $reduced_issues = $reduced_issues.'<tr id = "'.$project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.NL.
-                                                      '<td'.$style.$this->_get_one_value($issue,'id').'</td>'.NL;
-                    foreach ($configs as $config)
-                    {
-                        $isval = $this->_get_one_value($issue,strtolower($config));
-                        if ($config == 'status')
+                        $reduced_issues = $reduced_issues.'<tr id = "'.$a_project.' '.$this->_get_one_value($issue,'id').'" class="'.$rowEven.'" >'.NL.
+                                                          $td_project.NL.
+                                                          '<td'.$style.$this->_get_one_value($issue,'id').'</td>'.NL;
+                        foreach ($configs as $config)
                         {
-                            if ($noStatIMG === false) {                    
-                                $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
-                                $reduced_issues .='<td class="it_center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/></td>'.NL;
+                            $isval = $this->_get_one_value($issue,strtolower($config));
+                            if ($config == 'status')
+                            {
+                                if ($noStatIMG == false) {                    
+                                    $status_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
+                                    $reduced_issues .='<td class="it_center"><span style="display : none;">'.$a_status.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$status_img.'" width="16" height="16"/></td>'.NL;
+                                }
+                                else { $reduced_issues .= '<td'.$style.$isval.'</td>'.NL; }
+                            }                                            
+                            elseif ($config == 'severity')
+                            {
+                                if ($noSevIMG == false) {                    
+                                    $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
+                                    $reduced_issues .='<td  class="it_center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/></td>'.NL;
+                                }
+                                else { $reduced_issues .= '<td'.$style.$isval.'</td>'.NL; }
                             }
-                            else { $reduced_issues .= '<td'.$style.$isval.'</td>'.NL; }
-                        }                                            
-                        elseif ($config == 'severity')
-                        {
-                            if ($noSevIMG === false) {                    
-                                $severity_img = $imgBASE . implode('', explode(' ',$this->img_name_encode($isval))).'.gif';
-                                $reduced_issues .='<td  class="it_center"><span style="display : none;">'.$a_severity.'</span><img border="0" alt="'.$isval.'" title="'.$isval.'" style="margin-right:0.5em" vspace="1" align="middle" src="'.$severity_img.'" width="16" height="16"/></td>'.NL;
+                            elseif ($config == 'title')
+                            {   // build parameter for $_GET method
+                                $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($a_project));
+                                $reduced_issues .='<td>'.
+                                                  '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$isval.'">'.$isval.'</a></td>'.NL;
                             }
-                            else { $reduced_issues .= '<td'.$style.$isval.'</td>'.NL; }
+                            elseif ($config == 'created')
+                            {   $reduced_issues .='<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.NL;
+                            }
+                            elseif ($config == 'modified')
+                            {   $reduced_issues .='<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.NL;
+                            }
+                            elseif ($config == 'resolution')
+                            {   $reduced_issues .='<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.NL;
+                            }
+                            elseif ($config == 'description')
+                            {   $reduced_issues .='<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'description')).'</td>'.NL;
+                            }
+                            else 
+                            {
+                                $reduced_issues .= '<td'.$style.$isval.'</td>'.NL;
+                            }
                         }
-                        elseif ($config == 'title')
-                        {   // build parameter for $_GET method
-                            $pstring = sprintf("showid=%s&amp;project=%s", urlencode($this->_get_one_value($issue,'id')), urlencode($project));
-                            $reduced_issues .='<td>'.
-                                              '<a href="doku.php?id='.$ID.'&do=showcaselink&'.$pstring.'" title="'.$isval.'">'.$isval.'</a></td>'.NL;
-                        }
-                        elseif ($config == 'created')
-                        {   $reduced_issues .='<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'created'))).'</td>'.NL;
-                        }
-                        elseif ($config == 'modified')
-                        {   $reduced_issues .='<td class="itl__td_date">'.date($this->getConf('d_format'),strtotime($this->_get_one_value($issue,'modified'))).'</td>'.NL;
-                        }
-                        elseif ($config == 'resolution')
-                        {   $reduced_issues .='<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'resolution')).'</td>'.NL;
-                        }
-                        elseif ($config == 'description')
-                        {   $reduced_issues .='<td class="canbreak itl__td_standard">'.$this->xs_format($this->_get_one_value($issue,'description')).'</td>'.NL;
-                        }
-                        else 
-                        {
-                            $reduced_issues .= '<td'.$style.$isval.'</td>'.NL;
-                        }
+                        $reduced_issues .= '</tr>'.NL;
                     }
-                    $reduced_issues .= '</tr>'.NL;
-                }
-            }
+                  }
+              }
             
             $head = NL.$reduced_header.NL;
             $body = '<tbody>'.$reduced_issues.'</tbody>'.NL.'</table>'.NL.'</div>'.NL;
@@ -717,8 +794,14 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         if($data['myissues']==false) {$data['myissues'] = "";}
         else {$data['myissues'] = "checked='true'";}                
         
+        if($data['tblock']==false) { $data['tblock'] = ""; }
+        else $data['tblock'] = "checked='true'";
+
         if (strtolower($data['controls'])==='on') {
-          $li_count = $this->_count_render($issues,$start,$step,$next_start,$data);
+          $a_result = $this->_count_render($issues,$start,$step,$next_start,$data,$project);
+          $li_count =$a_result[1];
+          $count = $a_result[0];                
+
         $ret = '<div>'.NL.
                '<script  type="text/javascript">'.NL. 
                '        function changeAction(where) {'.NL. 
@@ -737,46 +820,56 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                '<table class="itl__t1"><tbody>'.NL.
                '<tr class="itd__tables_tr">'.NL.
                '   <td colspan="4" align="left" valign="middle" height="30">'.NL.
-               '       <label class="it__cir_projectlabel">'.sprintf($this->getLang('lbl_issueqty'),$project).count($issues).'</label>'.NL.
+               '       <label class="it__cir_projectlabel">'.sprintf($this->getLang('lbl_issueqty'),$project).$count.'</label>'.NL.
                '   </td>'.NL.
                '   <td class="itl__showdtls" rowspan="2" width="30%">'.$li_count.'</td>'.NL.
                '</tr>'.NL.
 
                '<tr class="itd__tables_tr">'.NL.
-               '   <td align ="left" valign="top" width="15%">'.NL.
-               '     <p class="it__cir_projectlabel">'.'<label for="itl_step"         style="align:left;">'.$this->getLang('lbl_scroll').    '</label><br />'.NL.
-                                                       '<label for="itl_sev_filter"   style="align:left;">'.$this->getLang('lbl_filtersev'). '</label><br />'.NL.
-                                                       '<label for="itl_stat_filter"  style="align:left;">'.$this->getLang('lbl_filterstat').'</label><br /></p>'.NL.
-               '    <p class="it__cir_projectlabel">'.'<label for="itl__prod_filter" style="align:left;">'.$this->getLang('lbl_filterprod').'</label><br />'.NL.
-                                                       '<label for="itl__vers_filter" style="align:left;">'.$this->getLang('lbl_filtervers').'</label><br />'.NL.
-                                                       '<label for="itl__comp_filter" style="align:left;">'.$this->getLang('lbl_filtercomp').'</label><br /></p>'.NL.
-               '    <p class="it__cir_projectlabel">'.'<label for="itl__block_filter" style="align:left;">'.$this->getLang('lbl_filterblock').'</label><br />'.NL.
-                                                       '<label for="itl__assi_filter" style="align:left;">'.$this->getLang('lbl_filterassi').'</label><br />'.NL.
-                                                       '<label for="itl__user_filter" style="align:left;">'.$this->getLang('lbl_filterreporter').'</label><br />'.NL.
-                                                       '<label for="itl_myis_filter"  style="align:left;">'.$this->getLang('cbx_myissues').  '</label><br />'.NL.
-                                                       '<label for="it_glbl_sort"     style="align:left;">'.$this->getLang('lbl_sort').'</label></p>'.NL.
-               '   </td>'.NL.
-               '   <td align ="left" valign="top" width="25%">'.NL.
+               '   <td align ="left" valign="top" width="15%">'.NL;
+
+               $ret .= '   <p class="it__cir_projectlabel">'.'<label for="itl_step"           style="align:left;">'.$this->getLang('lbl_scroll')                                                 .'</label><br />'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'Filter Severity')=== false)      $ret .= '<label for="itl_sev_filter"   style="align:left;">'.$this->getLang('lbl_filtersev')     .'</label><br />'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'Filter Status')=== false)        $ret .= '<label for="itl_stat_filter"  style="align:left;">'.$this->getLang('lbl_filterstat')    .'</label><br />'.NL;
+               $ret .= '</p><p class="it__cir_projectlabel">'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'Filter Product')=== false)       $ret .= '<label for="itl__prod_filter" style="align:left;">'.$this->getLang('lbl_filterprod')    .'</label><br />'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'Filter Version')=== false)       $ret .= '<label for="itl__vers_filter" style="align:left;">'.$this->getLang('lbl_filtervers')    .'</label><br />'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'Filter Component')=== false)     $ret .= '<label for="itl__comp_filter" style="align:left;">'.$this->getLang('lbl_filtercomp')    .'</label><br />'.NL;
+               $ret .= '</p><p class="it__cir_projectlabel">'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'Filter Test blocking')=== false) $ret .= '<label for="itl__block_filter" style="align:left;">'.$this->getLang('lbl_filterblock')  .'</label><br />'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'Filter Assignee')=== false)      $ret .= '<label for="itl__assi_filter" style="align:left;">'.$this->getLang('lbl_filterassi')    .'</label><br />'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'Filter Reporter')=== false)      $ret .= '<label for="itl__user_filter" style="align:left;">'.$this->getLang('lbl_filterreporter').'</label><br />'.NL;
+               $ret .= '</p><p class="it__cir_projectlabel">'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'MyIssues')=== false)             $ret .= '<label for="itl_myis_filter"  style="align:left;">'.$this->getLang('cbx_myissues')      .'</label><br />'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'Sort by')=== false)              $ret .= '<label for="it_glbl_sort"     style="align:left;">'.$this->getLang('lbl_sort')          .'</label>'.NL;
+               $ret .= '</p></td>'.NL;
+
+               $ret .= '   <td align ="left" valign="top" width="25%">'.NL.
                '    <form name="myForm" action="" method="post">'.NL.
                '       <input                          type="hidden" name="itl_start"        id="itl_start"        value="'.$start.'"/>'.NL.
                '       <input                          type="hidden" name="itl_step"         id="itl_step"         value="'.$step.'"/>'.NL.
                '       <input                          type="hidden" name="itl_next"         id="itl_next"         value="'.$next_start.'"/>'.NL.
                '       <input                          type="hidden" name="itl_project"      id="itl_project"      value="'.$project.'"/>'.NL.
-               '    <input class="itl__buttons"     type="button" name="showprevious"                           value="'   .$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>'.NL.
+               '       <input                          type="hidden" name="it_th_cols"       id="it_th_cols"       value="'.$data['columns'].'"/>'.NL.
+               '       <input class="itl__buttons"     type="button" name="showprevious"                           value="'.$this->getLang('btn_previuos').'" title="'.$this->getLang('btn_previuos_title').'" onClick="changeAction(1)"/>'.NL.
                '       <input class="itl__step_input"  type="text"   name="itl_step"         id="itl_step"         value="'.$step.'"/>'.NL.
-               '       <input class="itl__buttons"     type="button" name="shownext"                               value="'.$this->getLang('btn_next').'"     title="'.$this->getLang('btn_next_title').'"     onClick="changeAction(2)"/><br />'.NL.
-               '       <input class="itl__sev_filter"  type="text"   name="itl_sev_filter"   id="itl_sev_filter"   value="'.$data['severity'].'"/><br />'.NL.                         
-               '       <input class="itl__stat_filter" type="text"   name="itl_stat_filter"  id="itl_stat_filter"  value="'.$data['status'].'"/><br /></p>'.NL.
-               '    <p><input class="itl__prod_filter" type="text"   name="itl__prod_filter" id="itl__prod_filter" value="'.$data['product'].'"/><br />'.NL.
-               '       <input class="itl__prod_filter" type="text"   name="itl__vers_filter" id="itl__vers_filter" value="'.$data['version'].'"/><br />'.NL.
-               '       <input class="itl__prod_filter" type="text"   name="itl__comp_filter" id="itl__comp_filter" value="'.$data['component'].'"/><br /></p>'.NL.
-               '    <p><input                          type="checkbox" name="itl__block_filter" id="itl__block_filter" '   .$data['tblock'].'/><br />'.NL.
-               '       <input class="itl__prod_filter" type="text"   name="itl__assi_filter" id="itl__assi_filter" value="'.$data['assignee'].'"/><br />'.NL.
-               '       <input class="itl__prod_filter" type="text"   name="itl__user_filter" id="itl__user_filter" value="'.$data['reporter'].'"/><br />'.NL.
-               '       <input                          type="checkbox" name="itl_myis_filter" id="itl_myis_filter" '       .$data['myissues'].' title="'.$this->getLang('cbx_myissues').'" /><br />'.NL.
-               '       <input class="itl__sev_filter"  type="text"   name="it_glbl_sort"      id="it_glbl_sort"    value="'.$data['sort'].'"/><br /></p>'.NL.
-               '       <input class="itl__buttons"     type="button" name="go"                                     value="'.$this->getLang('btn_go').'"        title="'.$this->getLang('btn_go').'"            onClick="changeAction(3)"/><br />'.NL.
-               '    </form>'.NL.                      
+               '       <input class="itl__buttons"     type="button" name="shownext"                               value="'.$this->getLang('btn_next').'"     title="'.$this->getLang('btn_next_title').'"     onClick="changeAction(2)"/><br />'.NL;
+               
+                   if(stripos($this->getConf('ltdListFilters'),'Filter Severity')=== false)      $ret .= '<input class="itl__sev_filter"  type="text"   name="itl_sev_filter"   id="itl_sev_filter"   value="'.$data['severity'].'"/><br />'.NL;                         
+                   if(stripos($this->getConf('ltdListFilters'),'Filter Status')=== false)        $ret .= '<input class="itl__stat_filter" type="text"   name="itl_stat_filter"  id="itl_stat_filter"  value="'.$data['status'].'"/><br /></p>'.NL;
+               $ret .= '</p><p>'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'Filter Product')=== false)       $ret .= '<input class="itl__prod_filter" type="text"   name="itl__prod_filter" id="itl__prod_filter" value="'.$data['product'].'"/><br />'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'Filter Version')=== false)       $ret .= '<input class="itl__prod_filter" type="text"   name="itl__vers_filter" id="itl__vers_filter" value="'.$data['version'].'"/><br />'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'Filter Component')=== false)     $ret .= '<input class="itl__prod_filter" type="text"   name="itl__comp_filter" id="itl__comp_filter" value="'.$data['component'].'"/><br /></p>'.NL;
+               $ret .= '</p><p>'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'Filter Test blocking')=== false) $ret .= '<input                          type="checkbox" name="itl__block_filter" id="itl__block_filter" '   .$data['tblock'].'/><br />'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'Filter Assignee')=== false)      $ret .= '<input class="itl__prod_filter" type="text"   name="itl__assi_filter" id="itl__assi_filter" value="'.$data['assignee'].'"/><br />'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'Filter Reporter')=== false)      $ret .= '<input class="itl__prod_filter" type="text"   name="itl__user_filter" id="itl__user_filter" value="'.$data['reporter'].'"/><br />'.NL;
+               $ret .= '</p><p>'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'MyIssues')=== false)             $ret .= '<input                          type="checkbox" name="itl_myis_filter" id="itl_myis_filter" '       .$data['myissues'].' title="'.$this->getLang('cbx_myissues').'" /><br />'.NL;
+                   if(stripos($this->getConf('ltdListFilters'),'Sort by')=== false)              $ret .= '<input class="itl__sev_filter"  type="text"   name="it_glbl_sort"      id="it_glbl_sort"    value="'.$data['sort'].'"/><br /></p>'.NL;
+               $ret .= '</p><input class="itl__buttons" type="button" name="go" value="'.$this->getLang('btn_go').'" title="'.$this->getLang('btn_go').'" onClick="changeAction(3)"/><br />'.NL;
+               $ret .= '</form>'.NL.                      
                '   </td>'.NL.
                '   <td width="2%">&nbsp;</td>'.NL.
                '   <td class="itl__showdtls" align ="left" width="40%">'.NL.
@@ -845,7 +938,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 /******************************************************************************/
 /* send an e-mail to admin due to new issue created
 */
-    function _emailForNewIssue($project,$issue)
+    function _emailForNewIssue($project,$issue,$email_to)
     {
         if ($this->getConf('send_email')==1)
         {   global $ID;
@@ -875,7 +968,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 
             $body = html_entity_decode($body);
             if ($this->getConf('mail_templates')==1) $bodyhtml = $this->replace_bodyhtml($bodyhtml, $pstring, $project, $issue, $comment);
-            $from=$this->getConf('email_address') ;
+            $from=$email_to ;
             $to=$from;
             $cc=$issue['add_user_mail'];
             if ($this->getConf('mail_templates')==1) { 
@@ -914,7 +1007,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
      
       $random_hash = md5(date('r', time())); // added
      
-      $to = mail_encode_address($to,'',$usenames);
+      $to = mail_encode_address($to,'',$usenames); 
       $header .= mail_encode_address($from,'From');
       $header .= mail_encode_address($cc,'Cc');
       $header .= mail_encode_address($bcc,'Bcc');
@@ -923,8 +1016,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
       $header  = trim($header);
      
 
-      $body = mail_quotedprintable_encode($body);
-      $bodyhtml = mail_quotedprintable_encode($bodyhtml);
+      $body = mail_quotedprintable_encode($body,0);
+      $bodyhtml = mail_quotedprintable_encode($bodyhtml,0);
 
       $message =	"--PHP-alt-".$random_hash."\r\n".
     				"Content-Type: text/plain; charset=UTF-8"."\n".
@@ -935,11 +1028,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     				"Content-Transfer-Encoding: quoted-printable"."\n\n".
     				$bodyhtml."\n".
     				"--PHP-alt-".$random_hash."--";
-     
+
       if($params == null){
-        return @mail($to,$subject,$message,$header);
+        return mail($to,$subject,$message,$header);
       }else{
-        return @mail($to,$subject,$message,$header,$params);
+        return mail($to,$subject,$message,$header,$params);
       }
     }
 /******************************************************************************/
@@ -963,11 +1056,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $bodyhtml = str_ireplace("%%SEVERITY%%",$issue['severity'],$bodyhtml);
         $bodyhtml = str_ireplace("%%issuemod_creator%%",$this->getLang('issuemod_creator'),$bodyhtml);
         $bodyhtml = str_ireplace("%%CREATOR%%",$issue['user_name'],$bodyhtml);
+        $bodyhtml = str_ireplace("%%CREATOR_MAIL%%",$issue['user_mail'],$bodyhtml);
         $bodyhtml = str_ireplace("%%th_assigned%%",$this->getLang('th_assigned'),$bodyhtml);
         $bodyhtml = str_ireplace("%%ASSIGNED%%",$issue['assigned'],$bodyhtml);
         $bodyhtml = str_ireplace("%%th_created%%",$this->getLang('th_created'),$bodyhtml);
         $bodyhtml = str_ireplace("%%CREATED%%",$issue['created'],$bodyhtml);
-
 
         $bodyhtml = str_ireplace("%%issue_resolved_intro%%",$this->getLang('issue_resolved_intro'),$bodyhtml);
         $bodyhtml = str_ireplace("%%issue_resolved_text%%",$this->getLang('issue_resolved_text'),$bodyhtml);
@@ -1007,20 +1100,48 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         global $ID;
         $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
         $project = $data['project'];
+        
         // retrive some basic information
         $user_mail = pageinfo();  //to get mail address of reporter
         $cur_date = date($this->getConf('d_format'));
         $user_check = $this->getConf('registered_users');
 
+        // check if current user is admin/assignee
+        // check if syntax parameter asympupl is switched on
+        $user_mail    = pageinfo();
+        if(array_key_exists('userinfo', $user_mail))
+        {   foreach ($user_mail['userinfo']['grps'] as $ugrp)
+            {  $user_grps = $user_grps . $ugrp;  }
+        }
+        else
+        {   $user_grps = 'all';  }
+        $allowed_users = explode('|', $this->getConf('assign'));
+        $cFlag = false;
+        foreach ($allowed_users as $w) 
+        {   // check if one of the assigned user roles does match with current user roles
+            if (strpos($user_grps,$w)!== false)
+            {   $cFlag = true;
+                break;  } 
+        }      
+
         $_cFlag = false;
         if($user_check == 0) {
-            if ($user_mail['perm'] >= 1) 
-            { $_cFlag = true; } }             
-        elseif ($user_check == 1) {
-            if ($user_mail['perm'] > 1) 
-            { $_cFlag = true; } }
+            $_cFlag = true;  }             
+        elseif (($user_check == 1) && ($user_mail['perm'] > 1)) {
+            $_cFlag = true;  }
 
         if($_cFlag === true) {
+            /*--------------------------------------------------------------------*/
+            // load set of projects defined by admin
+            /*--------------------------------------------------------------------*/
+            $STR_PROJECT = "";
+            $l_projects = explode(',', $this->getConf('projects')) ;
+            $STR_PROJECT = '<option value="" >'.$project.'</option>'.NL;
+            foreach ($l_projects as $a_project)
+            {
+                $a_project = trim($a_project);
+                $STR_PROJECT .= '<option value="'.$a_project.'" >'.$a_project."</option>".NL;
+            }
             /*--------------------------------------------------------------------*/
             // load set of product names defined by admin
             /*--------------------------------------------------------------------*/
@@ -1080,6 +1201,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $ret = '<div class="it__cir_form"><script type="text/javascript">
                    // JavaScript Document
                     function chkFormular (frm) {
+
+                        //alert(frm.description.innerHTML);
+                        frm.description.value = frm.description.innerHTML;
+                        
+                        
                         if (frm.product.value == "") {
                           alert("Please select a valid product!");
                           frm.product.focus();
@@ -1127,9 +1253,16 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             '</p>'.NL.
             '<table class="it_form_table">
               <tr>
-                <td>'.$this->getLang('th_project').'</td>
-                <td><label class="it__cir_projectlabel">'.$project.'</label></td>
-              </tr>'.NL.
+                <td>'.$this->getLang('th_project').'</td>'.NL;
+                
+                   //Check config if hidden
+                  if($this->getConf('projects')==""){ 
+                        msg("I am here");
+                        $ret .= '<td><label class="it__cir_projectlabel">'.$project.'</label></td>'.NL; } 
+                  else {
+                      $ret .='<td><select class="element select small it__cir_select" name="project">'.$STR_PROJECT.'</select></td>'.NL;
+                  }
+     $ret .= '</tr>'.NL.
              '<tr>
                 <td>'.$this->getLang('th_product').'</td>
                 <td><select class="element select small it__cir_select" name="product">'.$STR_PRODUCTS.'</select></td>
@@ -1147,9 +1280,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         
         $ret .= '</tr><tr>'.NL;
                    //Check config if hidden
-                  if(strpos($this->getConf('ltdReport'),'components')!==false){
+                  if(strpos($this->getConf('ltdReport'),'Components')!==false){
                       $STR_COMPONENTS = ' ';
-                      $ret .= '<input type="hidden" class="it__cir_input" name="version" value="'.$STR_COMPONENTS.'"/>';
+                      $ret .= '<input type="hidden" class="it__cir_input" name="component" value="'.$STR_COMPONENTS.'"/>';
                   } 
                   else {
                       $ret .='<td>'.$this->getLang('th_components').'</td>
@@ -1158,7 +1291,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $ret .= '</tr><tr>'.NL;
                 
                    //Check config if hidden
-                  if(strpos($this->getConf('ltdReport'),'tblock')!==false){
+                  if(strpos($this->getConf('ltdReport'),'Test blocking')!==false){
                       $ret .= '<input type="hidden" name="tblock" value="false">';
                   } 
                   else {
@@ -1168,7 +1301,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         
         $ret .= '</tr><tr><td colspan=2>&nbsp;</td></tr>'.NL.
              '<tr>
-                <td>'.$this->getLang('th_username').'</td>
+                <td>'.$this->getLang('th_user_name').'</td>
                 <td><input class="it__cir_input" name="user_name" value="'.$user_mail['userinfo']['name'].'"/></td>
               </tr>'.NL.
              '<tr>
@@ -1217,165 +1350,67 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 <td>'.NL;
 
 // mod for editor ---------------------------------------------------------------------
-$ret .= '<script type="text/javascript">
-          function doHLine(tag1,obj)
-          { textarea = document.getElementById(obj);
-          	if (document.selection) 
-          	{     // Code for IE
-          				textarea.focus();
-          				var sel = document.selection.createRange();
-          				sel.text = tag1 + sel.text;
-          	}
-            else 
-            {   // Code for Mozilla Firefox
-             		var len = textarea.value.length;
-             	  var start = textarea.selectionStart;
-             		var end = textarea.selectionEnd;
-              		
-             		var scrollTop = textarea.scrollTop;
-             		var scrollLeft = textarea.scrollLeft;
-              		
-                var sel = textarea.value.substring(start, end);
-         		    var rep = tag1 + sel;
-                textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
-              		
-             		textarea.scrollTop = scrollTop;
-             		textarea.scrollLeft = scrollLeft;
-          	}
-          }'.
-
-         "function doLink(tag1,tag2,obj)
-          {   var sel;
-              textarea = document.getElementById(obj);
-              var url = prompt('Enter the URL:','http://');
-              var scrollTop = textarea.scrollTop;
-              var scrollLeft = textarea.scrollLeft;
-              
-              if (url != '' && url != null) 
-              {   if (document.selection) 
-                  {   textarea.focus();
-                      var sel = document.selection.createRange();
-                      
-                      if(sel.text=='') { sel.text = '<a href=\"' + url + '\">' + url + '</a>'; }
-                      else { sel.text = '<a href=\"' + url + '\">' + sel.text + '</a>'; }				
-                  }
-                  else 
-                  {   var len = textarea.value.length;
-                      var start = textarea.selectionStart;
-                      var end = textarea.selectionEnd;
-                      var sel = textarea.value.substring(start, end);
-                      
-                      if(sel==''){ sel=url; } 
-                      else { var sel = textarea.value.substring(start, end); }
-                      
-                      var rep = '<a href=\"' + url + '\">' + sel + '</a>';
-                      textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
-                      textarea.scrollTop = scrollTop;
-                      textarea.scrollLeft = scrollLeft;
-                	}
-              }
-          }".
-         'function doAddTags(tag1,tag2,obj)
-          { textarea = document.getElementById(obj);
-          	// Code for IE
-          	if (document.selection) 
-          			{ textarea.focus();
-          				var sel = document.selection.createRange();
-          				sel.text = tag1 + sel.text + tag2;
-          			}
-             else 
-              {  // Code for Mozilla Firefox
-          		  var len = textarea.value.length;
-          	    var start = textarea.selectionStart;
-          		  var end = textarea.selectionEnd;
-          		
-          		  var scrollTop = textarea.scrollTop;
-          		  var scrollLeft = textarea.scrollLeft;
-          		
-                var sel = textarea.value.substring(start, end);
-          		  var rep = tag1 + sel + tag2;
-                textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
-          		
-          		  textarea.scrollTop = scrollTop;
-          		  textarea.scrollLeft = scrollLeft;
-          	}
-          }
-          
-          function doList(tag1,tag2,obj)
-          {
-              textarea = document.getElementById(obj);
-
-          		if (document.selection) 
-          			{ // Code for IE
-          				textarea.focus();
-          				var sel = document.selection.createRange();
-          				var list = sel.text.split("\n");
-          		
-          				for(i=0;i<list.length;i++) 
-          				{
-          				list[i] = "[li]" + list[i] + "[/li]";
-          				}
-          				sel.text = tag1 + "\n" + list.join("\n") + "\n" + tag2;
-          			} 
-              else
-          			{ // Code for Firefox
-          		    var len = textarea.value.length;
-          	      var start = textarea.selectionStart;
-          		    var end = textarea.selectionEnd;
-          		    var i;
-
-          		    var scrollTop = textarea.scrollTop;
-          		    var scrollLeft = textarea.scrollLeft;
-
-                  var sel = textarea.value.substring(start, end);
-          		    var list = sel.split("\n");
-          		
-              		for(i=0;i<list.length;i++) 
-              		{ list[i] = "[li]" + list[i] + "[/li]"; }
-
-              		var rep = tag1 + "\n" + list.join("\n") + "\n" +tag2;
-              		textarea.value =  textarea.value.substring(0,start) + rep + textarea.value.substring(end,len);
-
-              		textarea.scrollTop = scrollTop;
-              		textarea.scrollLeft = scrollLeft;
-              }
-          }
-         </script>';                      
+// check the config setting what editor to be used
+        if($this->getConf('wysiwyg')==true)
+        { 
+                  //hack if DOKU_BASE is not properly set
+                  if(strlen(DOKU_BASE) < strlen(DOKU_URL)) $sFilename = DOKU_URL."lib/plugins/issuetracker/wysiwyg_editor.js";
+                  else $sFilename = DOKU_BASE."lib/plugins/issuetracker/wysiwyg_editor.js";
+                  $ret      .= '<script type="text/javascript" src="'.$sFilename.'"></script>';
+                  $sFilename = DOKU_PLUGIN.'issuetracker/wysiwyg_editor.html';
+                  $ret      .= file_get_contents($sFilename);
+                  $ret       = str_ireplace("%%DOKU_BASE%%",DOKU_BASE,$ret);
+                  $ret .= '<span class="reply_close_link">
+                             <a href="javascript:resizeBoxId(\'description\', -20)"><img src="'.$imgBASE.'reduce.png" title="reduce textarea" style="float:right;" /></a>
+                             <a href="javascript:resizeBoxId(\'description\', +20)"><img src="'.$imgBASE.'enlarge.png" title="enlarge textarea" style="float:right;" /></a>
+                           </span>'.NL;                  
+                  
+                  
+        }
+        else
+        {
+                  if(strlen(DOKU_BASE) < strlen(DOKU_URL)) $sFilename = DOKU_INC."lib/plugins/issuetracker/xsEditor.js";
+                  else $sFilename = DOKU_BASE."lib/plugins/issuetracker/xsEditor.js";
+                  $ret      .= '<script type="text/javascript" src="'.$sFilename.'"></script>';
+                  $ret .= file_get_contents($sFilename);
+                  global $_FILES;
+                  $ret .= $this->it_edit_toolbar('description');
+                  $ret .= '<textarea class="it__cir_linput" id="description" name="description" cols="109" rows="7">'.$_REQUEST['description'].'</textarea></td></tr>
+                           <span class="reply_close_link">
+                              <a href="javascript:resizeBoxId(\'description\', -20)"><img src="'.$imgBASE.'reduce.png" title="reduce textarea" style="float:right;" /></a>
+                              <a href="javascript:resizeBoxId(\'description\', +20)"><img src="'.$imgBASE.'enlarge.png" title="enlarge textarea" style="float:right;" /></a>
+                           </span>'.NL;
+        }                      
 // mod for editor ---------------------------------------------------------------------
-  global $_FILES;
-  $ret .= $this->it_edit_toolbar('description');
 
-          $ret .= '<textarea class="it__cir_linput" id="description" name="description" cols="109" rows="7">'.$_REQUEST['description'].'</textarea></td>
-             </tr>'.
-            '<tr><td colspan=2>&nbsp;</td></tr>';
+          $ret .= '<tr><td colspan=2>&nbsp;</td></tr>';
                   // check if symptom file upload is allowed
-                  if($this->getConf('upload')>0) {
-                      $ret .= '<tr><td><input class="it__cir_linput" type="hidden" name="MAX_FILE_SIZE" value="'.$this->getConf('max_fsize').'" />'.NL.
-                              'Symptom file upload:</td><td><input class="it__cir_linput" name="uploadedfile" type="file" /></td></tr>'.NL;
-
-                  }
-                  else {
+                  if(($this->getConf('upload')>0) || (($cFlag === true) && ($data['asympupl']=true))) {
                       //Check config if hidden
-                      if(strpos($this->getConf('ltdReport'),'Symptom link 1')!==false){
+                      if(($cFlag === true) && ($data['asympupl']=true)) {
+                          $ret .= '<tr><td>'.$this->getLang('th_sympt').'1</td>
+                                       <td><input type="file" class="it__cir_linput" name="attachment1" value="'.$_REQUEST['attachment1'].'"/></td></tr>';
+                      }                                   
+                      elseif(strpos($this->getConf('ltdReport'),'Symptom link 1')!==false){
                           $ret .= ' <input type="hidden" class="it__cir_linput" name="attachment1" value="'.$_REQUEST['attachment1'].'"/>';
                       } 
                       else {
                           $ret .= '<tr><td>'.$this->getLang('th_sympt').'1</td>
-                                       <td><input type="text" class="it__cir_linput" name="attachment1" value="'.$_REQUEST['attachment1'].'"/></td></tr>';
+                                       <td><input type="file" class="it__cir_linput" name="attachment1" value="'.$_REQUEST['attachment1'].'"/></td></tr>';
                       }             
                       if(strpos($this->getConf('ltdReport'),'Symptom link 2')!==false){
                           $ret .= ' <input type="hidden" class="it__cir_linput" name="attachment2" value="'.$_REQUEST['attachment2'].'"/>';
                       } 
                       else {
                           $ret .= '<tr><td>'.$this->getLang('th_sympt').'2</td>
-                                       <td><input type="text" class="it__cir_linput" name="attachment2" value="'.$_REQUEST['attachment2'].'"/></td></tr>';
+                                       <td><input type="file" class="it__cir_linput" name="attachment2" value="'.$_REQUEST['attachment2'].'"/></td></tr>';
                       }             
                       if(strpos($this->getConf('ltdReport'),'Symptom link 3')!==false){
                           $ret .= ' <input type="hidden" class="it__cir_linput" name="attachment3" value="'.$_REQUEST['attachment3'].'"/>';
                       } 
                       else {
                           $ret .= '<tr><td>'.$this->getLang('th_sympt').'3</td>
-                                       <td><input type="text" class="it__cir_linput" name="attachment3" value="'.$_REQUEST['attachment3'].'"/></td></tr>';
+                                       <td><input type="file" class="it__cir_linput" name="attachment3" value="'.$_REQUEST['attachment3'].'"/></td></tr>';
                       }
                   }             
         $ret .= '</table><p><input type="hidden" name="modified" value="'.$cur_date.'"/>'.NL.
@@ -1393,7 +1428,7 @@ $ret .= '<script type="text/javascript">
       			    }
             }
          //<input name="do[save]" type="submit" value="Save" class="button" id="edbtn__save" accesskey="s" tabindex="4" title="Save [S]" />
-            $ret .= '</p><p><input name="submit" type="submit" value="'.$this->getLang('btn_reportsave').'" class="button" id="edbtn__save" title="'.$this->getLang('btn_reportsave').'"/>'.
+            $ret .= '</p><p><input name="absenden" type="submit" value="'.$this->getLang('btn_reportsave').'" class="button" id="edbtn__save" title="'.$this->getLang('btn_reportsave').'"/>'.
             '</p></form></div>'.NL;
         }
         // the user maybe registered within group "all" but the registered flag is turned on
@@ -1504,7 +1539,7 @@ address format and the domain exists.
              }
           }
           
-          if(!function_exists('checkdnsrr'))
+          if((!function_exists('checkdnsrr')) && ($this->getConf('validate_mail_addr')==true))
           {
               function checkdnsrr($host, $type='')
               {
@@ -1521,7 +1556,7 @@ address format and the domain exists.
                  return false;
               }
            }
-          else if ($isValid && !(checkdnsrr($domain,"MX") || checkdnsrr($domain,"A")))
+          else if ($isValid && !(checkdnsrr($domain,"MX") || checkdnsrr($domain,"A")) && ($this->getConf('validate_mail_addr')==true))
           {
              // domain not found in DNS
              $isValid = false;
@@ -1594,7 +1629,7 @@ address format and the domain exists.
         $x_comment = preg_replace("/\[img\](.*?)\[\/img\]/si", "<img src=\"\\1\" title=\"\\1\" style=\"max-width:850px;\" \/>", $x_comment);
         $x_comment = preg_replace("/\[img=(.*?)\](.*?)\[\/img\]/si", "<img src=\"\\1\" title=\"\\2\" style=\"max-width:850px;\" \/>", $x_comment);
 
-
+        
 
 /*---------------------------------------------------------------------------------
 *  think about parsing content by dokuwiki renderer for dokuwiki syntax recognition
@@ -1671,7 +1706,7 @@ address format and the domain exists.
 /******************************************************************************/ 
 /* upload a file if valid on mime type and file extension
 */
-  function _symptom_file_upload(&$issues, $issue_id) {
+  function _symptom_file_upload(&$issues, $issue_id, $attachment_id) {
       global $conf;
       if($this->getConf('it_data')==false) $target_path = "data/meta/";
       else $target_path = $this->getConf('it_data');
@@ -1687,6 +1722,7 @@ address format and the domain exists.
           $valid_file_extensions[] = $key;
           $valid_mimetypes[] = $value;
       }
+      
       if($this->getConf('ip_blocked') == 1){
           $ip_blocked_sec = $this->getConf('ip_blockd_time')*60;
            
@@ -1717,12 +1753,20 @@ address format and the domain exists.
           if($ip_addr != ""){
               // check if ip already known
               if(file_exists(DOKU_INC.$ip_block_path.'/'.$ip_addr)) {
-                  $error_code = 1;
-                  $t_check = intval((filemtime(DOKU_INC.$ip_block_path.'/'.$filename)+$ip_blocked_sec-time())/60); 
-                  msg(sprintf($this->getLang('wmsg9'), $t_check),-1);
+                  // check upload remaining attempts (to be larger than 0)
+                  $iplog = fopen(DOKU_INC.$ip_block_path.'/'.$ip_addr, "r");
+                  $attachments_left=fread($iplog, filesize(DOKU_INC.$ip_block_path.'/'.$ip_addr)); 
+                  fclose($iplog);
+                  if($attachments_left<1) {
+                    $error_code = 1;
+                    $t_check = intval((filemtime(DOKU_INC.$ip_block_path.'/'.$filename)+$ip_blocked_sec-time())/60); 
+                    msg(sprintf($this->getLang('wmsg9'), $t_check),-1);
+                  }
               }
+              else $attachments_left = 3;
           } 
       }
+
       if(isset($error_code)){ 
         $t_check = intval((filemtime(DOKU_INC.$ip_block_path.'/'.$filename)+$ip_blocked_sec-time())/60);
         $Generated_Header = '<div class="it__negative_feedback">'.sprintf($this->getLang('wmsg9'), $t_check).'</div>';
@@ -1731,8 +1775,8 @@ address format and the domain exists.
       }      
 
       // get file extension 
-      $mime_type = $_FILES['uploadedfile']['type'];    
-      $file_extension = strrchr($_FILES['uploadedfile']['name'],'.'); // last occurance of dot to detect extension
+      $mime_type = $_FILES[$attachment_id]['type'];    
+      $file_extension = strrchr($_FILES[$attachment_id]['name'],'.'); // last occurance of dot to detect extension
       $file_dot_extension = strtolower($file_extension);   
       $file_extension = str_replace(".", "", strtolower($file_dot_extension));  
       $error_flag = 0;
@@ -1740,26 +1784,29 @@ address format and the domain exists.
       // check validity of file extension
       if(!in_array($file_extension, $valid_file_extensions)) {
         $error_flag = 1;
-        $Generated_Header .= '<span>'.$this->getLang('wmsg7').' (File: <b>'.$_FILES['uploadedfile']['name'].'</b>)</span><br>'; 
+        $Generated_Header .= '<span>'.$this->getLang('wmsg7').' (File: <b>'.$_FILES[$attachment_id]['name'].'</b>)</span><br>'; 
       }
       // check mime type
       if((!in_array($mime_type, $valid_mimetypes)) && (!in_array("!".$mime_type, $valid_mimetypes)) ) {
         $error_flag = 1;
-        $Generated_Header .= '<span>'.$this->getLang('wmsg8').' (File: <b>'.$_FILES['uploadedfile']['name'].', Mime-Type: '.$mime_type.'</b>)</span><br>';
+        $Generated_Header .= '<span>'.$this->getLang('wmsg8').' (File: <b>'.$_FILES[$attachment_id]['name'].', Mime-Type: '.$mime_type.'</b>)</span><br>';
       }
       // check file-size
-      if($_FILES['uploadedfile']['size'] > ($this->getConf('max_fsize'))){
+      if($_FILES[$attachment_id]['size'] > ($this->getConf('max_fsize'))){
           $error_flag = 1;
-          $Generated_Header .= '<span>'.sprintf($this->getLang('wmsg6'), $this->getConf('max_fsize')).' (File: <b>'.$_FILES['uploadedfile']['name'].'</b>)</span><br>';
+          $Generated_Header .= '<span>'.sprintf($this->getLang('wmsg6'), $this->getConf('max_fsize')).' (File: <b>'.$_FILES[$attachment_id]['name'].'</b>)</span><br>';
       }                
 // -----------------------------------------------------------------------------
     if($error_flag > 0) { 
       echo $Generated_Header = '<div class="it__negative_feedback">'.$Generated_Header.'</div>';
     }                  
     else {
-      $safe_filename = preg_replace(array("/\s+/", "/[^-\.\w]+/"),array("_", ""),trim(basename( $_FILES['uploadedfile']['name']))); 
+      //$safe_filename = preg_replace(array("/\s+/", "/[^-\.\w]+/"),array("_", ""),trim(basename( $_FILES[$attachment_id]['name']))); 
+      // delete all other characters beside the following defined
+      $safe_filename = preg_replace('#[^A-Za-z0-9_.-]#', '',trim(basename( $_FILES[$attachment_id]['name']))); 
       $target_path = $target_path . $issue_id . '_sympt_' . $safe_filename; 
-      if(move_uploaded_file($_FILES['uploadedfile']['tmp_name'], DOKU_INC.$target_path)) {
+      if(move_uploaded_file($_FILES[$attachment_id]['tmp_name'], DOKU_INC.$target_path)) {
+          $attachments_left = $attachments_left-1;
           $issues[$issue_id]['attachment1'] = DOKU_URL.$target_path;
 //          msg("The file ".$safe_filename." has been successfully uploaded to ".DOKU_URL.$target_path,1);
           msg("The file ".$safe_filename." has been successfully uploaded.",1);
@@ -1775,11 +1822,15 @@ address format and the domain exists.
                   if(getenv(HTTP_X_FORWARDED_FOR)) { $ip_addr = getenv('HTTP_X_FORWARD_FOR'); }
                   else { $ip_addr = getenv('REMOTE_ADDR'); }
               }
-              if(!is_dir(DOKU_INC.$ip_block_path.'ipblock/')) { mkdir(DOKU_INC.$ip_block_path.'/', 0777); }
-              if($ip_addr != ""){
-                  $empty = '.'; 
+              if(!is_dir(DOKU_INC.$ip_block_path) && ($ip_addr != "")) { 
+                  @mkdir(DOKU_INC.$ip_block_path.'/', 0777); 
                   $iplog = fopen(DOKU_INC.$ip_block_path.'/'.$ip_addr, "w+");
-                  fwrite($iplog, $empty); 
+                  fwrite($iplog, $attachments_left); 
+                  fclose($iplog); 
+                  }
+              elseif($ip_addr != ""){ 
+                  $iplog = fopen(DOKU_INC.$ip_block_path.'/'.$ip_addr, "w+");
+                  fwrite($iplog, $attachments_left); 
                   fclose($iplog); 
               }
           }            
@@ -1789,6 +1840,7 @@ address format and the domain exists.
   }
 /******************************************************************************/
   function __find_projects($path) { 
+    if(!is_dir($path))  return false;  // prevent the php-warning
     if ($handle=opendir($path)) { 
       while (false!==($file=readdir($handle))) { 
         if ($file<>"." AND $file<>"..") { 
@@ -1859,6 +1911,7 @@ address format and the domain exists.
     if(($this->getConf('multi_projects')!==false) && ($all !== false)) {
         // loop through it_datastore and list all .issues files
         $xprojects = $this->__find_projects($it_datastore);
+
         $x_projects = explode(',',$xprojects);
         $issues = array();
         $tmp    = array();
@@ -1900,8 +1953,7 @@ address format and the domain exists.
             $down[$key]    = $row['id'];
             $up[$key]      = $row[$sort_key];
         }
-        array_multisort($up, SORT_DESC, $down, SORT_ASC, $issues);
+        if($up) { @array_multisort($up, constant($this->getConf('global_sort')), $down, SORT_ASC, $issues); }
         return $issues;
     }
-/******************************************************************************/
 }

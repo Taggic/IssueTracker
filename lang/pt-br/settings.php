@@ -4,8 +4,8 @@
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Benedito Carneiro <ctsbc@yahoo.com.br>
- */
- 
+ * @extensions Taggic 
+ */ 
 // for the configuration manager
 $lang['d_format']         = 'd-m-Y G:i:s';
 $lang['it_data']          = 'Raiz do IssueTracker na pasta de dados ("" = meta)<img title="Aviso: Recomenda-se armazenar as ocorrências fora da pasta Meta. Então, por favor, entre um caminho (ex. \'data/it_store/\')." alt="aviso" src="./lib/plugins/config/images/warning.png" style="float:right;"> ';
@@ -18,6 +18,7 @@ $lang['mail_templates']   = 'Usar modelos de email em HTML?';
 $lang['email_address']    = 'Qual endereço de email deve ser informado?';
 $lang['registered_users'] = 'Somente usuários registrados com permissão de edição no registro de ocorrências<br> têm permissão de criar relatórios e adicionar comentários?';
 $lang['auth_ad_overflow'] = 'Evitar sobrecarga AUTH:AD (ver documentação)?';
+$lang['assgnee_list']     = 'Extensão de arquivo único lista cessionário pele (por exemplo: cessionarios)';
 $lang['profile_updt']     = 'Sincronize sobre as mudanças de perfil do usuário';
 $lang['userinfo_email']   = 'Informar por email o usuário sobre modificações em ocorrências? (tecla global)';
 $lang['mail_add_comment']         = 'Informar sobre novos comentários?';
@@ -37,3 +38,9 @@ $lang['assign']         = 'Selecionar grupos de usuários do wiki pré-seleciona
 $lang['noStatIMG']      = 'Usar textos de status em lugar dos ícones na lista de ocorrências?';
 $lang['noSevIMG']       = 'Usar textos de severidade em lugar dos ícones na lista de ocorrências?';
 $lang['ltdReport']      = 'Excluir estes itens do formulário de relatório';
+$lang['ltdListFilters'] = 'Reduzir lista problema seguindo controles de filtro';
+$lang['multi_projects']	= 'Mostrar todos os projetos';
+$lang['shw_project_col']= 'Projeto Ver coluna';
+$lang['components']     = 'Lista de módulos <br>(separados por vírgulas)';
+$lang['global_sort']	    = 'issues global sort order';
+$lang['listview_sort']    = 'default list view sort order by ID';
