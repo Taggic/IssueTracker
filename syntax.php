@@ -1238,7 +1238,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                           return false;
                         }
                         if ((frm.description.value.length <= 5) & (frm.description.value.indexOf(" ") == -1)) {
-                          alert ("'.$this->getLang('wmsg3').'");
+                          alert ("Length: ".frm.description.value.length.  '.$this->getLang('wmsg3').'");
                           frm.description.focus();
                           return false;
                       	}
@@ -1369,7 +1369,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         }
         else
         {
-                  if(strlen(DOKU_BASE) < strlen(DOKU_URL)) $sFilename = DOKU_INC."lib/plugins/issuetracker/xsEditor.js";
+                  if(strlen(DOKU_BASE) < strlen(DOKU_URL)) $sFilename = DOKU_URL."lib/plugins/issuetracker/xsEditor.js";
                   else $sFilename = DOKU_BASE."lib/plugins/issuetracker/xsEditor.js";
                   $ret      .= '<script type="text/javascript" src="'.$sFilename.'"></script>';
                   $ret .= file_get_contents($sFilename);
