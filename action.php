@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2014-12-01',
+         'date'   => '2014-12-15',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display details of a dedicated issue.',
          'url'    => 'https://www.dokuwiki.org/plugin:issuetracker',
@@ -108,7 +108,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
      function _handle_act(&$event, $param) {
          if (($event->data === 'showcase') || ($event->data === 'store_resolution') || ($event->data === 'store_workaround')){
              $this->parameter  = $_POST['showid'];
-             $this->project    = $_POST['itl_project'];         
+             $this->project    = $_POST['itl_project'];
          }
          elseif ($event->data === 'showcaselink') {
             $this->parameter   = $_GET['showid'];
@@ -292,6 +292,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                  if(($data->data == 'showcase') && ($this->getConf('multi_projects')!== false)) {
                    // 2. get list of projects and issues
                    $issues = $this->_get_issues($project, true);
+
                    // 3. filter for related issue id
                    foreach($issues as $issue) {
                       if($issue['id']==$issue_id) {
@@ -309,6 +310,10 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                        echo $this->getLang('msg_showCase') . '<br />';
                        echo $itl_item_title;
                        return;
+                   }
+                   elseif(count($issues)===1) {
+                     // just one issue but of which project ?
+                      $project = $issue['project'];
                    }
                  }
 
@@ -717,7 +722,8 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
                  //$data->doc .= $Generated_Header.$Generated_Table.$Generated_feedback;
         }
 /* scrolling next/previous issues --------------------------------------------*/ 
-        elseif (($data->data == 'issuelist_next') || ($data->data == 'issuelist_previous') || ($data->data == 'issuelist_filter') || ($data->data == 'issuelist_filterlink'))  {
+        elseif (($data->data == 'issuelist_next') || ($data->data == 'issuelist_previous') || ($data->data == 'issuelist_filter') || ($data->data == 'issuelist_filterlink'))  
+        {
                  $data->preventDefault();
                  $renderer->info['cache'] = false;         
                  $project = $this->itl_pjct;

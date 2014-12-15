@@ -1257,7 +1257,6 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                 
                    //Check config if hidden
                   if($this->getConf('projects')==""){ 
-                        msg("I am here");
                         $ret .= '<td><label class="it__cir_projectlabel">'.$project.'</label></td>'.NL; } 
                   else {
                       $ret .='<td><select class="element select small it__cir_select" name="project">'.$STR_PROJECT.'</select></td>'.NL;
