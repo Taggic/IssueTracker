@@ -1198,13 +1198,11 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             /*--------------------------------------------------------------------*/
             // create the report template and check input on client site
             /*--------------------------------------------------------------------*/
-            $ret = '<div class="it__cir_form"><script type="text/javascript">
+            $ret = '<div class="it__cir_form"><script>
                    // JavaScript Document
-                    function chkFormular (frm) {
+                    function chkFormular(frm) {
 
-                        //alert(frm.description.innerHTML);
-                        frm.description.value = frm.description.innerHTML;
-                        
+                        frm.description.value = frm.description.innerHTML;                        
                         
                         if (frm.product.value == "") {
                           alert("Please select a valid product!");
@@ -1227,7 +1225,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                           frm.user_mail.focus();
                           return false;
                         }
-                         if (frm.severity.value == "") {
+                        if (frm.severity.value == "") {
                           alert ("Please select a severity");
                           frm.severity.focus();
                           return false;
@@ -1238,14 +1236,13 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                           return false;
                         }
                         if ((frm.description.value.length <= 5) & (frm.description.value.indexOf(" ") == -1)) {
-                          alert ("Length: ".frm.description.value.length.  '.$this->getLang('wmsg3').'");
-                          frm.description.focus();
+                          alert ("'.$this->getLang('wmsg3').'");
                           return false;
                       	}
                     }
-                   </script>'.NL.
-                   '<form class="issuetracker__form" name="issuetracker__form" method="post" onsubmit="return chkFormular(this)" accept-charset="'.$lang['encoding'].'" enctype="multipart/form-data" ><p>'.NL;
-            $ret .= formSecurityToken(false).
+                   </script>'.NL;
+            $ret .= '<form class="issuetracker__form" name="issuetracker__form" method="post" onsubmit="return chkFormular(this)" accept-charset="'.$lang['encoding'].'" enctype="multipart/form-data" ><p>'.NL.
+            formSecurityToken(false).
             '<input type="hidden" name="do" value="show" />'.NL.
             '<input type="hidden" name="id" value="'.$ID.'" />'.NL.
             '<input type="hidden" name="created" value="'.$cur_date.'"/>'.NL.
@@ -1427,7 +1424,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
       			    }
             }
          //<input name="do[save]" type="submit" value="Save" class="button" id="edbtn__save" accesskey="s" tabindex="4" title="Save [S]" />
-            $ret .= '</p><p><input name="absenden" type="submit" value="'.$this->getLang('btn_reportsave').'" class="button" id="edbtn__save" title="'.$this->getLang('btn_reportsave').'"/>'.
+            $ret .= '</p><p><input name="submit" type="submit" value="'.$this->getLang('btn_reportsave').'" class="button" id="edbtn__save" title="'.$this->getLang('btn_reportsave').'"/>'.
             '</p></form></div>'.NL;
         }
         // the user maybe registered within group "all" but the registered flag is turned on
