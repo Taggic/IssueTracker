@@ -1201,8 +1201,6 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             $ret = '<div class="it__cir_form"><script>
                    // JavaScript Document
                     function chkFormular(frm) {
-
-                        frm.description.value = frm.description.innerHTML;                        
                         
                         if (frm.product.value == "") {
                           alert("Please select a valid product!");
