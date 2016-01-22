@@ -42,7 +42,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 /******************************************************************************/
 /* Handle the match
 */
-    function handle($match, $state, $pos, &$handler){
+    function handle($match, $state, $pos, Doku_Handler $handler){
         $match = substr($match,15,-2); //strip markup from start and end
         //handle params
         $data = array();
@@ -98,7 +98,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 /******************************************************************************/
 /* Create output
 */
-    function render($mode, &$renderer, $data) {        
+    function render($mode, Doku_Renderer $renderer, $data) {        
         global $ID;
         $project = $data['project']; 
         
