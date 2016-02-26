@@ -93,8 +93,8 @@ function ShowPopup(hoveritem, hoverpopup)
   HidePopup("hoverpopup1", "hoverpopup2");
   hp = document.getElementById(hoverpopup);
 	// Set position of hover popup
-	hp.style.top  = (posArray[1]+15) + 'px';
-	hp.style.left = (posArray[0] ) + 'px';    
+	hp.style.top  = (posArray[1]-250) + 'px';
+	hp.style.left = (posArray[0]-200 ) + 'px';    
 	// Set popup to visible
 	hp.style.visibility = "Visible";
 }
@@ -111,15 +111,15 @@ function resizeBoxId(obj,size) {
 }
 
 function findPos(obj){
-var posX = obj.offsetLeft;var posY = obj.offsetTop;
-while(obj.offsetParent){
-if(obj==document.getElementsByTagName('body')[0]){break}
-else{
-posX=posX+obj.offsetParent.offsetLeft;
-posY=posY+obj.offsetParent.offsetTop;
-obj=obj.offsetParent;
-}
-}
-var posArray=[posX,posY]
-return posArray;
+    var posX = obj.offsetLeft;var posY = obj.offsetTop;
+    while(obj.offsetParent){
+        if(obj==document.getElementsByTagName('body')[0]){break}
+        else{
+            posX=posX+obj.offsetParent.offsetLeft;
+            posY=posY+obj.offsetParent.offsetTop;
+            obj=obj.offsetParent;
+        }
+    }    
+    var posArray=[posX,posY];
+    return posArray;
 }

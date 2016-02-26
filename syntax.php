@@ -100,7 +100,9 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
 */
     function render($mode, &$renderer, $data) {        
         global $ID;
-        $project = $data['project']; 
+        $project = htmlspecialchars(stripslashes($_REQUEST['project']));
+        if(strlen($project) <1) $project = $data['project'];
+        else $data['project'] = $project;
         
         if ($mode == 'xhtml'){
             
@@ -187,6 +189,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
     
                                     $xuser = $issues[$issue_id]['user_mail'];
                                     $xdescription = $issues[$issue_id]['description'];
+
+//echo "Beschreibung: ".$xdescription."<br />";
 
 // *****************************************************************************
 // upload a symptom file
@@ -1177,12 +1181,13 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             /*--------------------------------------------------------------------*/
             $STR_COMPONENTS = "";
             $components = explode(',', $this->getConf('components')) ;
-            $STR_COMPONENTS = '<option value="" ></option>'.NL;
+//            $STR_COMPONENTS = '<option value="" ></option>'.NL;
             foreach ($components as $_component)
             {
                 $_component = trim($_component);
                 $STR_COMPONENTS .= '<option value="'.$_component.'" >'.$_component."</option>".NL;
             }
+            if($STR_COMPONENTS === "") $STR_COMPONENTS = '<option value="" ></option>'.NL;
 
             /*--------------------------------------------------------------------*/
             // load set of severity values defined by admin
@@ -1198,22 +1203,43 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
             /*--------------------------------------------------------------------*/
             // create the report template and check input on client site
             /*--------------------------------------------------------------------*/
+            if($this->getConf('wysiwyg')==true) {
+              $_editor_java ='if ((document.getElementById("a_description").innerHTML.length <= 5) & (document.getElementById("a_description").innerHTML.indexOf(" ") == -1)) {
+                          alert ("'.$this->getLang('wmsg3').'");
+                          frm.description.focus();
+                          return false;}';
+              $_editor_java_2 ='function myFunction() {
+                                  document.getElementById("description").value = document.getElementById("a_description").innerHTML;
+                                }';
+              $myFunc = 'onsubmit="myFunction()"';
+              
+            }
+            else {
+              $_editor_java ='if ((frm.description.value.length <= 5) & (frm.description.value.indexOf(" ") == -1)) {
+                          alert ("'.$this->getLang('wmsg3').'");
+                          frm.description.focus();
+                          return false;';
+                          
+              $_editor_java_2 ='';
+              $myFunc = 'onsubmit="return chkFormular(this)"';
+            }
+            
             $ret = '<div class="it__cir_form"><script>
                    // JavaScript Document
                     function chkFormular(frm) {
 
-                        frm.description.value = frm.description.innerHTML;                        
-                        
                         if (frm.product.value == "") {
                           alert("Please select a valid product!");
                           frm.product.focus();
                           return false;
                         }
+
                         if (frm.version.value == "") {
                           alert("'.$this->getLang('wmsg2').'");
                           frm.version.focus();
                           return false;
                         }
+
                         if (frm.user_name.value < 3) {
                           alert("Please enter your user name!");
                           frm.user_name.focus();
@@ -1225,23 +1251,24 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                           frm.user_mail.focus();
                           return false;
                         }
+
                         if (frm.severity.value == "") {
                           alert ("Please select a severity");
                           frm.severity.focus();
                           return false;
                         }
+
                         if ((frm.title.value.length <= 5) & (frm.title.value.indexOf(" ") == -1)) {
                           alert ("'.$this->getLang('wmsg5').'");
                           frm.title.focus();
                           return false;
                         }
-                        if ((frm.description.value.length <= 5) & (frm.description.value.indexOf(" ") == -1)) {
-                          alert ("'.$this->getLang('wmsg3').'");
-                          return false;
-                      	}
+
+                        '.NL.$_editor_java.NL.'
                     }
+                    '.NL.$_editor_java_2.NL.'
                    </script>'.NL;
-            $ret .= '<form class="issuetracker__form" name="issuetracker__form" method="post" onsubmit="return chkFormular(this)" accept-charset="'.$lang['encoding'].'" enctype="multipart/form-data" ><p>'.NL.
+            $ret .= '<form class="issuetracker__form" name="issuetracker__form" method="post" '.$myFunc.' accept-charset="'.$lang['encoding'].'" enctype="multipart/form-data" ><p>'.NL.
             formSecurityToken(false).
             '<input type="hidden" name="do" value="show" />'.NL.
             '<input type="hidden" name="id" value="'.$ID.'" />'.NL.
@@ -1359,7 +1386,8 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                   $ret .= '<span class="reply_close_link">
                              <a href="javascript:resizeBoxId(\'description\', -20)"><img src="'.$imgBASE.'reduce.png" title="reduce textarea" style="float:right;" /></a>
                              <a href="javascript:resizeBoxId(\'description\', +20)"><img src="'.$imgBASE.'enlarge.png" title="enlarge textarea" style="float:right;" /></a>
-                           </span>'.NL;                  
+                           </span>'.NL;
+                  $ret .= '<textarea id="description" name="description" style="display: none;">'.$_REQUEST['description'].'</textarea>';                  
                   
                   
         }

@@ -3,7 +3,7 @@
   <!--    <form name="compForm" method="post" action="sample.php" onsubmit="if(validateMode()){this.myDoc.value=oDoc.innerHTML;return true;}return false;"> -->   
       <input type="hidden" name="myDoc">
   
-      <div id="toolBar2" style="margin-top:3px;">                
+      <div id="toolBar2" style="margin-top:3px; ">                
           <!-- <img class="intLink" title="Print" onclick="printDoc();" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAABGdBTUEAALGPC/xhBQAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9oEBxcZFmGboiwAAAAIdEVYdENvbW1lbnQA9syWvwAAAuFJREFUOMvtlUtsjFEUx//n3nn0YdpBh1abRpt4LFqtqkc3jRKkNEIsiIRIBBEhJJpKlIVo4m1RRMKKjQiRMJRUqUdKPT71qpIpiRKPaqdF55tv5vvusZjQTjOlseUkd3Xu/3dPzusC/22wtu2wRn+jG5So/OCDh8ycMJDflehMlkJkVK7KUYN+ufzA/RttH76zaVocDptRxzQtNi3mRWuPc+6cKtlXZ/sddP2uu9uXlmYXZ6Qm8v4Tz8lhF1H+zDQXt7S8oLMXtbF4e8QaFHjj3kbP2MzkktHpiTjp9VH6iHiA+whtAsX5brpwueMGdONdf/2A4M7ukDs1JW662+XkqTkeUoqjKtOjm2h53YFL15pSJ04Zc94wdtibr26fXlC2mzRvBccEbz2kiRFD414tKMlEZbVGT33+qCoHgha81SWYsew0r1uzfNylmtpx80pngQQ91LwVk2JGvGnfvZG6YcYRAT16GFtW5kKKfo1EQLtfh5Q2etT0BIWF+aitq4fDbk+ImYo1OxvGF03waFJQvBCkvDffRyEtxQiFFYgAZTHS0zwAGD7fG5TNnYNTp8/FzvGwJOfmgG7GOx0SAKKgQgDMgKBI0NJGMEImpGDk5+WACEwEd0ywblhGUZ4Hw5OdUekRBLT7DTgdEgxACsIznx8zpmWh7k4rkpJcuHDxCul6MDsmmBXDlWCH2+XozSgBnzsNCEE4euYV4pwCpsWYPW0UHDYBKSWu1NYjENDReqtKjwn2+zvtTc1vMSTB/mvev/WEYSlASsLimcOhOBJxw+N3aP/SjefNL5GePZmpu4kG7OPr1+tOfPyUu3BecWYKcwQcDFmwFKAUo90fhKDInBCAmvqnyMgqUEagQwCoHBDc1rjv9pIlD8IbVkz6qYViIBQGTJPx4k0XpIgEZoRN1Da0cij4VfR0ta3WvBXH/rjdCufv6R2zPgPH/e4pxSBCpeatqPrjNiso203/5s/zA171Mv8+w1LOAAAAAElFTkSuQmCC"> -->
           <img class="intLink" title="Undo" onclick="formatDoc('undo');" src="data:image/gif;base64,R0lGODlhFgAWAOMKADljwliE33mOrpGjuYKl8aezxqPD+7/I19DV3NHa7P///////////////////////yH5BAEKAA8ALAAAAAAWABYAAARR8MlJq7046807TkaYeJJBnES4EeUJvIGapWYAC0CsocQ7SDlWJkAkCA6ToMYWIARGQF3mRQVIEjkkSVLIbSfEwhdRIH4fh/DZMICe3/C4nBQBADs=" />
           <img class="intLink" title="Redo" onclick="formatDoc('redo');" src="data:image/gif;base64,R0lGODlhFgAWAMIHAB1ChDljwl9vj1iE34Kl8aPD+7/I1////yH5BAEKAAcALAAAAAAWABYAAANKeLrc/jDKSesyphi7SiEgsVXZEATDICqBVJjpqWZt9NaEDNbQK1wCQsxlYnxMAImhyDoFAElJasRRvAZVRqqQXUy7Cgx4TC6bswkAOw==" />
@@ -21,7 +21,7 @@
           <img class="intLink" title="Bold" onclick="formatDoc('bold');" src="data:image/gif;base64,R0lGODlhFgAWAID/AMDAwAAAACH5BAEAAAAALAAAAAAWABYAQAInhI+pa+H9mJy0LhdgtrxzDG5WGFVk6aXqyk6Y9kXvKKNuLbb6zgMFADs=" />
           <img class="intLink" title="Italic" onclick="formatDoc('italic');" src="data:image/gif;base64,R0lGODlhFgAWAKEDAAAAAF9vj5WIbf///yH5BAEAAAMALAAAAAAWABYAAAIjnI+py+0Po5x0gXvruEKHrF2BB1YiCWgbMFIYpsbyTNd2UwAAOw==" />
           <img class="intLink" title="Underline" onclick="formatDoc('underline');" src="data:image/gif;base64,R0lGODlhFgAWAKECAAAAAF9vj////////yH5BAEAAAIALAAAAAAWABYAAAIrlI+py+0Po5zUgAsEzvEeL4Ea15EiJJ5PSqJmuwKBEKgxVuXWtun+DwxCCgA7" />
-  
+ 
           <img title="Font color" id="hoveritem1" onMouseOver="ShowPopup('hoveritem1', 'hoverpopup1');" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAMBSURBVEhL3ZVbSBRhFMf/s+tuu+u65aU07UIZZHTR0goriqCgiPChCEKqlwKfeokgeqiH6rEHg6KX6qHyIZGgQrs8LIoprqZdENLSrBQ13dV128vs7MzpzDezoKaRkC/9YBjmnDNnzvc/5/tGIgbzgMW8/3PmlrhLMq6/4LfEGmmIJ2QoqmJaGHUQGDkGWG2ALR0UfgwiVbiEkrIMxOPiOcmUxIoax4dhH2o676D+yzMEoiOmh18mDrV4+HLzs9Uw6/T3Ao/uAzVV/HEuIInevCTDoQE6V3uctt3KoiMPt5K35ylpGq9BjVE8WEfqtwukjVSSpgyIeE1RSKu8QrQqh2hNLlH1XWHXmVKxqiUwFvVjQgliXB5DNBERdsmyAOTYj1jGJShpFZBScg07yyYFg0BgjKv1AxMTwq4zZdzkRAyt/V54e54gP3MdDq0tx0JnJsY5/uYDwPceKCwAzp4EsjLMl/r7gHu3AYcDKGdH7mrDLuqeBDeNgtEAReI/hQw6vndEK/cQuYuIskuJXr1mGQwX91AlCgWJwqFJRlMKVdPwIxCBfzzK3bTC40iH05YKSTJGy9sCRKLA4b284gDQ3GE8Cyycws1NdXFTzXgdkbixYwhnrjXh/I02dHSNCkeSMMv8shHYxBKcKAOWZXN8GzDKsv4Jkdj7ZgjPfcN40TKEt90BqKomnDpN7cDnr8D2QqB4A7BvB/CRJ6zzky6jGTQDInFJQQZyFtmxPNuJ/Dw3r85YUiIB1DVw1bzstFSg9zuwdAlYMqCVG6lM2kPTEVMRkRNo6/HDbpexcYULLksKpBhX1mfHqctOdPdJWMxToEuoVznI+2bLeqDqOpCXY2aajmjhLFRfbSVPkUanLxI1+Iia2oka24jKKogySojq6s3AGRBSzEZzpwcKy3H0ALCrBCjdDOwsBg7uNvy19cZ9JubtPJZknm+ZTyqrJQY7NFj5MxI3hfiwUjQJUcmNBB9kHh5TGx9uk1HZHgobTXbyxkt1mQ7mf/+DzIF5Sgz8AvKx1tDAH5mZAAAAAElFTkSuQmCC">
           <div id="hoverpopup1" style="visibility:hidden; position:absolute;" >
           <table>
@@ -134,7 +134,7 @@
             </map>
       </div>
     </div>
-    <div id="description" name="description" class="it__cir_linput" contenteditable="true" onMouseOver="javascript:HidePopup('hoverpopup1', 'hoverpopup2')" style="margin-left:1.9em !important;padding-top:5px;font-family: calibri, sans-serif;font-size:1.25em; width:53em !important; height:22em !important;" >
+    <div id="a_description" name="a_description" class="it__cir_linput" contenteditable="true" onMouseOver="javascript:HidePopup('hoverpopup1', 'hoverpopup2')" style="margin-left:1.9em !important;padding-top:5px;font-family: calibri, sans-serif;font-size:1.25em; width:53em !important; height:22em !important;" >
       <p>&nbsp;</p>
     </div> 
     <div style="clear:both;"></div>

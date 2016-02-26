@@ -67,7 +67,7 @@ $lang['msg_addFollower_true']   = 'ID: %s -> Interessenten hinzugefügt: ';
 $lang['msg_rmvFollower_true']   = 'ID: %s -> Interessenten gelöscht: ';
 $lang['msg_addFollower_failed'] = 'ID: %s -> Fehler bei der Aktualisierung des Interessenten: ';
 $lang['itd_follower']        = '(Interessenten: %s)';
-$lang['msg_showCase']        = 'This Issue ID exist on multiple projects. Please choose which one you mean:';
+$lang['msg_showCase']        = 'Diese Ticket ID existiert in mehreren Projekten. Bitte w&aamp;hlen Sie:';
 
 $lang['lbl_project']         = 'Projekt:';
 $lang['lbl_issueid']         = 'ID:';

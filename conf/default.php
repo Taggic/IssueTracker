@@ -45,4 +45,3 @@ $conf['multi_projects']	   = 0;                        // global switch to tell 
 $conf['shw_project_col']	 = 0;                        // show an additional column for the project name per issue on ListView
 $conf['global_sort']	     = "SORT_DESC";              // sort order of selected key
 $conf['listview_sort']	   = "sortfirstdesc";          // default listview sort order
-$conf['wysiwyg']	         = 0;          // 

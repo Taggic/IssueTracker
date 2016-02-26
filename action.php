@@ -2118,8 +2118,14 @@ $issue_initial_description = '<table class="itd__tables"><tbody>
             $issue_initial_description .= '   <tr class="itd_edit_tr">
                                                  <td class="itd_edit_tr" colSpan="2" style="display : none;" id="'.$blink_id.'">';
                     
-            $issue_initial_description .= $this->it_edit_toolbar('description_mod_'.$alink_id);
-                    
+            if($this->getConf('wysiwyg')==true) {
+                $issue_initial_description .= $this->it_wysiwyg_edit_toolbar($x_comment);
+                $_textarea = '<textarea class="itd_textarea" id="description_mod" name="description_mod" style="display: none;"> </textarea><br />'.NL;
+            }
+            else {
+                $issue_initial_description .= $this->it_xs_edit_toolbar('description_mod_'.$alink_id);
+                $_textarea = '<textarea class="itd_textarea" id="description_mod_'.$alink_id.'" name="description_mod" type="text" cols="106" rows="7" value="">'.strip_tags($x_comment).'</textarea><br />'.NL;
+            }        
             $issue_initial_description .= '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
             $issue_initial_description .= formSecurityToken(false). 
                                          '<input type="hidden" name="project" value="'.$project.'" />'.NL.
@@ -2127,7 +2133,7 @@ $issue_initial_description = '<table class="itd__tables"><tbody>
                                          '<input type="hidden" name="author"value="'.$u_mail_check.'" />'.NL.        
                                          '<input type="hidden" name="timestamp" value="'.$cur_date.'" />'.NL.
                                          '<input type="hidden" name="mod_description" value="1"/>'.NL.
-                                         '<textarea class="itd_textarea" id="description_mod_'.$alink_id.'" name="description_mod" type="text" cols="106" rows="7" value="">'.strip_tags($x_comment).'</textarea><br />
+                                         $_textarea . '
                                           <span class="reply_close_link">
                                             <a href="javascript:resizeBoxId(\'description_mod_'.$alink_id.'\', -20)"><img src="'.$imgBASE.'reduce.png" title="reduce textarea" style="float:right;" /></a>
                                             <a href="javascript:resizeBoxId(\'description_mod_'.$alink_id.'\', +20)"><img src="'.$imgBASE.'enlarge.png" title="enlarge textarea" style="float:right;" /></a>
@@ -2260,7 +2266,7 @@ if(($user_mail['userinfo']['mail'] === $issue[$issue_id]['user_mail']) || (strpo
                     $issue_workaround .= '   <tr class="itd_edit_tr">
                                                  <td class="itd_edit_tr" colSpan="2" style="display : none;" id="'.$blink_id.'">';
                     
-                    $issue_workaround .= $this->it_edit_toolbar('wround_mod_'.$alink_id);
+                    $issue_workaround .= $this->it_xs_edit_toolbar('wround_mod_'.$alink_id);
                     
                     $issue_workaround .= '<form name="wround_form" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
                                           
@@ -2413,7 +2419,7 @@ $issue_comments_log ='<table class="itd__tables"><tbody>
                     $issue_comments_log .= '   <tr class="itd_edit_tr">
                                                  <td class="itd_edit_tr" colSpan="2" style="display : none;" id="'.$blink_id.'">';
                     
-                    $issue_comments_log .= $this->it_edit_toolbar('comment_mod_'.$alink_id);
+                    $issue_comments_log .= $this->it_xs_edit_toolbar('comment_mod_'.$alink_id);
                     
                     $issue_comments_log .= '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
                                           
@@ -2493,7 +2499,7 @@ $issue_add_comment .='<table class="itd__tables">'.
                       '<tr>'.
                         '<td class="itd_tables_tdh cmts_adcmt" colSpan="2" >'.$this->getLang('lbl_cmts_adcmt').'</td>
                       </tr><tr class="itd_edit_tr"><td class="itd_edit_tr" colSpan="2" style="display : none;" id="'.$blink_id.'">';
-$issue_add_comment .= $this->it_edit_toolbar('comment_'.$alink_id);                     
+$issue_add_comment .= $this->it_xs_edit_toolbar('comment_'.$alink_id);                     
 // mod for editor ---------------------------------------------------------------------
 
 $issue_add_comment .= '<form name="form1" method="post" accept-charset="'.$lang['encoding'].'">'.NL;
@@ -2557,7 +2563,7 @@ $issue_edit_resolution .= '<tr class="itd__tables_tr">
 ------------------------------------------------------------------------------*/
 
 // mod for editor ---------------------------------------------------------------------
-$issue_edit_resolution .= $this->it_edit_toolbar('x_resolution');                      
+$issue_edit_resolution .= $this->it_xs_edit_toolbar('x_resolution');                      
 // mod for editor ---------------------------------------------------------------------
 
 $issue_edit_resolution .= '<form name="edit_resolution" method="post" action="'.$_SERVER['REQUEST_URI'].'" accept-charset="'.$lang['encoding'].'">'.NL;                                            
@@ -3148,7 +3154,22 @@ $issue_edit_resolution .= '<input  type="hidden" class="showid__option" name="sh
 /******************************************************************************/
 /* return html-code for edit toolbar
 */
-    function it_edit_toolbar($type) {
+    function it_wysiwyg_edit_toolbar($xa_comment) {
+        $sFilename    = DOKU_BASE."lib/plugins/issuetracker/wysiwyg_editor.js";
+        $it_edit_tb  .= '<script type="text/javascript" src="'.$sFilename.'"></script>';
+        $sFilename    = DOKU_PLUGIN.'issuetracker/wysiwyg_editor.html';
+        $it_edit_tb  .= file_get_contents($sFilename);
+        $it_edit_tb   = str_ireplace("%%DOKU_BASE%%",DOKU_BASE,$it_edit_tb);
+        $trans=get_html_translation_table(HTML_SPECIALCHARS, ENT_QUOTES);
+        $trans=array_flip($trans);
+        $x_comment=strtr($xa_comment, $trans);
+
+        
+        $it_edit_tb   = str_ireplace('<p>&nbsp;</p>',$x_comment,$it_edit_tb);                  
+        return $it_edit_tb;
+    }
+
+    function it_xs_edit_toolbar($type) {
         $imgBASE = DOKU_BASE."lib/plugins/issuetracker/images/";
         $it_edit_tb  = '<div class="it_edittoolbar">'.NL;
       	$it_edit_tb .= "<img class=\"xseditor_button\" src=\"".$imgBASE."bold.png\" name=\"btnBold\" title=\"Bold\" onClick=\"doAddTags('[b]','[/b]','$type')\">".NL;
