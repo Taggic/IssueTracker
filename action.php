@@ -33,7 +33,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
 /******************************************************************************
 **  Register its handlers with the dokuwiki's event controller
 */
-     function register(&$controller) {
+     function register(Doku_Event_Handler $controller) {
          $controller->register_hook('ACTION_ACT_PREPROCESS', 'BEFORE', $this, '_handle_act', array());
          $controller->register_hook('TPL_ACT_UNKNOWN', 'BEFORE', $this, 'output', array());
                                     //HTML_UPDATEPROFILEFORM_OUTPUT
