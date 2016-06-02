@@ -24,7 +24,7 @@ class action_plugin_issuetracker extends DokuWiki_Action_Plugin {
     return array(
          'author' => 'Taggic',
          'email'  => 'Taggic@t-online.de',
-         'date'   => '2016-05-26',
+         'date'   => '2016-06-02',
          'name'   => 'Issue comments (action plugin component)',
          'desc'   => 'to display details of a dedicated issue.',
          'url'    => 'https://www.dokuwiki.org/plugin:issuetracker',
