@@ -1258,16 +1258,16 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
                           return false;
                         }
 
-                        if ((frm.title.value.length <= 5) & (frm.title.value.indexOf(" ") == -1)) {
+                        if ((frm.ittitle.value.length <= 5) & (frm.ittitle.value.indexOf(" ") == -1)) {
                           alert ("'.$this->getLang('wmsg5').'");
-                          frm.title.focus();
+                          frm.ittitle.focus();
                           return false;
                         }
 
                         '.NL.$_editor_java.NL.'
                     }
                     '.NL.$_editor_java_2.NL.'
-                   </script>'.NL;
+                   }</script>'.NL;
             $ret .= '<form class="issuetracker__form" name="issuetracker__form" method="post" '.$myFunc.' accept-charset="'.$lang['encoding'].'" enctype="multipart/form-data" ><p>'.NL.
             formSecurityToken(false).
             '<input type="hidden" name="do" value="show" />'.NL.
@@ -1366,7 +1366,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $ret .= '</tr>'.NL.
             '<tr>
                 <td>'.$this->getLang('th_title').'</td>
-                <td><input class="it__cir_linput" name="title" value="'.$_REQUEST['title'].'"/></td>
+                <td><input class="it__cir_linput" name="ittitle" value="'.$_REQUEST['title'].'"/></td>
              </tr>'.NL.
             '<tr>
                 <td>'.$this->getLang('th_description').'</td>
