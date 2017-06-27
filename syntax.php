@@ -1366,7 +1366,7 @@ class syntax_plugin_issuetracker extends DokuWiki_Syntax_Plugin
         $ret .= '</tr>'.NL.
             '<tr>
                 <td>'.$this->getLang('th_title').'</td>
-                <td><input class="it__cir_linput" name="ittitle" value="'.$_REQUEST['title'].'"/></td>
+                <td><input class="it__cir_linput" name="title" value="'.$_REQUEST['title'].'"/></td>
              </tr>'.NL.
             '<tr>
                 <td>'.$this->getLang('th_description').'</td>
